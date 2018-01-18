@@ -30,7 +30,6 @@ if(!empty($_POST)){ // Check wether user already input data
 	//-----Add additional registration input-----
 	$Who=WhoAreYou();
 	$Who=serialize($Who);
-	mark($Who);
 	$Additional=array("UserLevel"=>$NewUserLevel, "UserGroup"=>$NewUserGroup, "PasswordExpiration"=>$pexs, "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
 
 	$registered=array_merge ($newera,$Additional);
@@ -46,74 +45,15 @@ if(!empty($_POST)){ // Check wether user already input data
 	========================================================================================
 	FIELD VALIDATION
 	=====================================================================================
-	*/ 
-
-
-	$SignUpError=array(); //Array to store sign up error
 	
-	// ERROR 0 Check!!
-	//Check wether password and confirmation password is matched
-	if($_POST['Exc-PasswordConf'] != $_POST['Password']){
-		array_push($SignUpError,"Error0") ;
-	}
-	
-	
-	// ERROR 1 CHECK!! 
-	//Check if any required flagged array is empty
-	$emptyrequired = array();
-	$Required=$layout->GoFetch("WHERE form_id = 'gita_login_signup'AND required=1","field_id, field_label");
-	foreach($Required as $y){
-		$field=$y['field_id'];
-		if(empty($newera[$field])){
-			array_push($emptyrequired,$y['field_label']);
-		}
-		
-	}
-	if(!empty($emptyrequired)){ array_push($SignUpError,"Error1") ;}
+	*/
 
-	// ERROR 2 CHECK!! 
-	//Check if someone already registered with same Unique field (eg. Same email)
-	$uniquearray=array();
-	$unique = $layout->GoFetch("WHERE form_id = 'gita_login_signup' AND field_unique=1","field_id, field_label");
-	foreach($unique as $y){
-	$RowCount = $staff->GoCount("WHERE ". $y['field_id'] ."='". $newera[$y['field_id']] ."'");
-	if(!empty($RowCount)){
-		$UQ=array($y['field_id'] => $newera[$y['field_id']]);
-		$uniquearray=$uniquearray+$UQ;
-		array_push($SignUpError,"Error2"); 
-	 }
-	 
-	}
-
+	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,$_POST['Exc-PasswordConf'],$_POST['Password']);
+	$SignUpError=$Validation->SignUpError;
 	
-
-	// ERROR 3 CHECK!!
-	//Validation check
-	$InvalidField=array();
-	$Validation=$layout->GoFetch("WHERE form_id = 'gita_login_signup' ","field_id, field_label, field_type, field_validation");
-	foreach($Validation as $x){ // For each submited field, check what field type, and validate appropriatly
-		$Filed2Validate=$newera[$x['field_id']];
-		switch($x['field_type']){
-			case "email":
-				if(!ValidateEmail($Filed2Validate)){;
-					$InvField2Push=array($x['field_label']=>$Filed2Validate) ;
-					$InvalidField = $InvalidField + $InvField2Push; 
-				} 
-				break;
-			case "text":
-				if(empty($x['field_validation'])) { continue; }
-				if(!ValidateField($Filed2Validate,"/^". $x['field_validation'] ."*$/")){
-					$InvField2Push=array($x['field_label']=>$Filed2Validate) ;
-					$InvalidField = $InvalidField + $InvField2Push; 
-				} 
-				break;
-				
-			}
-			
-	}
-			if(!empty($InvalidField)){ array_push($SignUpError,"Error3"); }
 
 }
+
 
 
 /*
@@ -139,7 +79,7 @@ if( in_array("Error0",$SignUpError) ){ //Show error dialog wrong confirmation pa
 
 if( in_array("Error1",$SignUpError) ){ //Show error dialog urging user to fill required field
 	$FieldList=array();
-	foreach($emptyrequired as $i){
+	foreach($Validation->Error1 as $i){
 		 eval("\$i = \"$i\";"); 
 		 array_push($FieldList,$i);
 	}
@@ -162,7 +102,7 @@ if( in_array("Error1",$SignUpError) ){ //Show error dialog urging user to fill r
 if( in_array("Error2",$SignUpError) ){ //Show error dialog urging user use different email
 	$dup=array();
 	$DupErrorLog=array();
-	foreach($uniquearray as $i=>$x){
+	foreach($Validation->Error2 as $i=>$x){
 		 eval("\$i = \"$i\";");
 		 $Dup2Push=array($i=>$x); 
 		 $DupErrorLog=$DupErrorLog+$Dup2Push;
@@ -186,7 +126,7 @@ if( in_array("Error2",$SignUpError) ){ //Show error dialog urging user use diffe
 if( in_array("Error3",$SignUpError) ){ //Show error dialog telling user that some field are invalid
 	$invali=array();
 	$InvErrorLog=array();
-	foreach($InvalidField as $i=>$x){
+	foreach($Validation->Error3 as $i=>$x){
 		 eval("\$i = \"$i\";");
 		 $InvError=array($i=>$x); 
 		 $InvErrorLog=$InvErrorLog+$InvError;

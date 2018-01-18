@@ -1,77 +1,18 @@
 
 
 <?php
-
-//-------------------Debug------------------------------
-
-
-
-function DeFlea($Funk,$Egg="Nothing",$Flea="Nothing"){ 
-  echo "<br><table class='DeFlea'><th> Function [$Funk] initiated </th><tr><td> Argument is ";
-  print_r($Egg);
-  echo "<tr><td> It's returned ";
-  print_r($Flea);
-  echo " </table><bR>";
-}
-
-//----------Close DB--------
-function whine() {
-    $ewe->close();
-    
-}
-
-//---------Connect DB------------
-//SniffButt(Database (0 for default))
-function SniffButt($DBase=null, $Server=null){
-  global $MRdb, $MRhoster, $MRperson, $MRlock, $DBase;
-  $Server = isset($Server) ? $Server : array("Host"=>$MRhoster, "Person"=>$MRperson, "Lock"=>$MRlock);
-  $DBase = isset($DBase) ? $DBase : $MRdb;
-  
-  if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-} 
-
-  return new mysqli($Server['Host'], $Server['Person'], $Server['Lock'], $DBase);
-}
-
-//-------------------User-----------------------
-function Login($User){
-  $userlist=new GoodBoi("staff_list");
-  $x=$userlist->GoFetch("WHERE usrid='$User'");
-  $_SESSION['Person']=$User;
-  $_SESSION['UserN']=$x[0]['UserName'];
-  $_SESSION['Name']= $x[0]['FName'] ."/". $x[0]['MName'] ."/". $x[0]['LName'];
-  $_SESSION['ULevel']=$x[0]['UserLevel'];
-  $_SESSION['UGroup']=$x[0]['UserGroup'];
-  LogUser($User);
-}
-
-function Logout(){
-  unset($_SESSION['Person']);
-  unset($_SESSION['UserN']);
-  unset($_SESSION['Name']);
-  unset($_SESSION['ULevel']);
-  unset($_SESSION['UGroup']);
-}
-
-function LogUser($User,$Userclass=null){ // Update the Last IP and Last activity of user (User ID, Class that linked to staff_list db)
-	$Who=WhoAreYou();
-	$Who=serialize($Who);
-  $Updatecol=array("LastActiveTime"=>Date2SQL(), "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who);
-  if(empty($Userclass)){ $Userclass= new GoodBoi("staff_list"); } // If $Userclass empty, make a new class to link to staff_list db
-  $Userclass->GoBurry($Updatecol,"WHERE usrid=$User");
-}
-
-
-// Function to check user permission based on usergroup, level, and specifi user. Only one statement needed to be true.
-// (group(array of allowed usergroup), level(integer of minimum user level allowed), user(array of specific user allowed))
-function Bouncer($group,$level,$person){
-  if(in_array($_SERVER['UGroup'],$group)){ return TRUE; } // Check for User Group
-  if($_SERVER['ULevel']>=$level){ return TRUE; } // Check for User Level
-  if(in_array($_SERVER['Person'],$person)){ return TRUE; } // Check for Specific User
-}
-
-//----------------- CONVERTER--------------------------
+/*
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  CONVERTER ===============-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
 
 function array2csv($arr,$bra=null,$IgnoreBlank=null,$IgnoreExc=null,$sep=" , "){ // Ignore Blank=Ignore value with Blank Key, IgnoreExc=Ignore any value with key started with "Exc-"
   foreach($arr as $a => $b){
@@ -147,7 +88,24 @@ function lan2var($lan){ //Turn $lan string into watherever contained in it's cor
     return $lan;
   }
 }
-//-----------------------------Salvage Data---------------------
+/*
+==========================================================================================================
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  DATA    =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
 
 
 function WhosKnock(){ //Return the visiting user as array (Person[UserId], ULevel(User Level), UGroup [UserGroup])
@@ -173,10 +131,129 @@ function DrawOption($cluster,$ListDB){
   return $Options;
 }
 
-//---------------------Filtering & Validation-----------------------------------------
+
+/*
+==========================================================================================================
 
 
-function ValidateField($Field,$Rule=null){ // Validating input data
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  DEBUG  =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+
+function DeFlea($Funk,$Egg="Nothing",$Flea="Nothing"){ 
+  echo "<br><table class='DeFlea'><th> Function [$Funk] initiated </th><tr><td> Argument is ";
+  print_r($Egg);
+  echo "<tr><td> It's returned ";
+  print_r($Flea);
+  echo " </table><bR>";
+}
+/*
+==========================================================================================================
+
+
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  DISPLAY  ===============-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+function ErrorDialog($Title,$Content){
+  Global $lanError;
+  echo "<table class=ErrorDialog><th>$lanError - $Title</th><tr><td>$Content</td></tr></table><br>";
+   
+}
+
+function OkDialog($Title,$Content){
+  Global $lanOK;
+  echo "<table class=OkDialog><th>$lanOK - $Title</th><tr><td>$Content</td></tr></table><br>";
+   
+}
+
+function WarningDialog($Title,$Content){
+  Global $lanWarning;
+  echo "<table class=WarningDialog><th>$lanWarning - $Title</th><tr><td>$Content</td></tr></table><br>";
+   
+}
+
+function Mark($a,$pre=null,$post=null){ //DEBUGGING TOOLS
+  echo "<br><p class=Mark>$pre ";
+  if(is_array($a)){
+    print_r($a);
+  } else {
+    echo $a ;
+  }
+  echo " $post</p>";
+}
+
+function LastSQLEntry($table,$short,$number=10,$print=1){
+  $DB = new GoodBoi($table);
+  $Row = $DB->GoFetch("ORDER BY ". $short ." DESC LIMIT ". $number);
+  if(!empty($print)){
+    $Header=1;
+    echo "<table>";
+    foreach($Row as $x){
+      $isi=array2csv($x,$bra=null,$sep="<td>");
+      if(!empty($Header)) { 
+        echo "<tr>". $isi['Key'] ."</tr>";
+        unset($Header);
+      }
+      echo "<tr>". $isi['Val'] ."</tr>";
+    }
+    echo "</table>";
+  }
+  return $Row;
+}
+
+
+
+/*
+==========================================================================================================
+
+
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<==============  FILTERING & VALIDATION=======-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+// Validating input data
+
+function ValidateField($Field,$Rule=null){ 
   global $FieldValidaiton;
   if(empty($Rule)){ $Rule=$FieldValidaiton ; }
    //Debug
@@ -193,7 +270,10 @@ function ValidateEmail($Field){
   return $Vemail;
 }
 
-function AddDatalist($input,$cluster,$LastOrder=0,$position="Last"){ //Creating new list in list_list if datalist input is new data 
+
+//Creating new list in list_list if datalist input is new data 
+
+function AddDatalist($input,$cluster,$LastOrder=0,$position="Last"){ 
   $akamaru=new GoodBoi("list_list");
   if(!$akamaru->GoCount("WHERE cluster='". $cluster ."' AND list_value='". $input ."'")){
     switch ($position){
@@ -211,7 +291,236 @@ function AddDatalist($input,$cluster,$LastOrder=0,$position="Last"){ //Creating 
   }
 }
 
-/*MySQL query
+
+/*
+==========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<=================== LOGGING  ================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+function WhoAreYou(){ // Extract some information from $_SERVER
+  return array('Browser'=>$_SERVER['HTTP_USER_AGENT'],'IP'=>$_SERVER['REMOTE_ADDR'],'Port'=>$_SERVER['REMOTE_PORT'],'URI'=>$_SERVER['REQUEST_URI'],'sIP'=>$_SERVER['SERVER_ADDR'],'sPort'=>$_SERVER['SERVER_PORT']);
+}
+class Kayu extends GoodBoi{
+  
+  function __Construct(){
+    global $dbpre;
+    $this->table=$dbpre ."Kayu";
+  }
+
+  function KayuManis($a,$b,$d){ /// Logging Function | $a=Short Description | $b=Command/Packet/Content | $c=Succes? (true/false) | $d=Error
+    WhosKnock();
+    $l= WhoAreYou();
+    $Kayuing=array('SDesc'=>$a , 'Culpirt'=>$l['IP'], 'CBrowser'=>$l['Browser'], 'CPort'=>$l['Port'], 'Victim'=>$l['sIP'], 'Vport'=>$l['sPort'], 'VURI'=>$l['URI'], 'Command'=>$b, 'Error'=>$d, 'User'=>$_SESSION['Person'], 'UserN'=>$_SESSION['UserN'], 'Name'=>$_SESSION['Name'], 'ULevel'=>$_SESSION['ULevel'], 'UGroup'=>$_SESSION['UGroup']); 
+    $this->GoBark($Kayuing);
+    //Debug
+   if(!empty($_SESSION['DeFlea'])){ Mark($Kayuing,"LOG || "); } 
+   //Debug
+  }
+}
+
+/*
+==========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===========  MySQL Related  =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+//----------Close DB--------
+function whine() {
+    $ewe->close();
+    
+}
+
+//---------Connect DB------------
+//SniffButt(Database (0 for default))
+function SniffButt($DBase=null, $Server=null){
+  global $MRdb, $MRhoster, $MRperson, $MRlock, $DBase;
+  $Server = isset($Server) ? $Server : array("Host"=>$MRhoster, "Person"=>$MRperson, "Lock"=>$MRlock);
+  $DBase = isset($DBase) ? $DBase : $MRdb;
+  
+  if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+} 
+
+  return new mysqli($Server['Host'], $Server['Person'], $Server['Lock'], $DBase);
+}
+
+/*
+==========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  User    =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+
+//-------------------User-----------------------
+function Login($User){
+  $userlist=new GoodBoi("staff_list");
+  $x=$userlist->GoFetch("WHERE usrid='$User'");
+  $_SESSION['Person']=$User;
+  $_SESSION['UserN']=$x[0]['UserName'];
+  $_SESSION['Name']= $x[0]['FName'] ."/". $x[0]['MName'] ."/". $x[0]['LName'];
+  $_SESSION['ULevel']=$x[0]['UserLevel'];
+  $_SESSION['UGroup']=$x[0]['UserGroup'];
+  LogUser($User);
+}
+
+function Logout(){
+  unset($_SESSION['Person']);
+  unset($_SESSION['UserN']);
+  unset($_SESSION['Name']);
+  unset($_SESSION['ULevel']);
+  unset($_SESSION['UGroup']);
+}
+
+function LogUser($User,$Userclass=null){ // Update the Last IP and Last activity of user (User ID, Class that linked to staff_list db)
+	$Who=WhoAreYou();
+	$Who=serialize($Who);
+  $Updatecol=array("LastActiveTime"=>Date2SQL(), "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who);
+  if(empty($Userclass)){ $Userclass= new GoodBoi("staff_list"); } // If $Userclass empty, make a new class to link to staff_list db
+  $Userclass->GoBurry($Updatecol,"WHERE usrid=$User");
+}
+
+
+// Function to check user permission based on usergroup, level, and specifi user. Only one statement needed to be true.
+// (group(array of allowed usergroup), level(integer of minimum user level allowed), user(array of specific user allowed))
+function Bouncer($group,$level,$person){
+  if(in_array($_SERVER['UGroup'],$group)){ return TRUE; } // Check for User Group
+  if($_SERVER['ULevel']>=$level){ return TRUE; } // Check for User Level
+  if(in_array($_SERVER['Person'],$person)){ return TRUE; } // Check for Specific User
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+==============================================================================================================
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+==============================================================================================================
+_________ .____       _____    _________ _________
+\_   ___ \|    |     /  _  \  /   _____//   _____/
+/    \  \/|    |    /  /_\  \ \_____  \ \_____  \ 
+\     \___|    |___/    |    \/        \/        \
+ \______  /_______ \____|__  /_______  /_______  /
+        \/        \/       \/        \/        \/ 
+==============================================================================================================
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+==============================================================================================================
+*/
+
+/*
+
+==============================================================================================================  ________                  ._____________       .__ 
+ /  _____/  ____   ____   __| _/\______   \ ____ |__|
+/   \  ___ /  _ \ /  _ \ / __ |  |    |  _//  _ \|  |
+\    \_\  (  <_> |  <_> ) /_/ |  |    |   (  <_> )  |
+ \______  /\____/ \____/\____ |  |______  /\____/|__|
+        \/                   \/         \/           
+==============================================================================================================
+
+
+
+MySQL query
 To construct: $var = GoodBoi (Table)
 Method to call: 
 Select: GoFetch(MySQL Script after FROM,[Selection, default is "*" (all)])
@@ -290,54 +599,36 @@ class GoodBoi{
 
 
 
-//--------------------Display-----------------------
 
-function ErrorDialog($Title,$Content){
-  Global $lanError;
-  echo "<table class=ErrorDialog><th>$lanError - $Title</th><tr><td>$Content</td></tr></table><br>";
-   
-}
 
-function OkDialog($Title,$Content){
-  Global $lanOK;
-  echo "<table class=OkDialog><th>$lanOK - $Title</th><tr><td>$Content</td></tr></table><br>";
-   
-}
 
-function WarningDialog($Title,$Content){
-  Global $lanWarning;
-  echo "<table class=WarningDialog><th>$lanWarning - $Title</th><tr><td>$Content</td></tr></table><br>";
-   
-}
 
-function Mark($a,$pre=null,$post=null){ //DEBUGGING TOOLS
-  echo "<br><p class=Mark>$pre ";
-  if(is_array($a)){
-    print_r($a);
-  } else {
-    echo $a ;
-  }
-  echo " $post</p>";
-}
 
-function LastSQLEntry($table,$short,$number=10,$print=1){
-  $DB = new GoodBoi($table);
-  $Row = $DB->GoFetch("ORDER BY ". $short ." DESC LIMIT ". $number);
-  if(!empty($print)){
-    $Header=1;
-    echo "<table>";
-    foreach($Row as $x){
-      $isi=array2csv($x,$bra=null,$sep="<td>");
-      if(!empty($Header)) { 
-        echo "<tr>". $isi['Key'] ."</tr>";
-        unset($Header);
-      }
-      echo "<tr>". $isi['Val'] ."</tr>";
-    }
-    echo "</table>";
-  }
-  return $Row;
-}
+
+
+
+
+
+
+
+
+
+/*
+
+==============================================================================================================   _________                                  .__          
+ /   _____/ _____   ____ _____ _______  ____ |  |   ____  
+ \_____  \ /     \_/ __ \\__  \\_  __ \/ ___\|  | _/ __ \ 
+ /        \  Y Y  \  ___/ / __ \|  | \/ /_/  >  |_\  ___/ 
+/_______  /__|_|  /\___  >____  /__|  \___  /|____/\___  >
+        \/      \/     \/     \/     /_____/           \/ 
+==============================================================================================================
+
+
+
+Displaying Layout
+////////////////////////////////////////////////////////////////////*/
+
+
 
 class Smeargle{
   protected $ViewMode; //----Which viewing mode ? "view", "new" or "edit"
@@ -528,33 +819,103 @@ class Smeargle{
   }
 }
 
-//---------------------Logging Class------------
-
-function WhoAreYou(){ // Extract some information from $_SERVER
-  return array('Browser'=>$_SERVER['HTTP_USER_AGENT'],'IP'=>$_SERVER['REMOTE_ADDR'],'Port'=>$_SERVER['REMOTE_PORT'],'URI'=>$_SERVER['REQUEST_URI'],'sIP'=>$_SERVER['SERVER_ADDR'],'sPort'=>$_SERVER['SERVER_PORT']);
-}
-class Kayu extends GoodBoi{
+/*
+	===============================================================================================
+___________.__       .__       .___ ____   ____      .__  .__    .___       __                 
+\_   _____/|__| ____ |  |    __| _/ \   \ /   /____  |  | |__| __| _/____ _/  |_  ____   ____  
+ |    __)  |  |/ __ \|  |   / __ |   \   Y   /\__  \ |  | |  |/ __ |\__  \\   __\/  _ \ /    \ 
+ |     \   |  \  ___/|  |__/ /_/ |    \     /  / __ \|  |_|  / /_/ | / __ \|  | (  <_> )   |  \
+ \___  /   |__|\___  >____/\____ |     \___/  (____  /____/__\____ |(____  /__|  \____/|___|  /
+     \/            \/           \/                 \/             \/     \/                 \/ 
+	===============================================================================================
+	*/ 
+  class FieldValidation{
+    public $SignUpError; //Array to store sign up error
+    protected $MyClass; // A GoodBoi class for layout
+    protected $MyClasStaff; // A GoodBoi class for staff
+    protected $FormId; // Form Id that validate (Form id where the field POST-ed) came from
+    public $Error1; // Array of field(s) whom didn't pass Error1 check (Empty value on required field)
+    public $Error2; // Array of field(s) whom didn't pass Error2 check (Duplicate on Unique field)
+    public $Error3; // Array of field(s) whom didn't pass Error3 check (Invalid character)
   
-  function __Construct(){
-    global $dbpre;
-    $this->table=$dbpre ."Kayu";
+    function __Construct($FormId,$MyClass=null,$MyStaff=null,$E0S=null,$EOV=null,$E1=1,$E2=1,$E3=1){
+      // (Form ID, GoodBoi class, Run Check error1, error2, error3)
+    $this->SignUpError=array(); 
+    $this->FormId=$FormId;
+    $this->MyClass=$MyClass;
+    $this->MyClasStaff=$MyStaff;
+    if (!empty($E0S)){ $this->RepeatString($E0S,$E0V); }
+    if (!empty($E1)){ $this->Required(); }
+    if (!empty($E2)){ $this->Unique(); }
+    if (!empty($E3)){ $this->ValidateField(); }
+    }
+    
+    
+    function RepeatString($confirmated='null',$confirmaiton='null'){
+      // ERROR 0 Check!!
+      //Check wether password and confirmation password is matched
+      // (String to confirm, confirmation)
+      if($confirmated != $confirmaiton){
+        array_push($this->SignUpError,"Error0") ;
+      }
+    }
+    
+    
+    function Required(){
+      // ERROR 1 CHECK!! 
+      //Check if there are Empty value on required field
+      $this->Error1 = array();
+      $Required=$this->MyClass->GoFetch("WHERE form_id = '". $this->FormId ."' AND required <> 0","field_id, field_label");
+      foreach($Required as $y){
+        $field=$y['field_id'];
+        if(empty($GLOBALS['newera'][$field])){
+          array_push($this->Error1,$y['field_label']);
+        }
+      }
+      if(!empty($this->Error1)){ array_push($this->SignUpError,"Error1") ;}
+    }
+   
+    function Unique(){
+      // ERROR 2 CHECK!! 
+      //Check if someone already registered with same Unique field (eg. Same email)
+      $this->Error2=array();
+      $unique = $this->MyClass->GoFetch("WHERE form_id = '". $this->FormId ."' AND field_unique <> 0","field_id, field_label");
+      foreach($unique as $y){
+        $RowCount = $this->MyClasStaff->GoCount("WHERE ". $y['field_id'] ."='". $GLOBALS['newera'][$y['field_id']] ."'");
+        if(!empty($RowCount)){
+          $UQ=array($y['field_id'] => $GLOBALS['newera'][$y['field_id']]);
+          $this->Error2=$this->Error2+$UQ;
+          array_push($this->SignUpError,"Error2"); 
+        }
+      }
+    }
+  
+    
+    function ValidateField(){
+      // ERROR 3 CHECK!!
+      //Validation chaarcter check
+      $this->Error3=array();
+      $Validation=$this->MyClass->GoFetch("WHERE form_id = 'gita_login_signup' ","field_id, field_label, field_type, field_validation");
+      foreach($Validation as $x){ // For each submited field, check what field type, and validate appropriatly
+        $Filed2Validate=$GLOBALS['newera'][$x['field_id']];
+        switch($x['field_type']){
+          case "email":
+            if(!ValidateEmail($Filed2Validate)){;
+              $InvField2Push=array($x['field_label']=>$Filed2Validate) ;
+              $this->Error3 = $this->Error3 + $InvField2Push; 
+            } 
+            break;
+          case "text":
+            if(empty($x['field_validation'])) { continue; }
+            if(!ValidateField($Filed2Validate,"/^". $x['field_validation'] ."*$/")){
+              $InvField2Push=array($x['field_label']=>$Filed2Validate) ;
+              $this->Error3 = $this->Error3 + $InvField2Push; 
+            } 
+            break;
+          }     
+      }
+      if(!empty($this->Error3)){ array_push($this->SignUpError,"Error3"); }
+    }
   }
-
-  function KayuManis($a,$b,$d){ /// Logging Function | $a=Short Description | $b=Command/Packet/Content | $c=Succes? (true/false) | $d=Error
-    WhosKnock();
-    $l= WhoAreYou();
-    $Kayuing=array('SDesc'=>$a , 'Culpirt'=>$l['IP'], 'CBrowser'=>$l['Browser'], 'CPort'=>$l['Port'], 'Victim'=>$l['sIP'], 'Vport'=>$l['sPort'], 'VURI'=>$l['URI'], 'Command'=>$b, 'Error'=>$d, 'User'=>$_SESSION['Person'], 'UserN'=>$_SESSION['UserN'], 'Name'=>$_SESSION['Name'], 'ULevel'=>$_SESSION['ULevel'], 'UGroup'=>$_SESSION['UGroup']); 
-    $this->GoBark($Kayuing);
-    //Debug
-   if(!empty($_SESSION['DeFlea'])){ Mark($Kayuing,"LOG || "); } 
-   //Debug
-  }
-}
-
-
-//////////////////////////////////////// TESTING FUNCION //////////////////////////////////////////
-
-
-
-
+  
 ?>
