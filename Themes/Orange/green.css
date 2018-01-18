@@ -1,0 +1,49 @@
+.DeFlea {
+    color: goldenrod;
+}
+.Mark{
+    color:blue;
+    background-color: greenyellow;
+}
+
+/* Dialog Box */
+
+.ErrorDialog{
+    background-color:pink;
+    text-align: center;
+    border-style: double;
+    border-color: brown;
+}
+.OkDialog{
+    background-color:#e2f442;
+    text-align: center;
+    border-style: double;
+    border-color: #f4df41;
+}
+.WarningDialog{
+    background-color:#f4bb41;
+    text-align: center;
+    border-style: double;
+    border-color: #f4df41;
+}
+/* Form */
+
+.layout_form{
+    background-color:antiquewhite;
+    border-style: solid;
+    border-color: black;
+    column-width: 1000px;
+}
+.layout_group{
+    align-self: center;
+    background-color: rgb(167, 255, 207);
+    border-style: solid;
+    border-color: black;
+    width: 600px;
+    padding: 10px;
+}
+.area_content{
+    width: 1500 px;
+}
+h1   {color: blue;}
+p    {color: red;}

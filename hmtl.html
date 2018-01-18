@@ -1,0 +1,70 @@
+<table>
+			<tr>			<tr>			<tr>		</table>
+	<td>Job = 1 <br><form action=signup.php method=POST><table><tr>
+			<tr><td colspan=1>User Name
+			<td colspan=5><input type=text name=UserName></input><tr>
+			<tr><td colspan=1>Password
+			<td colspan=5><input type=password name=Password></input><tr>
+			<tr><td colspan=0>Nama
+			<td colspan=0><input type=text name=FName></input><tr>
+			<tr><td colspan=1>
+			<td colspan=5><input type=text name=MName></input><tr>
+			<tr><td colspan=0>
+			<td colspan=0><input type=text name=LName></input><tr>
+			<tr><td colspan=0>
+			<td colspan=0><input type=text name=NName></input><tr>
+			<tr><td colspan=1>SIP
+			<td colspan=5><input type=text name=RegID></input><tr>
+			<tr><td colspan=1>
+			<td colspan=5><input type=text name=PracticeID></input><tr>
+			<tr><td colspan=1>Tanggal Lahir
+			<td colspan=5><input type=date name=DOB></input><tr>
+			<tr><td colspan=1>Jenis Kelamin
+			<td colspan=5><select name=Sex><option value='$lanFemale'>Perempuan</option><option value='$lanAlien'>Alien</option><option value='$lanUnidentified'>Tidak diketahui</option></select><tr>
+			<tr><td colspan=1>Status
+			<td colspan=5><select name=Marital><option value='$lanSingle'>Lajang</option><option value='$lanMarried'>Menikah</option><option value='$lanWidowed'>Pasangan Meninggal</option><option value='$lanComplicated'>Ribet</option><option value='$lanDivorced'>Bercerai</option></select><tr>
+			<tr><td colspan=1>Surel
+			<td colspan=5><input type=email name=Email></input><tr>
+			<tr><td colspan=1>Nomer HP
+			<td colspan=5><input type=number name=Cell></input><tr>
+			<tr><td colspan=1>Jenis Identitas
+			<td colspan=5><select name=IDType><option value='$lanCountryStandard'>KTP</option><option value='$lanDriverLicense1'>SIM</option><option value='$lanStudentID'>Kartu Pelajar</option><option value='$lanPassport'>Passport</option></select><tr>
+			<tr><td colspan=1>Nomer KITAS
+			<td colspan=5><input type=text name=IDCard></input><tr>
+			<tr><td colspan=1>Nomer Anggota
+			<td colspan=5><input type=text name=StaffID></input><tr>
+			<tr><td colspan=1>Alamat
+			<td colspan=5><input type=textarea name=Address></input><tr>
+			<tr><td colspan=1>Desa
+			<td colspan=5><input list='Desa'><datalist id='Desa'><option value='Blahkiuh'>Blahkiuh</option><option value='Abiansemal'>Abiansemal</option><option value='Punggul'>Punggul</option><option value='Petang'>Petang</option><option value='Taman'>Taman</option><option value='Sangeh'>Sangeh</option><option value='Ayunan'>Ayunan</option></datalist></input><tr>
+			<tr><td colspan=1>Kecamatan
+			<td colspan=5><input list='District'><datalist id='District'><option value='Abiansemal'>Abiansemal</option><option value='Petang'>Petang</option><option value='Mengwi'>Mengwi</option></datalist></input><tr>
+			<tr><td colspan=1>Kabupaten
+			<td colspan=5><input list='Regency'><datalist id='Regency'><option value='Badung'>Badung</option><option value='Denpasar'>Denpasar</option><option value='Tabanan'>Tabanan</option><option value='Gianyar'>Gianyar</option><option value='Klungkung'>Klungkung</option><option value='Karangasem'>Karangasem</option><option value='Buleleng'>Buleleng</option><option value='Negara'>Negara</option><option value='Bangli'>Bangli</option></datalist></input><tr>
+			<tr><td colspan=1>Provinsi
+			<td colspan=5><select name=Province><option value='Bali'>Bali</option></select><tr>
+			<tr><td colspan=1>Negara
+			<td colspan=5><select name=Country><option value='Indonesia'>Indonesia</option></select><tr>
+			<tr><td colspan=1>Pasien
+			<td colspan=5>0
+			<tr><td colspan=1>Jenis
+			<td colspan=5><input list='Job'><datalist id='Job'><option value='$lanPhysician'>Dokter</option><option value='$lanNurse'>Perawat</option><option value='$lanMidWife'>Bidan</option><option value='$lanMedicalAssistance'>Asisten</option><option value='$lanRadiographer'>Radiografer</option><option value='$lanAnalyst'>Analis</option><option value='$lanChasier'>Kasir</option><option value='$lanBilling'>Pembayaran</option><option value='$lanAccountant'>Akuntan</option><option value='$lanCFO'>CFO</option></datalist></input><tr>
+			<tr><td colspan=1>Avatar
+			<td colspan=5><input type=file name=Aang></input><tr>
+			<tr><td colspan=1>Departement
+			<td colspan=5><select name=Departement><option value='$lanServices'>Pelayanan</option><option value='$lanAccounting'>Akunting</option><option value='$lanManagement'>Manajemen</option><option value='$lanLogistic'>Logistik</option><option value='$lanSales'>Penjualan</option><option value='$lanMarketing'>Pemasaran</option></select><tr>
+			<tr><td colspan=1>Spesialis
+			<td colspan=5><select name=Specialty></select><tr>
+			<tr><td colspan=1>Sub Spesialis
+			<td colspan=5><select name=SubSpecialty><option value='$lanGP'>Dokter Umum</option><option value='$lanUrologist'>Urologi</option><option value='$lanInternist'>Penyakit Dalam</option><option value='$lanCardiologist'>Jantung dan Pembuluh Darah</option><option value='$lanGeneralSurgeon'>Bedah Umum</option><option value='$lanDigestiveSurgeon'>Bedah Digestif</option><option value='$lanOrthopedic'>Ortopedi</option><option value='$lanPediatric'>Anak</option></select><tr>
+			<tr><td colspan=1>SIP
+			<td colspan=5><input type=text name=RegID></input><tr>
+			<tr><td colspan=1>Password kadaluarsa pada
+			<td colspan=5><input type=text name=Date></input><tr><input type=button value='OK'></table></form>	<td>
+		<table>
+			<tr>Modules<br>			<tr>			<tr>		</table>
+<tr>
+	<td colspan=3><tr>
+	<td colspan=3><tr>
+	<td colspan=3><tr>
+</table>
