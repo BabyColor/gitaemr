@@ -12,14 +12,14 @@ if(!empty($_SESSION['Person'] && $_GET['job']==1)){
 	Logout();
 }
 
-// Signup Action
+// New Patient Action
 if(!empty($_POST)){ // Check wether user already input data
 
 
 	//-----Action!--------
 	$_POST = array_map('strip_tags', $_POST); //STRIPPING
 	$newera=$_POST;
-	//$newera= array_map('mysqli_real_escape_string', $_POST);
+	//$newera= array_map('mysqli_real_esien.phpscape_string', $_POST);
 	if(empty($LogRawPass)){ // Hashing password if Raw Password option is set to 0
 		$newera=array_replace($newera,array("Password"=>password_hash($newera['Password'], 		PASSWORD_DEFAULT)));
 	}	
@@ -264,7 +264,7 @@ switch($_GET['job']){ // Decide which method should be used to display?
 
 
 
-$Form = new Smeargle("gita_login_signup",$viewsonic,$layout);
+$Form = new Smeargle("gita_patient",$viewsonic,$layout);
 $Forms = $Form->DrawForm(array($lanSignUp));
 //if($viewsonic!="view"){
 	$Forms=str_replace('$lan',"$lan",$Forms);
@@ -273,119 +273,6 @@ echo $Forms;
 
 
 
-
-
-
-	/*
-    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	PROTOTYPE CODE, DEPRECIATED, BEEN REPLACED WITH CLASS [Smeargle]
-	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	// Signup Form
-	echo "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=1 method=POST><table class=layout_form><tr>"; //---Draw form
-	$viewsonic="field_visible_edit"; //-----Check which kind of view (Edit or View) /******* CHANGE $viewsonic=field_visible_edit" IF USER IS ADMIN
-
-
-	//-----Grouping da fields-----
-
-	$group = $layout->GoFetch("WHERE form_id = 'gita_login_signup' ORDER BY group_order",'DISTINCT group_order, group_cap');
-	$layout->selectmethod = '*';
-	foreach($group as $g){
-		$gord=$g['group_order'];
-		$groupl=$g['group_cap'];
-		eval("\$groupl = \"$groupl\";");
-		unset($gl); //Header draw indicator, unset in each field_group loop
-
-		$field = $layout-> GoFetch("WHERE form_id = 'gita_login_signup' AND group_order = '". $g['group_order'] ."' AND ". $viewsonic ."=1 ORDER BY field_order"); //Fetch with following qury
-		foreach($field as $i){
-			
-			//---------- Draw group label
-			if(empty($gl)){
-				$gl++;
-				echo "<table class=layout_group><th>$groupl</td><tr> <td>";
-			}
-
-			$field_label=$i['field_label'];
-			eval("\$field_label = \"$field_label\";"); //---Set field label's content as variable name for language
-
-			$input_type=$i['field_type'];
-			$fieldname=$i['field_id'];
-
-			
-
-			//////////////////////////////////
-			$minlength= empty($i['field_minlength']) ? "" : "minlength=". $i['field_minlength'] ;
-			$placeholder= empty($i['field_placeholder'] ) ? "" : "placeholder=". $i['field_placeholder'] ;
-			$validator= empty($i['field_validation'] ) ? "" : "pattern=". $i['field_validation'] ;
-
-			switch($input_type){
-				case "select" : //---Decide how to draw the field based on the input_type
-					$field_type='<select name='. $i['field_id'] .'>';
-					$field_closure = "</select>";
-					$optiontype="select";
-					break;
-				case "datalist" :
-					$field_type="<input name=". $i['field_id'] ." list='$fieldname'><datalist id='". $i['field_id'] ."'>";
-					$field_closure = "</datalist></input>";
-					$optiontype="datalist";
-					break;
-				default :
-					
-					$field_type='<input type='. $input_type ." name= $fieldname $placeholder $minlength $validator >". $i['field_default'];
-					$field_closure = "</input>";
-					break;
-			}	
-
-			if($i[$viewsonic]>0){ // Only show if field's visible = 1
-				$list_id=$i['field_list'];
-				echo "
-					<tr><td colspan=$i[field_label_colspan]> $field_label 
-					<td colspan=$i[field_field_colspan]>"; //-----------Draw FIELD LABEL
-
-					echo $field_type;
-
-							if($input_type=='select' or $input_type=='datalist'){ //----Draw option if the field type is select or datalist
-								if(empty($i['field_list_table'])){
-									$listype= "Normal List";
-									$options = $option->GoFetch("WHERE cluster='". $list_id ."'ORDER BY list_order ASC");
-									$list_option='list_name';
-									$list_value='list_value';
-								} else {
-									$listype= "Custom List";
-									$options = $option->GoFetch("ORDER BY $i[field_order_by] ASC");
-									$list_option=$i['field_list_name'];
-									$list_value=$i['field_list_value'];
-								}
-								foreach($options as $i2){
-									$oplabel=$i2[$list_option];
-									eval("\$oplabel = \"$oplabel\";"); //---Set field label's content as variable name for language
-									if($optiontype=="select"){ // Select and Datalist have different drawing elements, damned html
-										echo "<option value='". $i2[$list_value] ."'>$oplabel</option>";
-									} elseif ($optiontype=="datalist"){
-										echo "<option true-value='". $i2[$list_value] ."' value=$oplabel>$oplabel</option>";
-									}
-								}
-							}
-						echo $field_closure;
-						if (!empty($_POST) AND empty($_POST[$fieldname]) AND !empty($i['required'])){
-							echo "<class=required> * $lanFieldRequired </class>";
-						} //Add "Field must not empty" message
-						if (empty($_POST) AND !empty($i['required'])){
-							echo "<class=required> $ShowRequiredFiled </class>";
-						}
-						
-						echo "<tr>";
-						unset($option);
-				}
-		}
-		echo "</table>";
-	}
-	echo "<tr><td><input type=submit value='$lanSignUp'>";
-	echo "</table></form>";
-	if(!empty($LogRawPass)){
-		WarningDialog($lanRawPasswordT,$lanRawPasswordC);
-	}
-	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	*/
 }
 
 

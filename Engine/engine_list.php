@@ -2,7 +2,7 @@
 
 <?php
 
-//Debug
+//-------------------Debug------------------------------
 
 
 
@@ -462,12 +462,12 @@ class Smeargle{
         case "select":
           $Input="select";
           $Close="select";
-          $InputContent = DrawOption($F['field_id'],$List);
+          $InputContent = DrawOption($F['field_list'],$List);
           break;
         case "datalist":
           $Input="input list=". $F['field_id'];
           $Close="input";
-          $InputContent = "<datalist id=". $F['field_id'] .">". DrawOption($F['field_id'],$List) ."</datalist>";
+          $InputContent = "<datalist id=". $F['field_id'] .">". DrawOption($F['field_list'],$List) ."</datalist>";
           break;
         case "password":
           $Input="input type=password";

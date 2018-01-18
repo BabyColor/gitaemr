@@ -64,6 +64,32 @@ $lanSignUp="Daftar";
 $lanOccupation="Pekerjaan";
 $lanOldPass="Kata sandi lama";
 $lanConfirmPass="Ulangi kata sandi";
+$lanBName='Awalan Nama';
+$lanECell='Telepon Darurat';
+$lanReligion='Agama';
+$lanRace='Ras';
+$lanOccupation='';
+$lanEmployee='Bekerja di';
+$lanWorkAddress='Alamat Kerja';
+$lanWorkCity='Kabupaten';
+$lanGuardianID='No RM';
+$lanGuardianFName='Nama Depan';
+$lanGuardianMName='Nama Tengah';
+$lanGuardianLName='Nama Belakang';
+$lanGuardianTitle='Titel';
+$lanGuardianBName='Awalan Nama';
+$lanGuardianSex='Jenis Kelamin';
+$lanGuardianRelationship='Hubungan';
+$lanGuardianAddress='Alamat';
+$lanGuardianNumber='No Telepon';
+$lanGuardianEmail='Surel';
+$lanGuardianOccupation='Pekerjaan';
+$lanContact="Kontak";
+$lanDetail="SARA";
+$lanJobs="Pekerjaan";
+$lanGuardian="Penanggung Jawab";
+
+
 
 //----Sex---
 $lanMale="Laki-Laki";
