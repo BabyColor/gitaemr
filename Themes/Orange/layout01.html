@@ -7,7 +7,7 @@
 	<body>
 		<table>
 			<tr>
-				<td colspan=3><?php if ($TampilkanLogoUtama == true) { echo "<img src='/Images/Situs/Logo.png'>"; } $sql = "SELECT * FROM Modul_deployment WHERE position='top1'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>"; echo "<br>";}?>
+				<td colspan=3><?php if ($TampilkanLogoUtama == true) { echo "<img src='Images/Situs/Logo.png' />"; } $sql = "SELECT * FROM Modul_deployment WHERE position='top1'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>"; echo "<br>";}?>
 			<tr>
 				<td colspan=3><?php $sql = "SELECT * FROM Modul_deployment WHERE position='top2'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
 			<tr>

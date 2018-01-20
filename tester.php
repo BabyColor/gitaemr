@@ -1,6 +1,14 @@
 <?php
 if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
+
+$A1=array("Pis"=>"Bolong");
+$A2=array("TOKAI"=>"EWE");
+$A2 += $A1;
+mark ($A2);
+
+/*
+echo 'Now:       '. date('Y-m-d  H:m:s') ."\n";
 $AAA='$lanMoreThanFriendButLessThanLover';
 $BBB=strtr($AAA, array('$lanMoreThanFriendButLessThanLover' => $lanMoreThanFriendButLessThanLover));
 mark($BBB, "STR  ");
@@ -23,7 +31,7 @@ $newbob=str_replace('$lan',"$lan",$bob,$uyu) ;
 
 mark($newbob," Bob 2");
 mark($uyu, "COUNT");
-/*
+
 class TES1{
     protected $MYSQL;
 

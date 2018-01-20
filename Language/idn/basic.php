@@ -187,6 +187,14 @@ $lanSignUpErrorMessage2C="Data berikut :";
 $lanSignUpErrorMessage2A="Sudah pernah didaftarkan, silahkan <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=2>Masuk</a> atau <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=3>Minta Bantuan Masuk</a>";
 $lanSignUpErrorMessage3T="Kesalahan Pengisian Kolom";
 $lanSignUpErrorMessage3C="Terdapat kesalahan pengisian / karakter tidak valid pada kolom berikut :";
+$lanSignUpErrorMessage4T="Kata Sandi Salah";
+$lanSignUpErrorMessage4C="Kata sandi lama yang anda masukkan tidak sesuai";
+$lanSignUpErrorMessage5T="Kata Sandi Baru Sama Dengan yang Lama";
+$lanSignUpErrorMessage5C="Kata sandi baru yang anda masukkan sama dengan yang lama";
+$lanBouncerT="Akses Ditolak";
+$lanBouncerC="Anda tidak memiliki ijin untuk mengakses halaman ini";
+$lanBannedT="Anda Diblokir!";
+$lanBannedC="Silahkan hubungi Administrator Sistem untuk memohon ampun atas apapun itu kekacauan yang telah anda perbuat";
 
 //----------------Warning
 $lanRawPasswordT="Password Tidak Di Proteksi";
@@ -197,6 +205,8 @@ $lanSignUpT="Pendaftaran Berhasil";
 $lanSignUp0="Pengguna berhasil di tambahkan, silahkan Login menggunakan email/username dan password yang anda daftarkan<br>$lanBackToLogin";
 $lanSignUp1="Pengguna berhasil di tambahkan, mohon menunggu moderator untuk mengaktifkan akun anda<br>$lanBackToLogin";
 $lanSignUp2="Pengguna berhasil di tambahkan, silahkan cek email anda untuk petunjuk cara mengaktifkan akun anda<br>$lanBackToLogin";
+$lanUserEditT="Profil Berhasil di-Ubah";
+$lanUserEditC="Profil sudah berhasil di ubah";
 
 //-------------------Login------------------------
 $lanBackToLogin="Kembali ke <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=2>Masuk</a> atau <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=3>Minta Bantuan Masuk</a>";

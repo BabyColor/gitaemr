@@ -1,182 +1,144 @@
 <?
-/*
-Error Code = (1) Required field(s) empty | (2) Email already taken
-*/
 $layout= new GoodBoi('layout'); //Declare an Object "$su_field" with class that used to connect to database with table "pre_layout". GoodBoi is class used for MySQL DB things. You get it? Good Boi...
 $staff = new GoodBoi('staff_list'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
 $option = new GoodBoi ('list_list');
 
 
-//---Auto Logout if registering bew user
+//---Auto Logout if registering new user
 if(!empty($_SESSION['Person'] && $_GET['job']==1)){
 	Logout();
 }
 
 // Signup Action
 if(!empty($_POST)){ // Check wether user already input data
-
+	
 
 	//-----Action!--------
 	$_POST = array_map('strip_tags', $_POST); //STRIPPING
 	$newera=$_POST;
-	//$newera= array_map('mysqli_real_escape_string', $_POST);
-	if(empty($LogRawPass)){ // Hashing password if Raw Password option is set to 0
-		$newera=array_replace($newera,array("Password"=>password_hash($newera['Password'], 		PASSWORD_DEFAULT)));
-	}	
+	$pexs = array();
+	//PAssword setting only when Register
+	if($_GET['job'] == 1){
+		
+		//$newera= array_map('mysqli_real_escape_string', $_POST);
+		if(empty($LogRawPass)){ // Hashing password if Raw Password option is set to 0
+			$newera=array_replace($newera,array("Password"=>password_hash($newera['Password'], 		PASSWORD_DEFAULT)));
+		}	
 
-	//----------Set password expiration
-	$pexs =Date2SQL(null,'P'. $PasswordExpiration);
-
+		//----------Set password expiration
+		$pexs =Date2SQL(null,'P'. $PasswordExpiration);
+		$pexs = array ("PasswordExpiration"=>$pexs);
+	}
 	//-----Add additional registration input-----
 	$Who=WhoAreYou();
 	$Who=serialize($Who);
-	$Additional=array("UserLevel"=>$NewUserLevel, "UserGroup"=>$NewUserGroup, "PasswordExpiration"=>$pexs, "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
+	$Additional= $pexs + array("UserLevel"=>$NewUserLevel, "UserGroup"=>$NewUserGroup,  "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
 
 	$registered=array_merge ($newera,$Additional);
 	
 	
 	//DEBUG
 	if(!empty($_SESSION['DeFlea'])){ 
-		mark(array2arrow($newera," ==> ","<br>"),"Refined POST<br>");
+		mark(array2arrow($registered," ==> ","<br>"),"Refined POST<br>");
 	}
 
 
-	/*
-	========================================================================================
-	FIELD VALIDATION
-	=====================================================================================
 	
-	*/
-
-	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,$_POST['Exc-PasswordConf'],$_POST['Password']);
-	$SignUpError=$Validation->SignUpError;
 	
 
 }
 
-
-
-/*
-=========================================================================================
-Construct Action Based on ERROR on validation (Displaying Error Dialog, Prepare Log)
-=========================================================================================
-*/
-
-if( in_array("Error0",$SignUpError) ){ //Show error dialog wrong confirmation password
-	
-	ErrorDialog($lanSignUpErrorMessage0T,$lanSignUpErrorMessage0C);
-	
-	//For Logging Purpose
-	//Construct the error log content
-	if(!empty($LogDes)){ $LogDes = $LogDes. " & "; }
-	if(!empty($ErrorLog)){ $ErrorLog = $ErrorLog. " & "; }
-
-	$LogDes=$LogDes ."[Password & Confirmation password Missmatch]";
-	$ErrorLog=$ErrorLog ."[Missmatch password]";
-	
-
+//===============================================================
+//Display Method
+//========================================================
+switch($_GET['job']){ // Decide which method should be used to display?
+	case 1:
+		$viewsonic="new";
+		break;
+	case 3:
+	if(bouncer()){
+			$viewsonic="view";
+		}
+		break;
+	case 4:
+	if(bouncer()){
+			$viewsonic="edit";
+		}
+		break;
 }
 
-if( in_array("Error1",$SignUpError) ){ //Show error dialog urging user to fill required field
-	$FieldList=array();
-	foreach($Validation->Error1 as $i){
-		 eval("\$i = \"$i\";"); 
-		 array_push($FieldList,$i);
-	}
-	$lanSignUpErrorMessage1C=Array2List($FieldList, $lanSignUpErrorMessage1C,null,null, $lanSignUpErrorMessage1A); //Turn the eror field into list
 
-	ErrorDialog($lanSignUpErrorMessage1T,$lanSignUpErrorMessage1C);
-	
-	//For Logging Purpose
-	//Construct the error log content
-	if(!empty($LogDes)){ $LogDes = $LogDes. " & "; }
-	if(!empty($ErrorLog)){ $ErrorLog = $ErrorLog. " & "; }
-
-	$LogDes=$LogDes ."[Empty required field(s)]";
-	$EmpErrorLog=array2csv($FieldList);
-	$ErrorLog=$ErrorLog ."[Empty on : ". $EmpErrorLog['Val'] ."]";
-	
-
-}
-
-if( in_array("Error2",$SignUpError) ){ //Show error dialog urging user use different email
-	$dup=array();
-	$DupErrorLog=array();
-	foreach($Validation->Error2 as $i=>$x){
-		 eval("\$i = \"$i\";");
-		 $Dup2Push=array($i=>$x); 
-		 $DupErrorLog=$DupErrorLog+$Dup2Push;
-		 array_push($dup,"$i : $x");
-	}
-	$lanSignUpErrorMessage2C= Array2List($dup, $lanSignUpErrorMessage2C,null,null,$lanSignUpErrorMessage2A);
-	ErrorDialog($lanSignUpErrorMessage2T,$lanSignUpErrorMessage2C);
-	
-
-	//For Logging Purpose
-	//Construct the error log content
-	if(!empty($LogDes)){ $LogDes = $LogDes. " & "; }
-	if(!empty($ErrorLog)){ $ErrorLog = $ErrorLog. " & "; }
-	$LogDes=$LogDes. "[Duplicate Unique field(s)]";
-	$DupErrorLog=array2csv($DupErrorLog);
-	$ErrorLog=$ErrorLog. "[Duplicate on : ". $DupErrorLog['Key']. " as " .$DupErrorLog['Val'] ."]";
-	
-
-}
-
-if( in_array("Error3",$SignUpError) ){ //Show error dialog telling user that some field are invalid
-	$invali=array();
-	$InvErrorLog=array();
-	foreach($Validation->Error3 as $i=>$x){
-		 eval("\$i = \"$i\";");
-		 $InvError=array($i=>$x); 
-		 $InvErrorLog=$InvErrorLog+$InvError;
-		 array_push($invali,$i);
-	}
-	$lanSignUpErrorMessage3C= Array2List($invali, $lanSignUpErrorMessage3C);
-	
-	ErrorDialog($lanSignUpErrorMessage3T,$lanSignUpErrorMessage3C);
-	
-	//For Logging Purpose
-	//Construct the error log content
-	if(!empty($LogDes)){ $LogDes = $LogDes. " & "; }
-	if(!empty($ErrorLog)){ $ErrorLog = $ErrorLog. " & "; }
-	$LogDes=$LogDes. "[Invalid field(s)]";
-	$InvErrorLog=array2arrow($InvErrorLog," filled as ");
-	$ErrorLog=$ErrorLog. "[Invalid on : ". $InvErrorLog ."]";
-}
 /*
 ========================================================================================
 //--------------------REGISTRATION-------------------
 =======================================================================================
 */ 
-
-if(empty($SignUpError) AND !empty($_POST)){ // Register if no error occured and form already posted
+if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
+	mark("REGIST");
+	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,1,array($_POST['Exc-PasswordConf'],$_POST['Password']));
 	
-	
-	
 
-	$staff-> GoBark ($registered);
 
-	$OKContent = "lanSignUp" . $NewUserApproved;
-	OkDialog($lanSignUpT,$$OKContent);
+	if(empty($Validation->SignUpError)){ // Register if no error occured 
+		
+		
+		$BARK= new Snorlax ('usrid','staff_list',$registered,'New',$staff);
 
-	$LogDes=$LogDes. "Sign Up Success";
-	$ErrorLog=null;
+		$OKContent = "lanSignUp" . $NewUserApproved;
+		OkDialog($lanSignUpT,$$OKContent);
 
-	if(!empty($LogRawPass)){
-		WarningDialog($lanRawPasswordT,$lanRawPasswordC);
+		$LogDes=$LogDes. "Sign Up Success";
+		$ErrorLog=null;
+
+		if(!empty($LogRawPass)){
+			WarningDialog($lanRawPasswordT,$lanRawPasswordC);
+		}
+
+		
 	}
-
-	//Auto Login	
-	foreach($unique as $U){
-		if(!empty($Syarat)){ $Syarat = $Syarat . " AND "; }
-		$Syarat= $Syarat . $U['field_id'] ."='". $newera[$U['field_id']] . "'";
-	}
-	mark($Syarat, "SYarat autoloin ");
-	$autologin=$staff->GoFetch("WHERE $Syarat");
-	Login($autologin[0]['usrid']);
+	
 }
 
+/*
+========================================================================================
+//--------------------UPDATING DATA-------------------
+=======================================================================================
+*/ 
+
+if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
+	mark("UPDATING");
+	if(empty($_SESSION['Person'])){ header('Location: http://you_stuff/url.php'); }
+	if(!empty($_GET['User']) && (in_array($_SESSION['UGroup'],$GLOBALS['$HRDAdminGroup']) || $_SESSION['ULevel']>=$GLOBALS('$HRDAdminLevel'))){ // Only allow edit other user if belong in HRD Admin
+		$EUser = $_GET['User'];
+	} else {
+		$EUser = $_SESSION['Person'];
+	}
+	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,1,0,0,0,0,1);
+
+
+	if(empty($Validation->SignUpError)){ // Register if no error occured 
+		
+		
+		$BARK= new Snorlax ('usrid','staff_list',$registered,'Edit',$staff);
+
+		$OKContent = "lanEdited" . $NewUserApproved;
+		OkDialog($lanUserEditT,$lanUserEditC);
+		if(bouncer()){
+			$viewsonic="view";
+		}
+
+		$LogDes=$LogDes. "Sign Up Success";
+		$ErrorLog=null;
+
+		if(!empty($LogRawPass)){
+			WarningDialog($lanRawPasswordT,$lanRawPasswordC);
+		}
+
+		
+		
+	}
+
+}
 
 
 /*
@@ -187,29 +149,18 @@ if(empty($SignUpError) AND !empty($_POST)){ // Register if no error occured and 
 
 
 
+if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Display registration Form if error occured o if no input yet
 
-if(!empty($SignUpError) OR empty($_POST)){ //Display registration Form if error occured o if no input yet
 
-switch($_GET['job']){ // Decide which method should be used to display?
-	case 1:
-		$viewsonic="new";
-		break;
-	case 3:
-		$viewsonic="view";
-		break;
-	case 4:
-		$viewsonic="edit";
-		break;
+if(!empty($viewsonic)){ // If viewsonic is empty, thats mean user have unatuhorized access
+	mark($viewsonic,"Viewsonic");
+	$Form = new Smeargle("gita_login_signup",$viewsonic,'usrid',$layout,$staff,$EUser);
+	$Forms = $Form->DrawForm(array($lanSignUp));
+	//if($viewsonic!="view"){
+	//	$Forms=str_replace('$lan',"$lan",$Forms);
+	//}
+	echo $Forms;
 }
-
-
-
-$Form = new Smeargle("gita_login_signup",$viewsonic,$layout);
-$Forms = $Form->DrawForm(array($lanSignUp));
-//if($viewsonic!="view"){
-//	$Forms=str_replace('$lan',"$lan",$Forms);
-//}
-echo $Forms;
 
 
 
