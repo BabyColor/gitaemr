@@ -10,7 +10,12 @@
 
 
 switch($job){
+	case 5: // Job 5 --- Make session for patient
+		$_SESSION['Patient']=$_GET['dataid'];
 	case 1: // Job 1 --- New Patient
+	case 2:
+	case 3:
+	case 4;
 	require "patient_status.php";
 	break;
 	default: // Job 0 --- Patient List

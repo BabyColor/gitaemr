@@ -25,6 +25,7 @@ $SettingSuperAdminGroup= array("Arceus"); //Those who belong in this groups bypa
 $SettingSuperAdminLevel= 9999; //Those who have user level past this number bypass all restriction. Should be given only to the owner of the systems as backup accounts.
 
 
+
 //----Account Setting-----
 $NewUserApproved=0;
 $NewUserLevel=1;

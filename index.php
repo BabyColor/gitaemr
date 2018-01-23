@@ -1,6 +1,7 @@
 <?php
 session_start();
-
+define('GitaEmr',1);
+$UnatuhorizedAccess="Unauthorized Access";
 
 require "Setting/conf.php"; //--Main config file
 require "Setting/database.php"; //--Database connection 

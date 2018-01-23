@@ -171,6 +171,9 @@ $lanEdit="Ubah";
 $lanSubmit="Kirim";
 $lanCancel="Batalkan";
 $lanReset="Hapus";
+$lanSearch="Cari";
+$lanAll='Semua';
+$lanNoResult='Tidak ada data yang ditemukan';
 
 ////////////////////////////////////////////////////
 ////////////  MESSAGE /////////////////////////////
@@ -195,6 +198,10 @@ $lanBouncerT="Akses Ditolak";
 $lanBouncerC="Anda tidak memiliki ijin untuk mengakses halaman ini";
 $lanBannedT="Anda Diblokir!";
 $lanBannedC="Silahkan hubungi Administrator Sistem untuk memohon ampun atas apapun itu kekacauan yang telah anda perbuat";
+$lanPxRegisterErrorMessage1T="Kolom Penting Masih Kosong";
+$lanPxRegisterErrorMessage1C="Kolom berikut harus diisi :";
+$lanPxRegisterErrorMessage2T="Pasien Sudah Terdaftar";
+$lanPxRegisterErrorMessage2C="Pasien sudah terdaftar dengan :" ;
 
 //----------------Warning
 $lanRawPasswordT="Password Tidak Di Proteksi";

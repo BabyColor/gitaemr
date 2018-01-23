@@ -1,158 +1,172 @@
 <?
-$layout= new GoodBoi('layout'); //Declare an Object "$su_field" with class that used to connect to database with table "pre_layout". GoodBoi is class used for MySQL DB things. You get it? Good Boi...
-$staff = new GoodBoi('staff_list'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
-$option = new GoodBoi ('list_list');
-
-
-
-
-// Signup Action
-if(!empty($_POST)){ // Check wether user already input data
-	
-
-	//-----Action!--------
-	$_POST = array_map('strip_tags', $_POST); //STRIPPING
-	$newera=$_POST;
-	$pexs = array();
-	//PAssword setting only when Register
-	
-	//-----Add additional registration input-----
-	$Who=WhoAreYou();
-	$Who=serialize($Who);
-	$Additional= $pexs + array("UserLevel"=>$NewUserLevel, "UserGroup"=>$NewUserGroup,  "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
-
-	$registered=array_merge ($newera,$Additional);
-	
-	
-	//DEBUG
-	if(!empty($_SESSION['DeFlea'])){ 
-		mark(array2arrow($registered," ==> ","<br>"),"Refined POST<br>");
-	}
+defined('GitaEmr') or Die($UnatuhorizedAccess);
+if(bouncer()){
+	$layout= new GoodBoi('layout'); //Declare an Object "$su_field" with class that used to connect to database with table "pre_layout". GoodBoi is class used for MySQL DB things. You get it? Good Boi...
+	$MainTable = new GoodBoi('com_gita_patient'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
+	$option = new GoodBoi ('list_list');
+	$FieldID = "gita_patient";
+	$Tid='patientid';
 
 
 	
-	
+	// Signup Action
+	if(!empty($_POST)){ // Check wether user already input data
+		
 
-}
+		//-----Action!--------
+		$_POST = array_map('strip_tags', $_POST); //STRIPPING
+		$newera=$_POST;
+		
+		//-----Add additional registration input-----
+		$Who=WhoAreYou();
+		$Who=serialize($Who);
+		$Additional= array('register_date'=>Date2SQL(),'last_mod'=>Date2SQL(),"last_mod_by"=>$_SESSION['Person']); //Aditional values to record on DB on registration
 
-//===============================================================
-//Display Method
-//========================================================
-switch($_GET['job']){ // Decide which method should be used to display?
-	case 1:
-		$viewsonic="new";
-		break;
-	case 3:
-	if(bouncer()){
-			$viewsonic="view";
+		if($_GET['job']==1){ // New Patient specific additional data
+			$Additional += array("registered_by"=>$_SESSION['Person'], 'registered_at'=>$SettingCurrentFacility);
 		}
-		break;
-	case 4:
-	if(bouncer()){
+
+		$registered=array_merge ($newera,$Additional);
+		
+		
+		//DEBUG
+		if(!empty($_SESSION['DeFlea'])){ 
+			mark(array2arrow($registered," ==> ","<br>"),"Refined POST<br>");
+		}
+
+
+		
+		
+
+	}
+	
+	//===============================================================
+	//Display Method
+	//========================================================
+	switch($_GET['job']){ // Decide which method should be used to display?
+		case 1:
+			$viewsonic="new";
+			break;
+		case 2:
+		case 5:
+			$viewsonic="list";
+			break;
+		case 3:
+			$viewsonic="view";
+			break;
+		case 4:
 			$viewsonic="edit";
-		}
-		break;
-}
-
-
-/*
-========================================================================================
-//--------------------REGISTRATION-------------------
-=======================================================================================
-*/ 
-if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
-	mark("REGIST");
-	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,1,array($_POST['Exc-PasswordConf'],$_POST['Password']));
+			break;
+	}
+	if(!empty($_POST)){
+	$Px= $MainTable->GoFetch("WHERE $Tid='". $_POST['patientid'] ."'");
+	$PxId=$Px[0]['patientid'];
+	$PxName=NameArrangement($Px[0]['FName'],$Px[0]['MName'],$Px[0]['LName']);
+	}
+	/*
+	========================================================================================
+	//--------------------REGISTRATION-------------------
+	=======================================================================================
+	*/ 
 	
-
-
-	if(empty($Validation->SignUpError)){ // Register if no error occured 
+	if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
+		mark("REGIST");
+		$Validation=new FieldValidation ("PxRegister",$FieldID,$layout,$MainTable,1);
 		
+
+
+		if(empty($Validation->SignUpError)){ // Register if no error occured 
+			
+			
+			$BARK= new Snorlax ('patientid','com_gita_patient',$registered,'New',$MainTable);
+			
+
+			$OKContent = "lanSignUp" . $NewUserApproved;
+			OkDialog($lanSignUpT,$$OKContent);
+
+			$_SESSION['Patient']=$registered[$TID];
+
+			$LogDes=$LogDes. "Patient Register Success";
+			$ErrorLog=null;
+
 		
-		$BARK= new Snorlax ('usrid','staff_list',$registered,'New',$staff);
 
-		$OKContent = "lanSignUp" . $NewUserApproved;
-		OkDialog($lanSignUpT,$$OKContent);
-
-		$LogDes=$LogDes. "Sign Up Success";
-		$ErrorLog=null;
-
-		if(!empty($LogRawPass)){
-			WarningDialog($lanRawPasswordT,$lanRawPasswordC);
+			
 		}
-
 		
 	}
+
+	/*
+	========================================================================================
+	//--------------------UPDATING DATA-------------------
+	=======================================================================================
+	*/ 
+
+	if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
+		mark("UPDATING");
+		$EditedPatient = $_GET['patient'];
+		$Validation=new FieldValidation ("PxRegister",$FieldID,$layout,$staff,1,0,0,0,0,1);
+
+
+		if(empty($Validation->SignUpError)){ // Register if no error occured 
+			
+			
+			$BARK= new Snorlax ($Tid,'com_gita_patient',$registered,'Edit',$MainTable);
+
+			$OKContent = "lanEdited" . $NewUserApproved;
+			OkDialog($lanUserEditT,$lanUserEditC);
+			if(bouncer()){
+				$viewsonic="view";
+			}
+
+			$LogDes=$LogDes. "Patient Data Update Success";
+			$ErrorLog=null;
+			
+			
+		}
+
+	}
+
+
+	/*
+	=====================================================================================
+	// -----------------------------------Draw Signup Form---------------------------
+	===========================================================================================
+	*/
+
+
 	
-}
+	if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Display registration Form if error occured o if no input yet
 
-/*
-========================================================================================
-//--------------------UPDATING DATA-------------------
-=======================================================================================
-*/ 
-
-if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
-	mark("UPDATING");
-	if(empty($_SESSION['Person'])){ header('Location: http://you_stuff/url.php'); }
-	if(!empty($_GET['User']) && (in_array($_SESSION['UGroup'],$GLOBALS['$HRDAdminGroup']) || $_SESSION['ULevel']>=$GLOBALS('$HRDAdminLevel'))){ // Only allow edit other user if belong in HRD Admin
-		$EUser = $_GET['User'];
-	} else {
-		$EUser = $_SESSION['Person'];
-	}
-	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,1,0,0,0,0,1);
-
-
-	if(empty($Validation->SignUpError)){ // Register if no error occured 
+	switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
+		case "view":
+		case "edit":
+		case "new":
+			$Form = new Smeargle($FieldID,$viewsonic,$Tid,$layout,$MainTable,$EditPatient);
+			$Forms = $Form->DrawForm(array($lanSignUp));
+			//if($viewsonic!="view"){
+			//	$Forms=str_replace('$lan',"$lan",$Forms);
+			//}
+			Gardevoir($Forms);
+			break;
+		case "list":
+			$_SESSION['Patient']=$_GET['dataid'];
+			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, fname, mname, lname, dob, sex, address, desa, district",8=>'FName',9=>"prefix, fname, mname, lname", 4=>$Tid, 10=>"prefix,fname,mname,lname"));
 		
-		
-		$BARK= new Snorlax ('usrid','staff_list',$registered,'Edit',$staff);
-
-		$OKContent = "lanEdited" . $NewUserApproved;
-		OkDialog($lanUserEditT,$lanUserEditC);
-		if(bouncer()){
-			$viewsonic="view";
+			foreach($List->Gardevoir as $y=>$x){
+				if(strpos($y, 'pre') === false && strpos($y, 'post') === false) {
+				//	mark($y,"THIS GARDE ");
+					$List->Gardevoir[$y] .="<td><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=$y>Buat Kunjungan</a></td>";
+				}
+			}
+			$List->Gardevoir();
+			break;
 		}
 
-		$LogDes=$LogDes. "Sign Up Success";
-		$ErrorLog=null;
-
-		if(!empty($LogRawPass)){
-			WarningDialog($lanRawPasswordT,$lanRawPasswordC);
-		}
-
-		
 		
 	}
 
 }
-
-
-/*
-=====================================================================================
-// -----------------------------------Draw Signup Form---------------------------
-===========================================================================================
-*/
-
-
-
-if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Display registration Form if error occured o if no input yet
-
-if(!empty($viewsonic)){ // If viewsonic is empty, thats mean user have unatuhorized access
-	mark($viewsonic,"Viewsonic");
-	$Form = new Smeargle("gita_patient",$viewsonic,'patientid',$layout,$staff,$EUser);
-	$Forms = $Form->DrawForm(array($lanSignUp));
-	//if($viewsonic!="view"){
-	//	$Forms=str_replace('$lan',"$lan",$Forms);
-	//}
-	echo $Forms;
-}
-
-
-
-
-}
-
 
 
 $LogContent=array2arrow($registered); //For Logging

@@ -52,3 +52,14 @@
 }
 h1   {color: blue;}
 p    {color: red;}
+.Listing .Keroro {
+    background-color: rgb(154, 201, 27);
+}
+.Listing .Dororo {
+    background-color: rgb(239, 255, 196);
+}
+
+.Listing .Kururu {
+    background-color: rgb(87, 119, 0);
+    color : white;
+}

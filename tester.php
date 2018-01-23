@@ -1,13 +1,22 @@
 <?php
 if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
-
-$A1=array("Pis"=>"Bolong");
-$A2=array("TOKAI"=>"EWE");
-$A2 += $A1;
-mark ($A2);
-
+Login(1);
+$RID='asas';
+$yuyu[$RID]="Asas";
+$yuyu[$RID] .= " asssda";
+mark($yuyu);
+//$registered=$_POST;
+//$BURK= new AddList ($registered);
 /*
+
+$AA=new GoodBoi('layout');
+$E=$AA->GoFetch("WHERE form_id='gita_patient'","field_id, field_label");
+mark($E);
+$E=Array2Array($E,'field_id','field_label');
+mark($E);
+
+
 echo 'Now:       '. date('Y-m-d  H:m:s') ."\n";
 $AAA='$lanMoreThanFriendButLessThanLover';
 $BBB=strtr($AAA, array('$lanMoreThanFriendButLessThanLover' => $lanMoreThanFriendButLessThanLover));

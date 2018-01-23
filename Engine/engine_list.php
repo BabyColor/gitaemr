@@ -1,7 +1,5 @@
-
-
 <?php
-
+defined('GitaEmr') or Die($UnatuhorizedAccess);
 /*
  ██████╗
 ██╔════╝
@@ -24,6 +22,7 @@
 */
 
 function array2csv($arr,$bra=null,$IgnoreBlank=null,$IgnoreExc=null,$sep=" , "){ // Ignore Blank=Ignore value with Blank Key, IgnoreExc=Ignore any value with key started with "Exc-"
+  $arr=array_map("ArraySerialize",$arr);
   foreach($arr as $a => $b){
     
     if((empty($b) && !empty($IgnoreBlank)) || (substr( $a, 0, 4 ) == "Exc-" && !empty($IgnoreExc))){ // Seperate the array into key/value and convert it into MySQL string (If key is't empty or not Exception [exc-]
@@ -46,16 +45,15 @@ function array2csv($arr,$bra=null,$IgnoreBlank=null,$IgnoreExc=null,$sep=" , "){
 
 
 
-function array2arrow($arr,$arrow=" ==> ",$sep=" || ",$valpre="'",$valpost="'",$keypre="",$keypost=""){ // Turn array into key => value (Array,Arrow,Seperator)
-  mark($arr,"A2A ") ;
+function array2arrow($arr,$arrow=" ==> ",$sep="<br/>",$valpre="'",$valpost="'",$keypre="",$keypost=""){ // Turn array into key => value (Array,Arrow,Seperator)
+  $arr=array_map("ArraySerialize",$arr);
   foreach($arr as $a => $b){
     if(!empty($counter)){  // Assign seperator if not first value
       $aa = $aa . $sep;
     }
     $aa = $aa. $keypre . $a . $keypost . $arrow . $valpre . $b . $valpost;
     $counter++;
-  }
-  if(!empty($_SESSION['DeFlea'])){ Mark($aa,"[". __FUNCTION__ ."]","<br>". $bun->error); } 
+  } 
   return $aa;
 }
 
@@ -82,9 +80,10 @@ function Blissey($array){ //To Mysqli_real_escape_string an array
 }
 
 function Array2List($ListArray,$Pre=null,$InPre=null,$InPos=null,$Post=null,$KeySep=null){ //Turn array into <ul>, (Array,Pre Text, In list pretext, IN list postext, Post text)
+  $ListArray=array_map("ArraySerialize",$ListArray);
   $Pre .= "<br><ul>";
+  if(!empty($KeySep)){ $KeySep="$x $KeySep "; } else {  $KeySep=''; }
 	foreach($ListArray as $x=>$i){
-    if(!empty($KeySep)){ $KeySep="$x $KeySep "; } else {  $KeySep=''; }
      $Pre= $Pre . "<li>$InPre $KeySep $i $InPos</li>";
   }
   if(!empty($_SESSION['DeFlea'])){ mark($Pre . "</ul><br> $Post",__FUNCTION__ ."Returned "); }
@@ -98,6 +97,45 @@ function lan2var($lan){ //Turn $lan string into watherever contained in it's cor
     return $lan;
   }
 }
+
+function NameArrangement($FName,$MName,$LName,$Pre=null,$Post=null){
+  if($GLOBALS['FirstNameFirst']==1){
+    return "$Pre $FName $MName $LName $Post";
+  } else { 
+    return "$Pre $LName, $FName $MName $Post";
+  }
+}
+
+function ArraySerialize($A){
+  if (is_array($A)){ return serialize($A); } else { return $A; }
+}
+function ArrayUnserialize($A){
+  $B=@unserialize($A);
+  if ($B !== false){
+    return $B;
+  } else {
+    return $A;
+  }
+}
+
+function Array2Array($arr,$key,$label){
+  $result=array();
+  foreach($arr as $x){
+    $result += array($x[$key]=>$x[$label]);
+  }
+  return $result;
+}
+
+function csv2csv($csv,$sep=', ',$resep=',',$pre="'",$pst="'"){
+  // (CSV string, original delimeter, desired delimeter, string to put before, and after each values)
+  $arr=explode($sep,$csv);
+  $ncsv=array();
+  foreach ($arr as $x){
+    array_push ($ncsv, $pre . $x . $pst);
+  }
+  return implode($resep,$ncsv);
+}
+
 /*
 ==========================================================================================================
 
@@ -164,6 +202,7 @@ function DrawOption($cluster,$ListDB=null,$orderby="ASC",$CustomDBVal=null,$Cust
     }
   return $Options;
 }
+
 
 
 /*
@@ -268,6 +307,66 @@ function LastSQLEntry($table,$short,$number=10,$print=1){
   return $Row;
 }
 
+function ZebraList($Array,$NameColumn,$Label=null,$Argument=array('Listing','Keroro','Dororo','Kururu','Name',null,null)){
+  
+  //Variabelize Arguments
+    $StyleList= empty($Argument[0])? 'Listing' : $Argument[0]; // CSS Style for list table
+    $Style1= empty($Argument[1])? 'Keroro' : $Argument[1]; //CSS class for row Odd
+    $Style2= empty($Argument[2])? 'Dororo' : $Argument[2];// CSS class for row Even
+    $StyleHeader= empty($Argument[3])? 'Kururu' : $Argument[3];// CSS class for header
+    $NameLabel= empty($Argument[4])? $GLOBALS['lanName'] : $Argument[4]; // Label for 'Name' Column
+    $URI=$Argument[5]; // GET
+    $DID=$Argument[6]; // Data ID column (For linking)
+
+  foreach($Array as $y=>$x){
+    $RID=$x[$DID];
+    if(Empty($Zebra)){
+      $Zebra = array('pre'=>"<table class=$StyleList><tr class=$StyleHeader>");
+      foreach ($x as $b=>$a){
+        if(in_array($b,$NameColumn)){ // If the key is included in the [Name Column], Use $NameLabel as header
+          if(empty($HCounter)){ $Zebra['pre'] .="<th>$NameLabel</th>"; $HCounter++; }
+        } else {
+          $b= lan2var($Label[$b] );
+           $Zebra['pre'] .="<th>". $b ."</th>";
+        }
+      }     
+      unset($HCounter);
+    }
+    if($y%2==0){ $Style=$Style1; } else { $Style=$Style2; } 
+    $Zebra += array($RID=>"<tr class=$Style>");
+    $URI=$_GET;
+    $URI['job']=3;
+    $URI= GetGET($URI);
+    foreach ($x as $b=>$a){
+      if(in_array($b,$NameColumn)){ // If the key is included in the [Name Column], join them
+        if(empty($HCounter)){ $Zebra[$RID] .= "<td><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI". "dataid=". $RID ." >"; $HCounter++; }
+        $a= lan2var($a);
+        $Zebra[$RID] .=  "$a ";
+      } else {
+        $a= lan2var($a);
+        $Zebra[$RID] .= "<td>$a</td>";
+      }
+    }
+    unset($HCounter);
+  }
+  $Zebra['post'] = "</table>";
+  //DeFlea($Zebra, __FUNCTION__);
+  return $Zebra;
+}
+
+
+//---------------The Main Drawer---------------------------
+//$Draw can be array or string
+function Gardevoir($Draw){
+    if(is_array($Draw)){
+    foreach($Draw as $x){
+      Gardevoir($x);
+    }
+  } else {
+    echo "<p>". htmlspecialchars($Draw) ."</p>";
+    echo $Draw;
+  }
+}
 
 
 /*
@@ -453,7 +552,7 @@ class Kayu extends GoodBoi{
     WhosKnock();
     $l= WhoAreYou();
     $ULevel= empty($_SESSION['ULevel'])? 0 : $_SESSION['ULevel'];
-    $Kayuing=array('SDesc'=>$a , 'Culpirt'=>$l['IP'], 'CBrowser'=>$l['Browser'], 'CPort'=>$l['Port'], 'Victim'=>$l['sIP'], 'Vport'=>$l['sPort'], 'VURI'=>$l['URI'], 'Command'=>$b, 'Error'=>$d, 'User'=>$_SESSION['Person'], 'UserN'=>$_SESSION['UserN'], 'Name'=>$_SESSION['Name'], 'ULevel'=>$ULevel, 'UGroup'=>$_SESSION['UGroup']); 
+    $Kayuing=array('SDesc'=>$a , 'Culpirt'=>$l['IP'], 'CBrowser'=>$l['Browser'], 'CPort'=>$l['Port'], 'Victim'=>$l['sIP'], 'Vport'=>$l['sPort'], 'VURI'=>$l['URI'], 'Command'=>$b, 'Error'=>$d, 'User'=>$_SESSION['Person'], 'UserN'=>$_SESSION['UserN'], 'Name'=>$_SESSION['Name'], 'ULevel'=>$ULevel, 'UGroup'=>serialize($_SESSION['UGroup'])); 
     $this->GoBark($Kayuing);
     //Debug
    if(!empty($_SESSION['DeFlea'])){ Mark($Kayuing,"LOG || "); } 
@@ -554,7 +653,7 @@ function Login($User){
   $_SESSION['UserN']=$x[0]['UserName'];
   $_SESSION['Name']= $x[0]['FName'] ."/". $x[0]['MName'] ."/". $x[0]['LName'];
   $_SESSION['ULevel']=$x[0]['UserLevel'];
-  $_SESSION['UGroup']=$x[0]['UserGroup'];
+  $_SESSION['UGroup']=deserialization($x[0]['UserGroup']);
 }
 
 function Logout(){
@@ -566,6 +665,7 @@ function Logout(){
 }
 
 function LogUser($Userclass=null){ // Update the Last IP and Last activity of user (User ID, Class that linked to staff_list db)
+  if(empty($_SESSION['Person'])) { return; }
 	$Who=WhoAreYou();
 	$Who=serialize($Who);
   $Updatecol=array("LastActiveTime"=>Date2SQL(), "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who);
@@ -602,11 +702,32 @@ function Bouncer($group=array("user"),$level=1,$person=0,$MessageT=null,$Message
       OKDialog($MessageT,$MessageC);
       break;
   }
+  $GLOBALS['LogDes']="Unauthorized Access";
+  $GLOBALS['ErrorLog']="User Group is ". array2csv($_SESSION['UGroup']) .", allowed user group are". array2csv($group) ." || User level is ". $_SESSION['ULevel'] .", allowed Level is past $level";
   return FALSE;
 }
 
+/*
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  URI    =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
 
-
+//---Get the GET variable and return as string {For making certain URL}
+function GetGET($Arr=null){
+  if(empty($Arr)){ $Arr=$_GET; }
+  foreach($Arr as $x=>$y){
+    $URI=$URI. "$x=$y&";
+  }
+  return $URI;
+}
 
 
 
@@ -723,11 +844,9 @@ class GoodBoi{
     //Debug
     DeFlea($sausage, __CLASS__ . "++++" . __FUNCTION__);
    //Debug
-    if ($bun->query($sausage) === TRUE) {
-      return $bun->insert_id;
-    } else {
-      return $bun->error;
-    }
+    $bun->query($sausage) ;
+    DeFlea($bun->error, "Wan! Wan! Wan!");
+    return $bun->insert_id;
   }
   public function GoCount($a){
     $RowCount=$this->GoFetch($a,"COUNT(*) as Total");
@@ -821,7 +940,7 @@ class Smeargle{
     $this->Layout=$form;
     $this->adminlevel=$adminlevel;
     $this->Style=$style;
-    $this->Data= empty($Data)? $_SESSION['Person']: $Data; //If No Specific user, get own instead
+    $this->Data= empty($_GET['dataid'])? $_SESSION['Person']: $_GET['dataid']; //If No Specific user, get own instead
     //Make new class to link to layout table
     if(empty($mysqlclass)){ 
       $mysqlclass= new GoodBoi("layout"); 
@@ -842,15 +961,12 @@ class Smeargle{
     //Debug
     if(!empty($_SESSION['DeFlea'])){ mark("Drawed", __CLASS__ ." ----> ". __FUNCTION__ ."   "); }
    
-    foreach($_GET as $x=>$y){
-      $URI=$URI. "$x=$y&";
-    }
-
-    //Draw form pening ( <form> and <table>)
-    $Draw= "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ."><table class=". $this->Style ."><tr>"; 
+    $URI = GetGET();
+    //Draw form opening ( <form> and <table>)
+    $Draw = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ."><table class=". $this->Style ."><tr>"; 
     
     //---Draw form
-   $Draw= $Draw . $this->Grouping(); //  Go to function Grouping to draw each group
+   $Draw .= $this->Grouping(); //  Go to function Grouping to draw each group
    
    //Setting default values of buttons depending on languages
    global $lanSubmit;
@@ -863,20 +979,20 @@ class Smeargle{
    //Drawing button for each viewing type
    switch ($this->ViewMode){
      case "new":
-      $Draw= $Draw . "<tr><td colspan=2><input type=Submit value=$Button[0]></input> <input type=reset value=$Button[1]></input>";
+      $Draw .= "<tr><td colspan=2><input type=Submit value=$Button[0]></input> <input type=reset value=$Button[1]></input>";
       break;
     case "edit":
-      $Draw= $Draw . "<tr><td colspan=2>
+     $Draw .= "<tr><td colspan=2>
                         <input type=hidden name=". $this->DataID ." value=". $this->UserData[$this->DataID] .">
                         <input type=Submit value=$Button[2]></input> <input type=reset value=$Button[1]></input>"; 
       break;
     case "view":
-     $Draw= $Draw . "<tr><td colspan=2><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=4>$lanEdit</a>";
+      $Draw .= "<tr><td colspan=2><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=4>$lanEdit</a>";
       break;
    }
 
    //Draw closur </table> and </form>"
-   $Draw= $Draw . "</table></form>";
+   $Draw .= "</table></form>";
    return $Draw;
   }
 
@@ -902,7 +1018,7 @@ class Smeargle{
 
     switch($this->ViewMode){
       case "edit":
-        $UserData=$this->MySQL_Data-> GoFetch("WHERE usrid = '". $this->Data ."'" );
+        $UserData=$this->MySQL_Data-> GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'" );
         $this->UserData=$UserData[0];
       case "new":
         $Draw=$Draw . $this->NewFielding($Field,$Group);
@@ -1024,7 +1140,7 @@ class Smeargle{
 
   // Draw field if viewing mode is View
   function ViewFielding($Field,$Group){
-    $Staff=$this->MySQL_Data->GoFetch("WHERE usrid = '". $this->Data ."'");
+    $Staff=$this->MySQL_Data->GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'");
     foreach($Field as $F){ // Script for each found filed
       
       //Check if content is an Array
@@ -1057,6 +1173,7 @@ class Smeargle{
 	===============================================================================================
 	*/ 
   class FieldValidation{
+    protected $EM;
     public $SignUpError; //Array to store sign up error
     protected $MyClass; // A GoodBoi class for layout
     protected $MyClasStaff; // A GoodBoi class for staff
@@ -1067,10 +1184,11 @@ class Smeargle{
     public $Error4; // Array of field(s) whom didn't pass Error4$5 check (Password Change)
     public $User; 
   
-    function __Construct($FormId,$MyClass=null,$MyStaff=null,$ShowError=1,$E0=null,$E4=null,$E1=1,$E2=1,$E3=1){
-      // (Form ID, GoodBoi class layout, staff, Display error?, Run Check error0 array(Input,Confirmation), error4 (UserID,New Password, Old Password, Password Field ID), error1, error2, error3)
+    function __Construct($Error,$FormId,$MyClass=null,$MyStaff=null,$ShowError=1,$E0=null,$E4=null,$E1=1,$E2=1,$E3=1){
+      // (Error language variable, Form ID, GoodBoi class layout, staff, Display error?, Run Check error0 array(Input,Confirmation), error4 (UserID,New Password, Old Password, Password Field ID), error1, error2, error3)
     $this->SignUpError=array(); 
     $this->FormId=$FormId;
+    $this->EM=$Error;
     $this->MyClass= empty($MyClass)? new GoodBoi("layout") : $MyClass;
     $this->MyClasStaff= empty($MyStaff)? new GoodBoi("staff_list") : $MyStaff;
     $this->User=$E4[0];
@@ -1169,7 +1287,7 @@ class Smeargle{
     //Show Wich Error? (erorr0, 1, 2, 3) Default is 1 (Showing)
     $LogDes=array();
     $ErrorLog=array();
-
+    $EM = $this->EM;
     if( in_array("Error0",$this->SignUpError) && !empty($E0) ){ //Show error dialog wrong confirmation password
 	
       ErrorDialog($GLOBALS['lanSignUpErrorMessage0T'],$GLOBALS['lanSignUpErrorMessage0C']);
@@ -1188,8 +1306,8 @@ class Smeargle{
          $i=lan2var($i);
          array_push($FieldList,$i);
       }
-      $lanSignUpErrorMessage1C=Array2List($FieldList, $GLOBALS['lanSignUpErrorMessage1C'],null,null, $GLOBALS['lanSignUpErrorMessage1A']); //Turn the error field into list
-      ErrorDialog($GLOBALS['lanSignUpErrorMessage1T'],$lanSignUpErrorMessage1C);
+      $lanSignUpErrorMessage1C=Array2List($FieldList, $GLOBALS['lan'. $EM .'ErrorMessage1C'],null,null, $GLOBALS['lan'. $EM .'ErrorMessage1A']); //Turn the error field into list
+      ErrorDialog($GLOBALS['lan'. $EM .'ErrorMessage1T'],$lanSignUpErrorMessage1C);
       
       //For Logging Purpose
       //Construct the error log content
@@ -1209,8 +1327,9 @@ class Smeargle{
          $DupErrorLog=$DupErrorLog+$Dup2Push;
          array_push($dup,"$i : $x");
       }
-      $lanSignUpErrorMessage2C= Array2List($dup, $GLOBALS['lanSignUpErrorMessage2C'],null,null,$GLOBALS['lanSignUpErrorMessage2A']);
-      ErrorDialog($GLOBALS['lanSignUpErrorMessage2T'],$lanSignUpErrorMessage2C);
+      $lanSignUpErrorMessage2C= Array2List($dup, $GLOBALS['lan'. $EM .'ErrorMessage2C'],null,null,$GLOBALS['lan'. $EM .'ErrorMessage2A']);
+      ErrorDialog($GLOBALS['lan'. $EM .'ErrorMessage2T'],$lanSignUpErrorMessage2C);
+      mark('lan'. $EM .'ErrorMessage2T',"^&RT&^YKVKY");
       
     
       //For Logging Purpose
@@ -1231,9 +1350,9 @@ class Smeargle{
          $InvErrorLog=$InvErrorLog+$InvError;
          array_push($invali,$i);
       }
-      $lanSignUpErrorMessage3C= Array2List($invali, $GLOBALS['lanSignUpErrorMessage3C']);
+      $lanSignUpErrorMessage3C= Array2List($invali, $GLOBALS['lan'. $EM .'ErrorMessage3C']);
       
-      ErrorDialog($GLOBALS['lanSignUpErrorMessage3T'],$lanSignUpErrorMessage3C);
+      ErrorDialog($GLOBALS['lan'. $EM .'ErrorMessage3T'],$lanSignUpErrorMessage3C);
       
       //For Logging Purpose
       //Construct the error log content
@@ -1244,7 +1363,7 @@ class Smeargle{
 
     if( in_array("Error4",$this->SignUpError) && !empty($E4) ){ //Wrong Password
       
-      ErrorDialog($GLOBALS['lanSignUpErrorMessage4T'],$GLOBALS['lanSignUpErrorMessage4C'] . $this->Error4);
+      ErrorDialog($GLOBALS['lan'. $EM .'ErrorMessage4T'],$GLOBALS['lan'. $EM .'ErrorMessage4C'] . $this->Error4);
       
       //For Logging Purpose
       //Construct the error log content
@@ -1254,7 +1373,7 @@ class Smeargle{
     }
     if( in_array("Error5",$this->SignUpError) && !empty($E5) ){ //Wrong Password
       
-      ErrorDialog($GLOBALS['lanSignUpErrorMessage5T'],$GLOBALS['lanSignUpErrorMessage5C'] . $this->Error4);
+      ErrorDialog($GLOBALS['lan'. $EM .'ErrorMessage5T'],$GLOBALS['lan'. $EM .'ErrorMessage5C'] . $this->Error4);
       
       //For Logging Purpose
       //Construct the error log content
@@ -1448,6 +1567,7 @@ class Snorlax{
     mark($Snore, __FUNCTION__ . "Snore List "); //==================================DEBUG=======================
     //GO
     $this->PulverizingPancake($Ditto,$Snore);
+    $BURK= new AddList ($this->Data);
   }
 
   function IVs(){
@@ -1469,6 +1589,7 @@ class Snorlax{
     $DataOne= serialize($DataOne);
     $VHC= array('edited_data'=>$DataOne,'version'=>'current','edited_id'=>$Pokeball) + $this->LaxIncense;
     $this->GoodBoi_Version->GoBark($VHC);
+    $BURK= new AddList ($this->Data);
   }
 
   //1. Fetch column list with '1' [ColumnList] in Subversion DB where version=current AND edited_id= current edited id (ATR1) AND original_table = edited table (ATR2) [CurentVerRow].
@@ -1534,6 +1655,203 @@ class Snorlax{
     $this->GoodBoi_Version->GoBark($Snore);
   }
 }
+/*
+=======================================================================================
+██╗     ██╗███████╗████████╗██╗███╗   ██╗ ██████╗ 
+██║     ██║██╔════╝╚══██╔══╝██║████╗  ██║██╔════╝ 
+██║     ██║███████╗   ██║   ██║██╔██╗ ██║██║  ███╗
+██║     ██║╚════██║   ██║   ██║██║╚██╗██║██║   ██║
+███████╗██║███████║   ██║   ██║██║ ╚████║╚██████╔╝
+╚══════╝╚═╝╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
+=======================================================================================
+To display a list (e.g. Patient list, Staff list)
+                                                  
+*/
 
+class Listing{
+  protected $GoodBoi; // GoodBoi class
+  protected $Query; // ARRAY of fetching data to be listed
+  protected $ColumnLabelObj; //class GoodBoi to label name (usually layout)
+  protected $Header; //
+  protected $ColumnMain;
+  protected $DefaultSearchColumn;
+  protected $FormID;
+  protected $TID;// Main table's ID column
+  protected $NameColumn; 
+  public $Gardevoir; //Array of the final list draw
+
+  // (GoodBoi Class, [ARGUMENT])
+  function __Construct($GoodBoi,$ColumnLabelObj=null,$Argument=array(null,'Listing','*',null,'field_id','field_label',"form_id",null,null,'FName,MName,LName')){
+    //Variabelize Arguments
+      $Where=$Argument[0]; //WHERE query
+      $Style=$Argument[1]; // CSS class
+      $ColumnListed=$Argument[2]; // Which column will be listed
+      $DefaultOrder=$Argument[3];
+      $TID=$Argument[4];
+      $HeadingLabel=$Argument[5];
+      $HeadingWhereCol=$Argument[6];
+      $HeadingWhereVal=$Argument[7];
+      $ColumnMain=$Argument[8]; // Which column is the main column (Those will be used as link)
+      $DefaultSearchColumn=$Argument[9]; //CSV All column to be searched if no specific column selected
+      $NameColumn=$Argument[10]; // Column that makes the name (Also become main column)
+
+      $this->ColumnMain=$ColumnMain;
+      $this->Header=$E=Array2Array($ColumnLabelObj->GoFetch("WHERE $HeadingWhereCol ='$HeadingWhereVal'"),'field_id','field_label');
+      $this->GoodBoi=$GoodBoi;
+      $this->DefaultSearchColumn=$DefaultSearchColumn;
+      $this->ColumnLabelObj=$ColumnLabelObj;
+      $this->FormID=$HeadingWhereVal;
+      $this->TID=$TID;
+
+      //Name Colom to array
+      $this->NameColumn=explode(",",$NameColumn);
+
+    //Decide which criteria used to display data (Default if no search criteria inputed from the search bok)
+    if(empty($_GET['listcolumn']) || $_GET['listcolumn'] == 'ALL'){ $Src=$DefaultSearchColumn; } else {$Src =$_GET['listcolumn'];} // Turn Argument[9] into array for searching (Use all of them for search criteria)
+    if(strpos($Src, ',') !== false ){ // If the Src contain ',', treat explode them into array
+      $Src=explode(",",$Src); 
+    }
+    if(strpos($_GET['listcrit'], 'select__') !== false){ // If search taken from datalist
+      $Where = "WHERE ". $this->TID ."='". str_replace("select__","",$_GET['listcrit'])  ."'";
+    } else {
+      if(!empty($Src)){
+        if(is_array($Src)){ // If multiple search column (Treat as array), make multiple search query
+          foreach($Src as $x){
+            if(!empty($Where)){ $Where .=" OR "; } else { $Where = "WHERE "; }
+            $Where .= $x ." LIKE '%". $_GET['listcrit'] ."%' ";
+          } 
+        } else {
+          $Where = "WHERE $Src LIKE '%". $_GET['listcrit'] ."%'";
+        }
+      }
+    }
+   
+    $this->Query=$GoodBoi->GoFetch($Where,$ColumnListed);
+    $this->DrawList();
+  }
+
+  function DrawList(){
+    $URI = GetGET();
+    $Draw=ZebraList($this->Query,$this->NameColumn,$this->Header,array(6=>$this->TID,5=>$URI));
+    $this->Gardevoir=$Draw;
+    if(Empty($this->Query)){
+      echo $GLOBALS['lanNoResult'];
+    }
+  }
+
+  function SearchList(){
+    if(!empty($this->DefaultSearchColumn)){
+      //Draw search form
+      $URI = GetGET();
+      
+      $Form= "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
+      unset($_GET['listcrit']);
+      unset($_GET['listcolumn']);
+      $Form .= "<input name=listcrit type=search list=search>";
+
+      // Making datalist for SearchBox
+      $Form .= "<datalist id=search>";
+      $Tape=$this->GoodBoi->GoFetch();
+      
+      $Ketan=explode(", ",$this->DefaultSearchColumn);
+      foreach($Tape as $y=>$x){
+        $Form .= "<option value=select__". $x[$this->TID] .">";
+        foreach($Ketan as $b=>$a){
+          $Arm .= $x[$a] ." ";
+        }
+        $Form .= $Arm;
+        unset($Arm);
+        $Form .= "</option>";
+      }
+      $Form .= "</datalist>";
+
+      $Form .= "<select name=listcolumn >";
+      $Form .= "<option value=ALL selected>". $GLOBALS['lanAll'] ."</option>";
+
+      // Making the search column list
+      $rpl= csv2csv($this->DefaultSearchColumn);
+      $Label=$this->ColumnLabelObj->GoFetch("WHERE form_id='". $this->FormID ."' AND field_id IN (". $rpl .")","field_label, field_id");
+      foreach ($Label as $x){
+        $Form .= "<option value=". $x['field_id'] .">". lan2var($x['field_label']) . "</option>";
+      }
+
+      $Form .= "</select>";
+      foreach ($_GET as $y=>$x){
+        $Form .= "<input type=hidden name=$y value=$x>";
+      }
+      $Form .= "<input type=submit value=". $GLOBALS['lanSearch'] ."></input>";
+      $Form .= "</form>";
+      return $Form;
+     }
+    }
+
+    function Gardevoir(){
+      Gardevoir($this->SearchList());
+      Gardevoir($this->Gardevoir);
+    }
+}
+
+
+/*
+=======================================================================================
+ █████╗ ██████╗ ██████╗     ████████╗ ██████╗     ██╗     ██╗███████╗████████╗
+██╔══██╗██╔══██╗██╔══██╗    ╚══██╔══╝██╔═══██╗    ██║     ██║██╔════╝╚══██╔══╝
+███████║██║  ██║██║  ██║       ██║   ██║   ██║    ██║     ██║███████╗   ██║   
+██╔══██║██║  ██║██║  ██║       ██║   ██║   ██║    ██║     ██║╚════██║   ██║   
+██║  ██║██████╔╝██████╔╝       ██║   ╚██████╔╝    ███████╗██║███████║   ██║   
+╚═╝  ╚═╝╚═════╝ ╚═════╝        ╚═╝    ╚═════╝     ╚══════╝╚═╝╚══════╝   ╚═╝   
+=======================================================================================
+For the the 'datalist' field, check Add to list_list if entry is new                                                                            
+*/
+class AddList{
+  protected $Data; // Array containing POST of form
+  protected $Layout; // Object of GoodBoi layout
+  protected $List; //Object of GoodBoi List
+
+  function __Construct($Data,$Layout=null,$List=null){
+    if (empty($Layout)) { $Layout= new GoodBoi('layout'); }
+    if (empty($List)) { $List= new GoodBoi('list_list'); }
+    $this->Layout = $Layout;
+    $this->List = $List;
+    $this->Data=$Data;
+    mark($this->Data, "DATA ");
+    $this->InsertList();
+  }
+
+  function CekIfNew($ListID,$Cluster){
+    $List=$this->List->GoCount("WHERE cluster='". $Cluster ."' AND list_value='". $ListID ."'");
+    mark($List,"LIST ");
+    if($List == 0 ){ mark("NEW LIST"); return TRUE; } else { mark("OLD LIST"); return FALSE; }
+  }
+
+  function InsertList(){
+    $Layout=$this->Layout->GoFetch("WHERE field_type='datalist' && field_list_table IS NULL", "field_id, field_list");
+    $Lay=array(); //Lay is array (field_id => field_list) of those field type datalist
+    //Make $Lay
+    foreach($Layout as $x){
+      $Lay += array($x['field_id']=>$x['field_list']);
+    }
+    DeFlea($Lay, "Lay");
+
+    foreach($this->Data as $y=>$x){
+      if(array_key_exists($y,$Lay)){
+        if($this->CekIfNew($x,$Lay[$y]) === TRUE && !empty($x)){
+          $Kue=$this->MakeQuery($x,$Lay[$y]);
+          DeFlea($Kue, "Kue ");
+          $this->List->GoBark($Kue);
+          
+        }
+      }
+    }
+  }
+
+  function MakeQuery($Data,$Cluster){
+    $Ord=$this->List->GoCount("WHERE cluster='". $Cluster ."'");
+    $Que=array('cluster'=>$Cluster,'list_name'=>$Data,'list_value'=>$Data,'active'=>1,'list_order'=>$Ord+1,'creator'=>$_SESSION['Person']);
+    $BARK= new Snorlax ('id','com_list_list',$Que,'New',$this->List);
+    return $Que;
+
+  }
+}
 
 ?>

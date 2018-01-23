@@ -17,7 +17,7 @@ if(!empty($_POST)){ // Check wether user already input data
 	$_POST = array_map('strip_tags', $_POST); //STRIPPING
 	$newera=$_POST;
 	$pexs = array();
-	//PAssword setting only when Register
+	//Password setting only when Register
 	if($_GET['job'] == 1){
 		
 		//$newera= array_map('mysqli_real_escape_string', $_POST);
@@ -27,12 +27,12 @@ if(!empty($_POST)){ // Check wether user already input data
 
 		//----------Set password expiration
 		$pexs =Date2SQL(null,'P'. $PasswordExpiration);
-		$pexs = array ("PasswordExpiration"=>$pexs);
+		$pexs = array ("PasswordExpiration"=>$pexs, "UserGroup"=>$NewUserGroup);
 	}
 	//-----Add additional registration input-----
 	$Who=WhoAreYou();
 	$Who=serialize($Who);
-	$Additional= $pexs + array("UserLevel"=>$NewUserLevel, "UserGroup"=>$NewUserGroup,  "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
+	$Additional= $pexs + array("UserLevel"=>$NewUserLevel,  "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
 
 	$registered=array_merge ($newera,$Additional);
 	
@@ -75,7 +75,7 @@ switch($_GET['job']){ // Decide which method should be used to display?
 */ 
 if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
 	mark("REGIST");
-	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,1,array($_POST['Exc-PasswordConf'],$_POST['Password']));
+	$Validation=new FieldValidation ("SignUp","gita_login_signup",$layout,$staff,1,array($_POST['Exc-PasswordConf'],$_POST['Password']));
 	
 
 
@@ -107,13 +107,12 @@ if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
 
 if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
 	mark("UPDATING");
-	if(empty($_SESSION['Person'])){ header('Location: http://you_stuff/url.php'); }
-	if(!empty($_GET['User']) && (in_array($_SESSION['UGroup'],$GLOBALS['$HRDAdminGroup']) || $_SESSION['ULevel']>=$GLOBALS('$HRDAdminLevel'))){ // Only allow edit other user if belong in HRD Admin
+	if(!empty($_GET['User']) && (array_diff($_SESSION['UGroup'],$GLOBALS['$HRDAdminGroup']) || $_SESSION['ULevel']>=$GLOBALS('$HRDAdminLevel'))){ // Only allow edit other user if belong in HRD Admin
 		$EUser = $_GET['User'];
 	} else {
 		$EUser = $_SESSION['Person'];
 	}
-	$Validation=new FieldValidation ("gita_login_signup",$layout,$staff,1,0,0,0,0,1);
+	$Validation=new FieldValidation ("SignUp","gita_login_signup",$layout,$staff,1,0,0,0,0,1);
 
 
 	if(empty($Validation->SignUpError)){ // Register if no error occured 
@@ -127,7 +126,7 @@ if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
 			$viewsonic="view";
 		}
 
-		$LogDes=$LogDes. "Sign Up Success";
+		$LogDes=$LogDes. "Profil Update Success";
 		$ErrorLog=null;
 
 		if(!empty($LogRawPass)){
@@ -279,6 +278,10 @@ if(!empty($viewsonic)){ // If viewsonic is empty, thats mean user have unatuhori
 	*/
 }
 
+if($_GET['job']==5){
+	$List= new Listing($staff,$layout,array(7=>'gita_login_signup',6=>'form_id',2=>"usrid, BName, FName, MName, LName, Job, Departement, Specialty",8=>'FName',9=>"BName, FName, MName, LName, Job, Departement, Specialty", 4=>'usrid'));
+	$List->DrawList();
+}
 
 
 $LogContent=array2arrow($registered); //For Logging
