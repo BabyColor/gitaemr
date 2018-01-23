@@ -137,6 +137,32 @@ function csv2csv($csv,$sep=', ',$resep=',',$pre="'",$pst="'"){
 }
 
 /*
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  CALCULATION =============-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+//------------------Get Age from MySQL Date (YY-mm-dd)
+function getAge($BD){
+  $BD = explode("-", $BD);
+  $date = "$BD[0]-$BD[1]-$BD[2]";
+  if(version_compare(PHP_VERSION, '5.3.0') >= 0){
+      $dob = new DateTime($date);
+      $now = new DateTime();
+      return $now->diff($dob)->y;
+  }
+  $difference = time() - strtotime($date);
+  return floor($difference / 31556926);
+}
+
+/*
 ==========================================================================================================
 
 
@@ -203,6 +229,20 @@ function DrawOption($cluster,$ListDB=null,$orderby="ASC",$CustomDBVal=null,$Cust
   return $Options;
 }
 
+//Make full name form MySQL query
+function FullName($Arr){
+  $Name= $Arr['prefix'] ." ". $Arr['fname'] ." ". $Arr['mname'] ." ". $Arr['lname'] ." ". $Arr['BName'] ." ". $Arr['FName'] ." ". $Arr['MName'] ." ". $Arr['LName'];
+  return $Name;
+}
+
+//Log Patient
+function LogPatient($PID){
+  $Pclass= New GoodBoi('com_gita_patient');
+  $Px=$Pclass -> GoFetch("WHERE patientid='". $PID ."'");
+  $_SESSION['Patient']=$PID;
+  $_SESSION['PName']=FullName($Px[0]);
+  $_SESSION['Px']=$Px[0];
+}
 
 
 /*
@@ -362,8 +402,8 @@ function Gardevoir($Draw){
     foreach($Draw as $x){
       Gardevoir($x);
     }
+    
   } else {
-    echo "<p>". htmlspecialchars($Draw) ."</p>";
     echo $Draw;
   }
 }
@@ -578,8 +618,37 @@ class Kayu extends GoodBoi{
 ██║╚██╔╝██║
 ██║ ╚═╝ ██║
 ╚═╝     ╚═╝
-           
 
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===========  Modules  =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+//-----------------Call Module With Arguments-----------------------------
+function Module($Mod,$Argument=null){
+  include "Modules/$Mod/modules.php";
+}
+
+//-----------------Call Modules In Certain Posititon-----------------------------
+function Modules($Position=null){
+  if(empty($GLOBALS['GoodModules'])){
+    $GLOBALS['GoodModules'] = new GoodBoi('modules_deployment');
+  }
+  $Modules=$GLOBALS['GoodModules']->GoFetch("WHERE position='". $Position ."' ORDER BY short ASC");
+  foreach($Modules as $x){
+    Module($x['module'],$x['arguments']);
+  }
+}
+
+/*
 ************************************************************************************************
              /<                                             
             /<                                              
@@ -651,7 +720,7 @@ function Login($User){
   $x=$userlist->GoFetch("WHERE usrid='$User'");
   $_SESSION['Person']=$User;
   $_SESSION['UserN']=$x[0]['UserName'];
-  $_SESSION['Name']= $x[0]['FName'] ."/". $x[0]['MName'] ."/". $x[0]['LName'];
+  $_SESSION['Name']= FullName($x[0]);
   $_SESSION['ULevel']=$x[0]['UserLevel'];
   $_SESSION['UGroup']=deserialization($x[0]['UserGroup']);
 }
@@ -729,6 +798,10 @@ function GetGET($Arr=null){
   return $URI;
 }
 
+//--- because i'm to lazy to memorize and to type the whole code everytimes
+function GetOwnURL(){
+  return htmlspecialchars( $_SERVER['PHP_SELF'] );
+}
 
 
 
@@ -831,7 +904,8 @@ class GoodBoi{
     if(!empty($_SESSION['DeFlea'])){ Mark($query,__CLASS__ ." ==> ". __FUNCTION__); echo debug_backtrace()[1]['function']; }
     //Debug
     $result = $ewe->query($query);
-   $row = $result->fetch_all(MYSQLI_ASSOC); 
+   
+    $row = $result->fetch_all(MYSQLI_ASSOC); 
 
    return $row;
   }
@@ -940,7 +1014,7 @@ class Smeargle{
     $this->Layout=$form;
     $this->adminlevel=$adminlevel;
     $this->Style=$style;
-    $this->Data= empty($_GET['dataid'])? $_SESSION['Person']: $_GET['dataid']; //If No Specific user, get own instead
+    $this->Data= empty($_GET['dataid'])? $Data: $_GET['dataid']; //If No Specific user, get own instead
     //Make new class to link to layout table
     if(empty($mysqlclass)){ 
       $mysqlclass= new GoodBoi("layout"); 
@@ -963,10 +1037,10 @@ class Smeargle{
    
     $URI = GetGET();
     //Draw form opening ( <form> and <table>)
-    $Draw = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ."><table class=". $this->Style ."><tr>"; 
+    $Draw['pre'] = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ."><div class=". $this->Style .">"; 
     
     //---Draw form
-   $Draw .= $this->Grouping(); //  Go to function Grouping to draw each group
+   $Draw['goruping']= $this->Grouping(); //  Go to function Grouping to draw each group
    
    //Setting default values of buttons depending on languages
    global $lanSubmit;
@@ -979,20 +1053,20 @@ class Smeargle{
    //Drawing button for each viewing type
    switch ($this->ViewMode){
      case "new":
-      $Draw .= "<tr><td colspan=2><input type=Submit value=$Button[0]></input> <input type=reset value=$Button[1]></input>";
+      $Draw['post']= "<br/><input type=Submit value=$Button[0]></input> <input type=reset value=$Button[1]></input>";
       break;
     case "edit":
-     $Draw .= "<tr><td colspan=2>
+    $Draw['post']= "<br/>
                         <input type=hidden name=". $this->DataID ." value=". $this->UserData[$this->DataID] .">
                         <input type=Submit value=$Button[2]></input> <input type=reset value=$Button[1]></input>"; 
       break;
     case "view":
-      $Draw .= "<tr><td colspan=2><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=4>$lanEdit</a>";
+    $Draw['post']= "<br/><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=4>$lanEdit</a>";
       break;
    }
 
    //Draw closur </table> and </form>"
-   $Draw .= "</table></form>";
+   $Draw['post'] .= "</div></form>";
    return $Draw;
   }
 
@@ -1002,18 +1076,18 @@ class Smeargle{
     
 
 
-    //Drawing group
+    //==================Drawing GROUPING============
     foreach($Group as $g){
-      $Draw= $Draw . "<tr><td><table class=$style>";
-        $Draw= $Draw . $this->Fielding($g['group_cap']); //Go to Fielding function to draw field
-      $Draw= $Draw . "</table></td></tr>";
+      $Draw[$g['group_cap'] .'_pre'] = "<br/><fieldset id=". $g['group_cap'] ." class=$style>";
+        $Draw[$g['group_cap'] .'_fielding'] =  $this->Fielding($g['group_cap']); //Go to Fielding function to draw field
+      $Draw[$g['group_cap'] .'_post'] = "</fieldset>";
     }
     return $Draw;
   }
 
+  //==================Drawing FIELDING TRIAGE============
   function Fielding($Group){
     $View="field_visible_". $this->ViewMode;
-    mark($View,"View Mode");
     $Field=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' AND group_cap='". $Group ."' AND ($View <> 0 $admin) ORDER BY field_order"); // Fetching from MySQL, the field with the same Group ID which is visible
 
     switch($this->ViewMode){
@@ -1021,16 +1095,16 @@ class Smeargle{
         $UserData=$this->MySQL_Data-> GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'" );
         $this->UserData=$UserData[0];
       case "new":
-        $Draw=$Draw . $this->NewFielding($Field,$Group);
+        $Draw=$this->NewFielding($Field,$Group);
         break;
       case "view":
-        $Draw=$Draw . $this->ViewFielding($Field,$Group);
+        $Draw=$this->ViewFielding($Field,$Group);
         break;
     }
     return $Draw;
   }
 
-
+  //==================Drawing NEW FIELDING============
   // Draw field if viewing mode is Edit or New
   function NewFielding($Field,$Group){
     
@@ -1041,20 +1115,24 @@ class Smeargle{
     $this->CustomList=array();
     foreach($Custom_List_Class as $x){
       if(!empty($x['field_list_table'])){
-        DeFlea($x, __CLASS__ ." ". __FUNCTION__, __LINE__);
         array_push($this->CustomList,$x['field_list_table']);
       }
     }
 
 
     foreach($Field as $F){ // Script for each found filed
-      DeFlea($F['field_label']);
       
       // Assign attributes
       $minlength= empty($F['field_minlength']) ? "" : "minlength=". $F['field_minlength'] ;
-			$placeholder= empty($F['field_placeholder'] ) ? "" : "placeholder=". $F['field_placeholder'] ;
+			$placeholder= empty($F['field_placeholder'] ) ? "" : "placeholder=". lan2var($F['field_placeholder']) ;
       $validator= empty($F['field_validation'] ) ? "" : "pattern=". $F['field_validation'] ;
       $required= empty($F['required'] ) ? "" : "required" ;
+      $GLOBALS['SideHelper'] = empty($F['field_side'] ) ? "" : lan2var($F['field_side']) ;
+      $Width= empty($F['field_col'])? "25" : $F['field_col'];
+      $Height= empty($F['field_row'])? "1" : $F['field_row'];
+      $Label= empty($F['field_label'])? " " : "<label for=". $F['field_id'] .">". lan2var($F['field_label']) ."</label> : ";
+
+      $LineBreak= empty($F['field_seperator'])? "<br/>" : $F['field_seperator'];
 
       switch($this->ViewMode){
         case "new":
@@ -1091,20 +1169,28 @@ class Smeargle{
           $InputContent = $Options;
           break;
         case "datalist":
-          $Input="input $required list=". $F['field_id'];
+          $Input="input size=$Width $required list=". $F['field_id'];
           $Close="input";
           $InputContent = "<datalist id=". $F['field_id'] .">". $Options ."</datalist>";
           break;
+        case "auto":
+          $Input="input value='". AutoField($F['field_id']) ."' type=hidden $placeholder $minlength $required";
+          $Close="input";
+          break;
         case "password":
-          $Input="input type=password $required";
+          $Input="input size=$Width type=password $required";
           $Close="input";
           if($this->ViewMode=="edit"){
-            $Pre= "<tr><td>". $GLOBALS['lanOldPass']. "<td><input type=password name=Exc-". $F['field_id'] . "Old></input>" ;
+            $Pre= "<br>". $GLOBALS['lanOldPass']. "<input type=password name=Exc-". $F['field_id'] . "Old></input>" ;
           }
-          $Additional="<tr><td>". $GLOBALS['lanConfirmPass'] ."<td><input type=password name=Exc-".  $F['field_id'] ."Conf></input>";
+          $Additional="<br>". $GLOBALS['lanConfirmPass'] ."<input type=password name=Exc-".  $F['field_id'] ."Conf></input>";
+          break;
+        case 'textarea':
+          $Input="textarea $defaultvalue $placeholder $minlength $required";
+          $Close="textarea";
           break;
         default:
-          $Input="input type=". $F['field_type'] ." $defaultvalue $placeholder $minlength $required";
+          $Input="input type=". $F['field_type'] ." size=$Width $defaultvalue $placeholder $minlength $required";
           $Close="input";
           break;
       }
@@ -1114,30 +1200,27 @@ class Smeargle{
      
 
       //The main drawing script
-      if(empty($Draw)){ $Draw= "<tr><th colspan=2>". lan2var($Group) ."</th></tr>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
+      if(empty($Draw)){ $Draw[$F['field_id']]= "<legend>". lan2var($Group) ."</legend>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
       
-      $Draw= $Draw . "$Pre
-                      <tr>
-                        <td>
-                          <label for=". $F['field_id'] .">". $F['field_label'] ."</label>
-                        </td>
-                        <td>
-                          <$Input name=".  $F['field_id'] .">
+      $Draw[$F['field_id']] .= "$LineBreak $Pre
+                          $Label
+                          <$Input name=".  $F['field_id'] ." id=".  $F['field_id'] .">
                             $InputContent
                           </$Close>     
-                        </td>
-                      </tr>
+                          ". $GLOBALS['SideHelper'] ."
                       $Additional
                       "; // Input
                       unset($InputContent);
                       unset($Additional);
                       unset($Pre);
+                      unset($GLOBALS['SideHelper']);
                     }
                     
                     return $Draw;
                     
   }
 
+    //==================Drawing VIEW FIELDING============
   // Draw field if viewing mode is View
   function ViewFielding($Field,$Group){
     $Staff=$this->MySQL_Data->GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'");
@@ -1147,8 +1230,8 @@ class Smeargle{
         $FLabel=deserialization(lan2var($Staff[0][$F['field_id']]),1,array(":"));
       
 
-      if(empty($Draw)){ $Draw= "<tr><th colspan=2>". lan2var($Group) ."</th></tr>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
-      $Draw= $Draw . "<tr>
+      if(empty($Draw)){ $Draw[$F['field_id']]= "<tr><th colspan=2>". lan2var($Group) ."</th></tr>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
+      $Draw[$F['field_id']] .= "<tr>
                         <td>
                           ". lan2var($F['field_label']) ."
                         </td>
@@ -1184,8 +1267,15 @@ class Smeargle{
     public $Error4; // Array of field(s) whom didn't pass Error4$5 check (Password Change)
     public $User; 
   
-    function __Construct($Error,$FormId,$MyClass=null,$MyStaff=null,$ShowError=1,$E0=null,$E4=null,$E1=1,$E2=1,$E3=1){
+    function __Construct($Error,$FormId,$MyClass=null,$MyStaff=null,$Arguments=array(null,null,null,null,null,1)){
       // (Error language variable, Form ID, GoodBoi class layout, staff, Display error?, Run Check error0 array(Input,Confirmation), error4 (UserID,New Password, Old Password, Password Field ID), error1, error2, error3)
+      $E0=$Arguments[0];
+      $E1=$Arguments[1];
+      $E2=$Arguments[2];
+      $E3=$Arguments[3];
+      $E4=$Arguments[4];
+      $ShowError= empty($Arguments[5])? 1 : $Arguments[5] ;
+
     $this->SignUpError=array(); 
     $this->FormId=$FormId;
     $this->EM=$Error;
@@ -1581,6 +1671,7 @@ class Snorlax{
      //[1]
      $Insert = $this->Data + array('sversion'=>1);
      $Pokeball=$this->GoodBoi_Target->GoBark($Insert);
+     $GLOBALS['NewDex']=$Pokeball;
     //[2]
     $DataOne=array();
     foreach($this->Data as $y=>$x){
@@ -1851,6 +1942,35 @@ class AddList{
     $BARK= new Snorlax ('id','com_list_list',$Que,'New',$this->List);
     return $Que;
 
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+///////////////   AUTO                                     ///////////////
+/////////////////////////////////////////////////////////////////////////
+
+function AutoField($Type,$Argument=null){
+  switch($Type){
+    case 'patient':
+     $Patient= new GoodBoi('com_gita_patient');
+     $PX = $Patient->GoFetch("WHERE patientid='". $_SESSION['Patient'] ."'","patientid,prefix,fname,mname,lname");
+     DeFlea($PX[0]['prefix'] ." ". $PX[0]['fname'] ." ". $PX[0]['mname'] ." ". $PX[0]['lname']);
+      $GLOBALS['SideHelper']= FullName($PX[0]);
+      return $PX[0]['patientid'];
+      break;
+    case 'age':
+      $Patient= new GoodBoi('com_gita_patient');
+      $PX = $Patient->GoFetch("WHERE patientid='". $_SESSION['Patient'] ."'","dob");
+      $BD = $PX[0]['dob'];
+      $Age= getAge($BD);
+      $GLOBALS['SideHelper']= $Age;
+      return $Age;
+    case 'provider':
+      $Prov= new GoodBoi('staff_list');
+      $Dr = $Prov->GoFetch("WHERE usrid='". $_SESSION['Person'] ."'","usrid,BName,FName,MName,LName");
+      $Name= FullName($Dr[0]);
+      $GLOBALS['SideHelper']=  $Name;
+      return $Dr[0]['usrid'];
   }
 }
 

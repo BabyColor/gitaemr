@@ -13,7 +13,7 @@ $dbpre = "gemr_";
 
 //----Default Setting
 $Themes= "Orange"; //---Theme
-$compdefault = "gita_login"; //---Component
+$compdefault = "gita_home"; //---Component
 $slang = "idn"; //---Language
 $FieldValidaiton = "[a-zA-Z 0-9]";
 $FirstNameFirst = 1; // How full name displayed 

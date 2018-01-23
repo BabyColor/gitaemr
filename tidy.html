@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org" />
+
+  <title>Gita EMR</title>
+  <link rel="stylesheet" href="Themes/Orange/green.css" type="text/css" />
+</head>
+
+<body>
+  <br />
+
+  <p class="Mark">DEBUG MODE</p>=================TESTER===========================<br />
+  <br />
+  <br />
+
+  <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_staff_list
+  WHERE usrid='1'</p>Login<br />
+
+  <p class="Mark"><strong>Age is</strong> 30</p><br />
+
+  <p class="Mark"><strong>This Session<br /></strong> DeFlea ==&gt; '1'<br />
+  Person ==&gt; '1'<br />
+  UserN ==&gt; 'BabyColor'<br />
+  Name ==&gt; 'Gita/Prasetya/Adiguna'<br />
+  ULevel ==&gt; '9999'<br />
+  UGroup ==&gt; 'user, Arceus'<br />
+  Patient ==&gt; '45454687'</p><br />
+  <br />
+  ===================END OF TESTER===========<br />
+  <br />
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity=
+  "sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous" type=
+  "text/javascript">
+</script>
+
+  <table>
+    <tr class='Top1'>
+      <td colspan="3">
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='top1' ORDER BY short ASC</p>Modules
+      </td>
+    </tr>
+
+    <tr class='Top2'>
+      <td colspan="3">
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='top2' ORDER BY short ASC</p>Modules
+      </td>
+    </tr>
+
+    <tr class='Top3'>
+      <td colspan="3">
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='top3' ORDER BY short ASC</p>Modules<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_mod_gita_menu WHERE parent='1' ORDER BY short</p>include
+
+        <div class="dropdown">
+          <button onclick="DropButton('2MD')" class='dropbtn'>Pasien</button>
+
+          <div id="2MD" class="dropdown-content">
+            <br />
+
+            <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+            gemr_mod_gita_menu WHERE parent='2' ORDER BY short</p>include<a href=
+            "/gitaemr/index.php?mod=gita_patient&amp;job=1">Pasien Baru</a><a href=
+            "/gitaemr/index.php?mod=gita_patient&amp;job=2">Daftar Pasien</a>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button onclick="DropButton('5MD')" class='dropbtn'>Staff</button>
+
+          <div id="5MD" class="dropdown-content">
+            <br />
+
+            <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+            gemr_mod_gita_menu WHERE parent='5' ORDER BY short</p>include<a href=
+            "/gitaemr/index.php?mod=gita_login&amp;job=5">Daftar Staff</a><a href=
+            "/gitaemr/index.php?mod=gita_login&amp;job=2">Keluar</a><a href=
+            "/gitaemr/index.php?mod=gita_login&amp;job=1">Daftar Staff</a>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button onclick="DropButton('9MD')" class='dropbtn'>Kunjungan</button>
+
+          <div id="9MD" class="dropdown-content">
+            <br />
+
+            <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+            gemr_mod_gita_menu WHERE parent='9' ORDER BY short</p>include<a href=
+            "/gitaemr/index.php?mod=gita_visit&amp;job=1">Kunjungan Baru</a><a href=
+            "/gitaemr/index.php?mod=gita_visit&amp;job=2">Daftar Kunjungan</a>
+          </div>
+        </div><script type="text/javascript">
+//<![CDATA[
+        /* When the user clicks on the button, 
+        toggle between hiding and showing the dropdown content */
+        function DropButton(xclass) {
+        document.getElementById(xclass).classList.toggle('show');
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+
+        var dropdowns = document.getElementsByClassName('dropdown-content');
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+        }
+        }
+        }
+        }
+
+        //]]>
+        </script>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='left1' ORDER BY short ASC</p>Modules
+
+        <table>
+          <tr class='Left1'>
+            <td></td>
+          </tr>
+
+          <tr class='Left2'>
+            <td>
+              <br />
+
+              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+              gemr_modules_deployment WHERE position='left2' ORDER BY short
+              ASC</p>Modules
+            </td>
+          </tr>
+
+          <tr class='Left3'>
+            <td>
+              <br />
+
+              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+              gemr_modules_deployment WHERE position='left3' ORDER BY short
+              ASC</p>Modules
+            </td>
+          </tr>
+        </table>
+      </td>
+
+      <td class='area_content'>
+        <br />
+
+        <p class="Mark"><strong>Smeargle ----&gt; __Construct</strong> Drawed</p><br />
+
+        <p class="Mark"><strong>Smeargle ----&gt; DrawForm</strong> Drawed</p><br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
+        group_order, group_cap FROM gemr_layout WHERE form_id = 'gita_visit_soap' ORDER
+        BY group_order</p>Grouping<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
+        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanVisitData' AND
+        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
+        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
+        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
+        0)</p>NewFielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT
+        prefix,fname,mname,lname FROM gemr_com_gita_patient WHERE
+        patientid='45454687'</p>AutoField<br />
+
+        <p class="DeFlea"><br />
+        <br />
+        Ketut Omeprazole Ranitidine Organophosfate on line <b>262</b></p><br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT dob FROM
+        gemr_com_gita_patient WHERE patientid='45454687'</p>AutoField<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT
+        BName,FName,MName,LName FROM gemr_staff_list WHERE usrid='1'</p>AutoField<br />
+
+        <p class="Mark"><strong>array2csv Key ==&gt;</strong> FName MName LName</p><br />
+
+        <p class="Mark"><strong>array2csv Val ==&gt;</strong> Gita Prasetya
+        Adiguna</p><br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_list_list WHERE cluster = 'VisitType' AND active &lt;&gt;
+        0</p>DrawOption<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_com_gita_visit WHERE visitid</p>DrawOption<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
+        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPSubject' AND
+        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
+        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
+        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
+        0)</p>NewFielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
+        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPObject' AND
+        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
+        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
+        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
+        0)</p>NewFielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
+        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPAssesment' AND
+        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
+        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
+        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
+        0)</p>NewFielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
+        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPPlaning' AND
+        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
+        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
+        (field_list_table IS NOT NULL OR field_list_table &lt;&gt; 0)</p>NewFielding
+
+        <form action="/gitaemr/index.php?mod=gita_visit&amp;job=1&amp;" method="post"
+        class="layout_form">
+          <table class="layout_form">
+            <tr>
+              <td>
+                <table id="$lanVisitData" class="layout_group">
+                  <tr>
+                    <th colspan="2">Data Kunjungan</th>
+                  </tr>
+
+                  <tr>
+                    <td><label for="patient">Pasien</label></td>
+
+                    <td><input value='Ketut Omeprazole Ranitidine Organophosfate' type=
+                    "text" disabled="disabled" name="patient" id="patient" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="age">Usia</label></td>
+
+                    <td><input value='49' type="text" disabled="disabled" name="age" id=
+                    "age" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="provider">Pemberi Layanan</label></td>
+
+                    <td><input value='Gita Prasetya Adiguna' type="text" disabled=
+                    "disabled" name="provider" id="provider" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="visit_type">Jenis Kunjungan</label></td>
+
+                    <td><select name="visit_type" id="visit_type">
+                      <option value="$lanNewCase">
+                        Kasus Baru
+                      </option>
+
+                      <option value="$lanFollowUp">
+                        Follow Up
+                      </option>
+
+                      <option value="$lanEmergency">
+                        Gawat Darurat
+                      </option>
+                    </select></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="linked_visit">Kunjungan lain</label></td>
+
+                    <td><input list="linked_visit" name="linked_visit" id=
+                    "linked_visit" /></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <table id="$lanSOAPSubject" class="layout_group">
+                  <tr>
+                    <th colspan="2">Subjek</th>
+                  </tr>
+
+                  <tr>
+                    <td><label for="soap_subject">Subjek</label></td>
+
+                    <td><input type="textarea" name="soap_subject" id=
+                    "soap_subject" /></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <table id="$lanSOAPObject" class="layout_group">
+                  <tr>
+                    <th colspan="2">Objek</th>
+                  </tr>
+
+                  <tr>
+                    <td><label for="soap_object">Objek</label></td>
+
+                    <td><input type="textarea" name="soap_object" id=
+                    "soap_object" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="vt_HR">Nadi</label></td>
+
+                    <td><input type="text" placeholder='Denyut / Menit' name="vt_HR" id=
+                    "vt_HR" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="vt_RR">Respirasi</label></td>
+
+                    <td><input type="text" placeholder='Respirasi / Menit' name="vt_RR"
+                    id="vt_RR" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="vt_Temp">Temp</label></td>
+
+                    <td><input type="text" placeholder='Derajat Selsius' name="vt_Temp"
+                    id="vt_Temp" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="vt_BP_Sys">'TD Sistolik'</label></td>
+
+                    <td><input type="number" placeholder='TD Sistolik' name="vt_BP_Sys"
+                    id="vt_BP_Sys" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="vt_BP_Dia">'TD Diastolik'</label></td>
+
+                    <td><input type="number" placeholder='TD Diastolik' name="vt_BP_Dia"
+                    id="vt_BP_Dia" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="stat_height">Tinggi Badan</label></td>
+
+                    <td><input type="text" placeholder="Kilometer" name="stat_height" id=
+                    "stat_height" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="stat_weight">Berat Badan</label></td>
+
+                    <td><input type="text" placeholder="Kilogram" name="stat_weight" id=
+                    "stat_weight" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="stat_BMI">BMI</label></td>
+
+                    <td><input value='' type="text" disabled="disabled" name="stat_BMI"
+                    id="stat_BMI" /></td>
+                  </tr>
+
+                  <tr>
+                    <td><label for="stat_BMI_int">BMI</label></td>
+
+                    <td><input value='' type="text" disabled="disabled" name=
+                    "stat_BMI_int" id="stat_BMI_int" /></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <table id="$lanSOAPAssesment" class="layout_group">
+                  <tr>
+                    <th colspan="2">Assessment</th>
+                  </tr>
+
+                  <tr>
+                    <td><label for="soap_assesment">Assessment</label></td>
+
+                    <td><input type="textarea" name="soap_assesment" id=
+                    "soap_assesment" /></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <table id="$lanSOAPPlaning" class="layout_group">
+                  <tr>
+                    <th colspan="2">Planing</th>
+                  </tr>
+
+                  <tr>
+                    <td><label for="soap_planing">Planing</label></td>
+
+                    <td><input type="textarea" name="soap_planing" id=
+                    "soap_planing" /></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td colspan="2"><input type="submit" value="Daftar" /> <input type="reset"
+              value="Hapus" /></td>
+            </tr>
+          </table>
+        </form>
+      </td>
+
+      <td>
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='right1' ORDER BY short ASC</p>Modules
+
+        <table>
+          <tr class='Right1'>
+            <td></td>
+          </tr>
+
+          <tr class='Right2'>
+            <td>
+              <br />
+
+              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+              gemr_modules_deployment WHERE position='right2' ORDER BY short
+              ASC</p>Modules
+            </td>
+          </tr>
+
+          <tr class='Right3'>
+            <td>
+              <br />
+
+              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+              gemr_modules_deployment WHERE position='right3' ORDER BY short
+              ASC</p>Modules
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr class='Bottom1'>
+      <td colspan="3">
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='bottom1' ORDER BY short ASC</p>Modules
+      </td>
+    </tr>
+
+    <tr class='Bottom2'>
+      <td colspan="3">
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='bottom2' ORDER BY short ASC</p>Modules
+      </td>
+    </tr>
+
+    <tr class='Bottom3'>
+      <td colspan="3">
+        <br />
+
+        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
+        gemr_modules_deployment WHERE position='bottom3' ORDER BY short ASC</p>Modules
+      </td>
+    </tr>
+  </table><br />
+
+  <p class="Mark"><strong>Date2SQL ==&gt;</strong> 2018-01-23 23:15:18</p><br />
+
+  <p class="Mark"><strong>[</strong> UPDATE gemr_staff_list SET
+  LastActiveTime='2018-01-23 23:15:18' , LastActiveIP='127.0.0.1' ,
+  LastActiveInfo='a:6:{s:7:\"Browser\";s:76:\"Mozilla/5.0 (X11; Ubuntu; Linux x86_64;
+  rv:57.0) Gecko/20100101
+  Firefox/57.0\";s:2:\"IP\";s:9:\"127.0.0.1\";s:4:\"Port\";s:5:\"45286\";s:3:\"URI\";s:39:\"/gitaemr/index.php?mod=gita_visit&amp;job=1\";s:3:\"sIP\";s:9:\"127.0.0.1\";s:5:\"sPort\";s:2:\"80\";}'
+  WHERE usrid=1 ]</p><br />
+
+  <p class="DeFlea"><strong>GoodBoi++++GoBurry</strong><br />
+  <br />
+  UPDATE gemr_staff_list SET LastActiveTime='2018-01-23 23:15:18' ,
+  LastActiveIP='127.0.0.1' , LastActiveInfo='a:6:{s:7:\"Browser\";s:76:\"Mozilla/5.0
+  (X11; Ubuntu; Linux x86_64; rv:57.0) Gecko/20100101
+  Firefox/57.0\";s:2:\"IP\";s:9:\"127.0.0.1\";s:4:\"Port\";s:5:\"45286\";s:3:\"URI\";s:39:\"/gitaemr/index.php?mod=gita_visit&amp;job=1\";s:3:\"sIP\";s:9:\"127.0.0.1\";s:5:\"sPort\";s:2:\"80\";}'
+  WHERE usrid=1 on line <b>262</b></p>
+</body>
+</html>

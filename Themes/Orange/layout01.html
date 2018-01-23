@@ -3,36 +3,43 @@
 	<head>
 		<title><?php echo "$SiteTitle"; ?></title>
 		<link rel="stylesheet" href="Themes/Orange/green.css">
+		<script
+			  src="Engine/jslib.js"></script>
 	</head>
 	<body>
 		<table>
-			<tr>
-				<td colspan=3><?php if ($TampilkanLogoUtama == true) { echo "<img src='Images/Situs/Logo.png' />"; } $sql = "SELECT * FROM Modul_deployment WHERE position='top1'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>"; echo "<br>";}?>
-			<tr>
-				<td colspan=3><?php $sql = "SELECT * FROM Modul_deployment WHERE position='top2'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-			<tr>
-				<td colspan=3><?php $sql = "SELECT * FROM Modul_deployment WHERE position='top3'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
+			<tr class='Top1'>
+				<td colspan=3><?php Modules('top1'); ?>
+			<tr class='Top2'>
+				<td colspan=3><?php Modules('top2'); ?>
+			<tr class='Top3'>
+				<td colspan=3><?php Modules('top3'); ?>
 			<tr>
 				<td>
 					<table>
-						<tr><?php $sql = "SELECT * FROM Modul_deployment WHERE position='left1'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-						<tr><?php $sql = "SELECT * FROM Modul_deployment WHERE position='left2'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-						<tr><?php $sql = "SELECT * FROM Modul_deployment WHERE position='left3'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
+						<tr class='Left1'>
+							<td></td><?php Modules('left1'); ?>
+						<tr class='Left2'>
+							<td><?php Modules('left2'); ?>
+						<tr class='Left3'>
+							<td><?php Modules('left3'); ?>
 					</table>
 				<td class='area_content'><?php require "Engine/content_display.php"; ?>
 				<td>
 					<table>
-						<tr><?php $sql = "SELECT * FROM Modul_deployment WHERE position='right1'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-						<tr><?php $sql = "SELECT * FROM Modul_deployment WHERE position='right2'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-						<tr><?php $sql = "SELECT * FROM Modul_deployment WHERE position='right3'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
+						<tr class='Right1'>
+							<td></td><?php Modules('right1'); ?>
+						<tr class='Right2'>
+							<td><?php Modules('right2'); ?>
+						<tr class='Right3'>
+							<td><?php Modules('right3'); ?>
 					</table>
-			<tr>
-				<td colspan=3><?php  $sql = "SELECT * FROM Modul_deployment WHERE position='bottom1'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";}  ?>
-			<tr>
-				<td colspan=3><?php $sql = "SELECT * FROM Modul_deployment WHERE position='bottom2'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-			<tr>
-				<td colspan=3><?php $sql = "SELECT * FROM Modul_deployment WHERE position='bottom3'"; $result = mysqli_query($ewe, $sql); while($row = mysqli_fetch_assoc($result)) { $Modules = $row["modul"] ; include "/Modules/" . $Modules ."/Modul.php"; echo "<br>";} ?>
-			<tr>
+				<tr class='Bottom1'>
+					<td colspan=3><?php Modules('bottom1'); ?>
+				<tr class='Bottom2'>
+					<td colspan=3><?php Modules('bottom2'); ?>
+				<tr class='Bottom3'>
+					<td colspan=3><?php Modules('bottom3'); ?>
 		</table>
 	</body>
 </html>

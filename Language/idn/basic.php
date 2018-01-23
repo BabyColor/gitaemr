@@ -175,6 +175,39 @@ $lanSearch="Cari";
 $lanAll='Semua';
 $lanNoResult='Tidak ada data yang ditemukan';
 
+
+//-------------------Visit--------------------------
+$lanAge='Usia';
+$lanProvider='Pemberi Layanan';
+$lanAssistant='Asisten';
+$lanVisitType='Jenis Kunjungan';
+$lanLinkedVisit='Kunjungan lain';
+$lanFacility='Fasilitas Kesehatan';
+$lanRoom='Ruangan';
+$lanSOAPSubject='Subjek';
+$lanSOAPObject='Objek';
+$lanSOAPAssesment='Assessment';
+$lanSOAPPlaning='Planing';
+$lanPulse='Nadi';
+$lanRespirationRate='Respirasi';
+$lanTemp='Temp';
+$lanSystole="Tekanan Darah";
+$lanDiastole="";
+$lanHeight='Tinggi Badan';
+$lanWeight='Berat Badan';
+$lanBMI='BMI';
+$lanBMIString='BMI';
+$lanVisitData='Data Kunjungan';
+$lanBPM="'Denyut / Menit'";
+$lanRPM="'Respirasi / Menit'";
+$lanDegree="'Derajat Selsius'";
+$lanKM='Kilometer';
+$lanKG='Kilogram';
+$lanNewCase='Kasus Baru';
+$lanFollowUp='Follow Up';
+$lanEmergency='Gawat Darurat';
+$lanMMHG="mmHg";
+
 ////////////////////////////////////////////////////
 ////////////  MESSAGE /////////////////////////////
 /////////////////////////////////////////////////
@@ -202,6 +235,10 @@ $lanPxRegisterErrorMessage1T="Kolom Penting Masih Kosong";
 $lanPxRegisterErrorMessage1C="Kolom berikut harus diisi :";
 $lanPxRegisterErrorMessage2T="Pasien Sudah Terdaftar";
 $lanPxRegisterErrorMessage2C="Pasien sudah terdaftar dengan :" ;
+$lanVisitErrorMessage1T="Kolom Penting Masih Kosong";
+$lanVisitErrorMessage1C="Kolom berikut harus diisi :";
+$lanVisitErrorMessage2T="Pasien Sudah Terdaftar";
+$lanVisitErrorMessage2C="Pasien sudah terdaftar dengan :" ;
 
 //----------------Warning
 $lanRawPasswordT="Password Tidak Di Proteksi";
@@ -214,6 +251,8 @@ $lanSignUp1="Pengguna berhasil di tambahkan, mohon menunggu moderator untuk meng
 $lanSignUp2="Pengguna berhasil di tambahkan, silahkan cek email anda untuk petunjuk cara mengaktifkan akun anda<br>$lanBackToLogin";
 $lanUserEditT="Profil Berhasil di-Ubah";
 $lanUserEditC="Profil sudah berhasil di ubah";
+$lanNewVisitT="Kunjungan Dicatat";
+$lanNewVisitC="Kunjungan berhasil dicatat";
 
 //-------------------Login------------------------
 $lanBackToLogin="Kembali ke <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=2>Masuk</a> atau <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=3>Minta Bantuan Masuk</a>";
@@ -223,4 +262,15 @@ $lanLoginWrongPass="Kata sandi yang dimasukkan salah";
 $lanLoginSuccessT="Login Berhasil";
 $lanLoginSuccessC="Selamat Datang";
 $lanLoginFailedT="Login Gagal";
+
+//---------------------Menu----------------------
+$lanNewPatient="Pasien Baru";
+$lanListPatient="Daftar Pasien";
+$lanStaff="Staff";
+$lanStaffList="Daftar Staff";
+$lanStaffNew="Daftar Staff";
+$lanLogout="Keluar";
+$lanVisit="Kunjungan";
+$lanVisitNew="Kunjungan Baru";
+$lanVisitList='Daftar Kunjungan';
 ?>

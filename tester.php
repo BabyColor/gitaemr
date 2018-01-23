@@ -2,10 +2,7 @@
 if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
 Login(1);
-$RID='asas';
-$yuyu[$RID]="Asas";
-$yuyu[$RID] .= " asssda";
-mark($yuyu);
+
 //$registered=$_POST;
 //$BURK= new AddList ($registered);
 /*

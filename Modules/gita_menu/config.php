@@ -1,0 +1,4 @@
+<?php
+
+$CSS='css.css'
+?>

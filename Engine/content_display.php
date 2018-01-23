@@ -8,16 +8,16 @@
 	} 
 ///////////////	
 	
-	require "Components/" . $location . "/com_setting.php"; //---Load component's setting
+	include "Components/" . $location . "/com_setting.php"; //---Load component's setting
 	
 // Load component's specific language file	
 	if(file_exists("Language/" . $slang . "/com_". $location .".php")){
-		require "Language/" . $slang . "/com_". $location .".php"; //---Load system's language file
+		include "Language/" . $slang . "/com_". $location .".php"; //---Load system's language file
 	} else {
-		require "Language/" . $compdeflang . "/com_". $location .".php"; //---Load component's default language file file if no system language file exist for the component
+		include "Language/" . $compdeflang . "/com_". $location .".php"; //---Load component's default language file file if no system language file exist for the component
 	}
 	
-	require "Components/" . $location . "/index.php"; //---Load Componet
+	include "Components/" . $location . "/index.php"; //---Load Componet
 	
 
 ?>

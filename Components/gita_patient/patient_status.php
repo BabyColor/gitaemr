@@ -71,7 +71,7 @@ if(bouncer()){
 	
 	if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
 		mark("REGIST");
-		$Validation=new FieldValidation ("PxRegister",$FieldID,$layout,$MainTable,1);
+		$Validation=new FieldValidation ("PxRegister",$FieldID,$layout,$MainTable,array(1=>1,2=>1,3=>1));
 		
 
 
@@ -105,7 +105,7 @@ if(bouncer()){
 	if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
 		mark("UPDATING");
 		$EditedPatient = $_GET['patient'];
-		$Validation=new FieldValidation ("PxRegister",$FieldID,$layout,$staff,1,0,0,0,0,1);
+		$Validation=new FieldValidation ("PxRegister",$FieldID,$layout,$staff,array(1=>1,3=>3));
 
 
 		if(empty($Validation->SignUpError)){ // Register if no error occured 
@@ -150,7 +150,7 @@ if(bouncer()){
 			Gardevoir($Forms);
 			break;
 		case "list":
-			$_SESSION['Patient']=$_GET['dataid'];
+			LogPatient($_GET['dataid']);
 			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, fname, mname, lname, dob, sex, address, desa, district",8=>'FName',9=>"prefix, fname, mname, lname", 4=>$Tid, 10=>"prefix,fname,mname,lname"));
 		
 			foreach($List->Gardevoir as $y=>$x){

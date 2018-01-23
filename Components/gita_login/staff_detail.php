@@ -1,4 +1,5 @@
 <?
+defined('GitaEmr') or Die($UnatuhorizedAccess);
 $layout= new GoodBoi('layout'); //Declare an Object "$su_field" with class that used to connect to database with table "pre_layout". GoodBoi is class used for MySQL DB things. You get it? Good Boi...
 $staff = new GoodBoi('staff_list'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
 $option = new GoodBoi ('list_list');
@@ -75,7 +76,7 @@ switch($_GET['job']){ // Decide which method should be used to display?
 */ 
 if(!empty($_POST) AND $_GET['job']==1){ // Validate if form already posted
 	mark("REGIST");
-	$Validation=new FieldValidation ("SignUp","gita_login_signup",$layout,$staff,1,array($_POST['Exc-PasswordConf'],$_POST['Password']));
+	$Validation=new FieldValidation ("SignUp","gita_login_signup",$layout,$staff,array(0=>array($_POST['Exc-PasswordConf'],$_POST['Password']),1=>1,2=>1,3=>3));
 	
 
 
@@ -112,7 +113,7 @@ if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
 	} else {
 		$EUser = $_SESSION['Person'];
 	}
-	$Validation=new FieldValidation ("SignUp","gita_login_signup",$layout,$staff,1,0,0,0,0,1);
+	$Validation=new FieldValidation ("SignUp","gita_login_signup",$layout,$staff,array(3=>1,1=>1,4=>1));
 
 
 	if(empty($Validation->SignUpError)){ // Register if no error occured 
