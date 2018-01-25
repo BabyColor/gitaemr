@@ -107,10 +107,10 @@ function NameArrangement($FName,$MName,$LName,$Pre=null,$Post=null){
 }
 
 function ArraySerialize($A){
-  if (is_array($A)){ return serialize($A); } else { return $A; }
+  if (is_array($A)){ return json_encode($A); } else { return $A; }
 }
 function ArrayUnserialize($A){
-  $B=@unserialize($A);
+  $B=@json_decode($A);
   if ($B !== false){
     return $B;
   } else {
@@ -136,6 +136,12 @@ function csv2csv($csv,$sep=', ',$resep=',',$pre="'",$pst="'"){
   return implode($resep,$ncsv);
 }
 
+function NameSep($name){
+  $name=explode(" ",$name);
+  $LName=array_pop($name);
+  $name=implode(" ",$name);
+  return array('FName'=>$name,'LName'=>$LName);
+}
 /*
 ************************************************************************************************
              /<                                             
@@ -231,7 +237,7 @@ function DrawOption($cluster,$ListDB=null,$orderby="ASC",$CustomDBVal=null,$Cust
 
 //Make full name form MySQL query
 function FullName($Arr){
-  $Name= $Arr['prefix'] ." ". $Arr['fname'] ." ". $Arr['mname'] ." ". $Arr['lname'] ." ". $Arr['BName'] ." ". $Arr['FName'] ." ". $Arr['MName'] ." ". $Arr['LName'];
+  $Name= $Arr['prefix'] ." ". $Arr['BName'] ." ".$Arr['FName'] ." ". $Arr['LName'];
   return $Name;
 }
 
@@ -244,6 +250,16 @@ function LogPatient($PID){
   $_SESSION['Px']=$Px[0];
 }
 
+//Seperate Name in Post
+function POSTName($array){
+  if(array_key_exists("FullName",$array)){
+    $Name=NameSep($array['FullName']);
+    unset($array['FullName']);
+    $array['FName']=$Name['FName'];
+    $array['LName']=$Name['LName'];
+  }
+  return $array;
+}
 
 /*
 ==========================================================================================================
@@ -321,7 +337,7 @@ function WarningDialog($Title,$Content){
 function Mark($a,$pre=null,$post=null){ //DEBUGGING TOOLS
   echo "<br><p class=Mark><strong>$pre </strong>";
   if(is_array($a)){
-    print_r($a);
+    var_dump($a);
   } else {
     echo $a ;
   }
@@ -485,7 +501,7 @@ function AddDatalist($input,$cluster,$LastOrder=0,$position="Last"){
 //Check wether data is a result of serialisasion and unzerilasisation them
 // (String to be deserilazation, want to turn into list?,array for list option(KeySeperator,Pre,InPre,InPos,Post Text))
 function deserialization($str,$listka,$list=null){
-  $data = @unserialize($str);
+  $data = @json_decode($str);
   if ($str === 'b:0;' || $data !== false) { 
     if(!empty($listka)){
       $data=Array2List($data,$list[0],$list[1],$list[2],$list[3],$list[4],$list[5]);    
@@ -592,7 +608,7 @@ class Kayu extends GoodBoi{
     WhosKnock();
     $l= WhoAreYou();
     $ULevel= empty($_SESSION['ULevel'])? 0 : $_SESSION['ULevel'];
-    $Kayuing=array('SDesc'=>$a , 'Culpirt'=>$l['IP'], 'CBrowser'=>$l['Browser'], 'CPort'=>$l['Port'], 'Victim'=>$l['sIP'], 'Vport'=>$l['sPort'], 'VURI'=>$l['URI'], 'Command'=>$b, 'Error'=>$d, 'User'=>$_SESSION['Person'], 'UserN'=>$_SESSION['UserN'], 'Name'=>$_SESSION['Name'], 'ULevel'=>$ULevel, 'UGroup'=>serialize($_SESSION['UGroup'])); 
+    $Kayuing=array('SDesc'=>$a , 'Culpirt'=>$l['IP'], 'CBrowser'=>$l['Browser'], 'CPort'=>$l['Port'], 'Victim'=>$l['sIP'], 'Vport'=>$l['sPort'], 'VURI'=>$l['URI'], 'Command'=>$b, 'Error'=>$d, 'User'=>$_SESSION['Person'], 'UserN'=>$_SESSION['UserN'], 'Name'=>$_SESSION['Name'], 'ULevel'=>$ULevel, 'UGroup'=>json_encode($_SESSION['UGroup'])); 
     $this->GoBark($Kayuing);
     //Debug
    if(!empty($_SESSION['DeFlea'])){ Mark($Kayuing,"LOG || "); } 
@@ -736,7 +752,7 @@ function Logout(){
 function LogUser($Userclass=null){ // Update the Last IP and Last activity of user (User ID, Class that linked to staff_list db)
   if(empty($_SESSION['Person'])) { return; }
 	$Who=WhoAreYou();
-	$Who=serialize($Who);
+	$Who=json_encode($Who);
   $Updatecol=array("LastActiveTime"=>Date2SQL(), "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who);
   if(empty($Userclass)){ $Userclass= new GoodBoi("staff_list"); } // If $Userclass empty, make a new class to link to staff_list db
   $Userclass->GoBurry($Updatecol,"WHERE usrid=". $_SESSION['Person']);
@@ -1128,7 +1144,7 @@ class Smeargle{
       $validator= empty($F['field_validation'] ) ? "" : "pattern=". $F['field_validation'] ;
       $required= empty($F['required'] ) ? "" : "required" ;
       $GLOBALS['SideHelper'] = empty($F['field_side'] ) ? "" : lan2var($F['field_side']) ;
-      $Width= empty($F['field_col'])? "25" : $F['field_col'];
+      $Width= empty($F['field_col'])? "18" : $F['field_col'];
       $Height= empty($F['field_row'])? "1" : $F['field_row'];
       $Label= empty($F['field_label'])? " " : "<label for=". $F['field_id'] .">". lan2var($F['field_label']) ."</label> : ";
 
@@ -1169,28 +1185,29 @@ class Smeargle{
           $InputContent = $Options;
           break;
         case "datalist":
-          $Input="input size=$Width $required list=". $F['field_id'];
+          $Input="input size=$Width $d list=". $F['field_id'];
           $Close="input";
           $InputContent = "<datalist id=". $F['field_id'] .">". $Options ."</datalist>";
           break;
         case "auto":
-          $Input="input value='". AutoField($F['field_id']) ."' type=hidden $placeholder $minlength $required";
+          $Input="input value='". AutoField($F['field_id']) ."' type=hidden $placeholder $minlength ";
           $Close="input";
           break;
         case "password":
-          $Input="input size=$Width type=password $required";
+          $Input="input size=$Width type=password ";
           $Close="input";
           if($this->ViewMode=="edit"){
-            $Pre= "<br>". $GLOBALS['lanOldPass']. "<input type=password name=Exc-". $F['field_id'] . "Old></input>" ;
+            $Pre= "<br>". $GLOBALS['lanOldPass']. "<input type=password id=oldpsw name=Exc-". $F['field_id'] . "Old></input>" ;
           }
-          $Additional="<br>". $GLOBALS['lanConfirmPass'] ."<input type=password name=Exc-".  $F['field_id'] ."Conf></input>";
+          $Additional="<br><label for=psw2>". $GLOBALS['lanConfirmPass'] ."</label> : <input id=psw2 type=password require name=Exc-".  $F['field_id'] ."Conf></input>
+          <div id=GEMRPidgey hidden>". $GLOBALS['lanPsMissmatched'] ."</div><script>$('#psw2').keyup(ConfirmPassword)</script>";
           break;
         case 'textarea':
-          $Input="textarea $defaultvalue $placeholder $minlength $required";
+          $Input="textarea $defaultvalue $placeholder $minlength ";
           $Close="textarea";
           break;
         default:
-          $Input="input type=". $F['field_type'] ." size=$Width $defaultvalue $placeholder $minlength $required";
+          $Input="input type=". $F['field_type'] ." size=$Width $defaultvalue $placeholder $minlength";
           $Close="input";
           break;
       }
@@ -1204,7 +1221,7 @@ class Smeargle{
       
       $Draw[$F['field_id']] .= "$LineBreak $Pre
                           $Label
-                          <$Input name=".  $F['field_id'] ." id=".  $F['field_id'] .">
+                          <$Input name=".  $F['field_id'] ." id=".  $F['field_id'] ."$required>
                             $InputContent
                           </$Close>     
                           ". $GLOBALS['SideHelper'] ."
@@ -1623,7 +1640,7 @@ class Snorlax{
     DeFlea("SNORLAX");  //========================== DEBUG===========================
    $this->GoodBoi_Version = new GoodBoi("snorlax"); // Connect to snorlax DB
    if(empty($TargetClass)){ $this->GoodBoi_Target = new GoodBoi($Target);  } else {$this->GoodBoi_Target=$TargetClass;  } //connect to target DB
-   $CulpirtInfo = serialize(WhosKnock());
+   $CulpirtInfo = json_encode(WhosKnock());
    $Culpirt = empty($_SESSION['Person'])? 0 : $_SESSION['Person'] ;
    $this->TargetID = $DataID;
    $this->TargetTab = $OriTab;   
@@ -1677,7 +1694,7 @@ class Snorlax{
     foreach($this->Data as $y=>$x){
       $DataOne += array($y=>1); 
     }
-    $DataOne= serialize($DataOne);
+    $DataOne= json_encode($DataOne);
     $VHC= array('edited_data'=>$DataOne,'version'=>'current','edited_id'=>$Pokeball) + $this->LaxIncense;
     $this->GoodBoi_Version->GoBark($VHC);
     $BURK= new AddList ($this->Data);
@@ -1688,7 +1705,7 @@ class Snorlax{
     $Gluttony= $this->GoodBoi_Version->GoFetch("WHERE version='current' AND edited_id='". $this->Data[$this->TargetID] ."' AND original_table='". $this->TargetTab ."' LIMIT 1" );
     $this->PrevVersionID = $Gluttony[0]['id']; //ID of the Gluttony
     $ColumnList=array(); // set up the ColumnList array
-    $SGluttony = unserialize($Gluttony[0]['edited_data']); // Make array of the "edited_data"
+    $SGluttony = json_decode($Gluttony[0]['edited_data']); // Make array of the "edited_data"
     foreach($SGluttony as $y=>$x){ // Assign all the column that is not empty to columnlist
       if(!empty($x)){
         array_push($ColumnList,$y);
@@ -1707,7 +1724,7 @@ class Snorlax{
     foreach($ColumnList as $x){ //Filled $Returned with each ColumnList with data from Original Table
       $Returned += array($x=>$this->OldData[$x]);
     }
-    $Returned=serialize($Returned);
+    $Returned=json_encode($Returned);
     return array('version'=>$this->OldData['sversion']) + array('edited_data'=>$Returned);
   }
 
@@ -1735,7 +1752,7 @@ class Snorlax{
     foreach($ChangedColumn as $x){ //Store 1 to each changed column
       $Snore += array($x=>1);
     }
-    $Snore= serialize($Snore);
+    $Snore= json_encode($Snore);
     return array('edited_data'=>$Snore,'version'=>'current') + $this->LaxIncense;
   }
 
@@ -1953,8 +1970,8 @@ function AutoField($Type,$Argument=null){
   switch($Type){
     case 'patient':
      $Patient= new GoodBoi('com_gita_patient');
-     $PX = $Patient->GoFetch("WHERE patientid='". $_SESSION['Patient'] ."'","patientid,prefix,fname,mname,lname");
-     DeFlea($PX[0]['prefix'] ." ". $PX[0]['fname'] ." ". $PX[0]['mname'] ." ". $PX[0]['lname']);
+     $PX = $Patient->GoFetch("WHERE patientid='". $_SESSION['Patient'] ."'","patientid,prefix,FName,LName");
+     DeFlea($PX[0]['prefix'] ." ". $PX[0]['FName'] ." ". $PX[0]['LName']);
       $GLOBALS['SideHelper']= FullName($PX[0]);
       return $PX[0]['patientid'];
       break;

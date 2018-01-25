@@ -19,7 +19,7 @@ if(bouncer()){
 		
 		//-----Add additional registration input-----
 		$Who=WhoAreYou();
-		$Who=serialize($Who);
+		$Who=json_encode($Who);
 		$Additional= array('register_date'=>Date2SQL(),'last_mod'=>Date2SQL(),"last_mod_by"=>$_SESSION['Person']); //Aditional values to record on DB on registration
 
 		if($_GET['job']==1){ // New Patient specific additional data
@@ -27,6 +27,7 @@ if(bouncer()){
 		}
 
 		$registered=array_merge ($newera,$Additional);
+		$registered=POSTName($registered);
 		
 		
 		//DEBUG
@@ -151,7 +152,7 @@ if(bouncer()){
 			break;
 		case "list":
 			LogPatient($_GET['dataid']);
-			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, fname, mname, lname, dob, sex, address, desa, district",8=>'FName',9=>"prefix, fname, mname, lname", 4=>$Tid, 10=>"prefix,fname,mname,lname"));
+			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, FName, LName, dob, sex, address, desa, district",8=>'FName',9=>"prefix, FName, LName", 4=>$Tid, 10=>"prefix,FName, LName"));
 		
 			foreach($List->Gardevoir as $y=>$x){
 				if(strpos($y, 'pre') === false && strpos($y, 'post') === false) {

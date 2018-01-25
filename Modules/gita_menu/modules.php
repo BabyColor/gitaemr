@@ -7,7 +7,7 @@ $Menu1=$Menu->GoFetch("WHERE parent='". $Root ."' ORDER BY short"); //Nge Fetch 
 
 foreach($Menu1 as $b=>$a){
     echo "<div class=dropdown>";
-    echo "<button onclick=DropButton('". $a['id'] ."MD') class='dropbtn'>". lan2Var($a['menu']) ."</button>";
+    echo "<button class='dropbtn'>". lan2Var($a['menu']) ."</button>";
     echo "<div id=". $a['id'] ."MD class=dropdown-content>";
     $Menu2=$Menu->GoFetch("WHERE parent='". $a['id'] ."' ORDER BY short");
     foreach($Menu2 as $y=>$x){
@@ -20,27 +20,15 @@ foreach($Menu1 as $b=>$a){
 }
 
 echo "<script>
-/* When the user clicks on the button, 
-toggle between hiding and showing the dropdown content */
-function DropButton(xclass) {
-  document.getElementById(xclass).classList.toggle('show');
-}
-
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
-
-    var dropdowns = document.getElementsByClassName('dropdown-content');
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
-
-</script>";
+$('.dropbtn').on('mouseenter', function(e) {
+	e.preventDefault();
+  
+  // hide all
+  $('.dropdown-content').slideUp(100);
+  
+  // show current dropdown
+  $(this).next().slideDown();
+});
+</script>		";
 
 ?>

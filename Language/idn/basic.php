@@ -243,6 +243,7 @@ $lanVisitErrorMessage2C="Pasien sudah terdaftar dengan :" ;
 //----------------Warning
 $lanRawPasswordT="Password Tidak Di Proteksi";
 $lanRawPasswordC="Password disimpan secara gamblang pada database.<br>Sewajarnya password di-enkripsi terlebih dahulu sebelum disimpan.<br>Hubungi administrator untuk info lebih lanjut.";
+$lanPsMissmatched="Kata sandi ulang tidak sesuai dengan kata sandi awal.";
 
 //-----------------Success----------------------
 $lanSignUpT="Pendaftaran Berhasil";

@@ -1,9 +1,9 @@
-$('.dropbtn').on('click', function(e) {
-	e.preventDefault();
-  
-  // hide all
-  $('.dropdown-content').hide();
-  
-  // show current dropdown
-  $(this).next().show();
-});
+function ConfirmPassword(){
+  var psw = $("#Password").val()
+  var psw2 = $("#psw2").val()
+ 		if (psw!=psw2){
+   $("#GEMRPidgey").show()
+ } else {
+   $("#GEMRPidgey").hide()
+ }
+}

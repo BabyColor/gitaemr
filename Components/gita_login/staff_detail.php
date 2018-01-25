@@ -32,10 +32,12 @@ if(!empty($_POST)){ // Check wether user already input data
 	}
 	//-----Add additional registration input-----
 	$Who=WhoAreYou();
-	$Who=serialize($Who);
+	$Who=json_encode($Who);
 	$Additional= $pexs + array("UserLevel"=>$NewUserLevel,  "Approval"=>$NewUserApproved, "LastActiveIP"=>$_SERVER['REMOTE_ADDR'], "LastActiveInfo"=>$Who); //Aditional values to record on DB on registration, like 'Active', 'User Level', and 'User Group'
 
 	$registered=array_merge ($newera,$Additional);
+	$registered=POSTName($registered);
+	
 	
 	
 	//DEBUG
@@ -43,8 +45,6 @@ if(!empty($_POST)){ // Check wether user already input data
 		mark(array2arrow($registered," ==> ","<br>"),"Refined POST<br>");
 	}
 
-
-	
 	
 
 }
@@ -152,14 +152,17 @@ if(!empty($_POST) AND $_GET['job']==4){ // Validate if form already posted
 if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Display registration Form if error occured o if no input yet
 
 
-if(!empty($viewsonic)){ // If viewsonic is empty, thats mean user have unatuhorized access
-	mark($viewsonic,"Viewsonic");
-	$Form = new Smeargle("gita_login_signup",$viewsonic,'usrid',$layout,$staff,$EUser);
-	$Forms = $Form->DrawForm(array($lanSignUp));
-	//if($viewsonic!="view"){
-	//	$Forms=str_replace('$lan',"$lan",$Forms);
-	//}
-	echo $Forms;
+	switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
+		case "view":
+		case "edit":
+		case "new":
+			$Form = new Smeargle("gita_login_signup",$viewsonic,'usrid',$layout,$staff,$EUser);
+			$Forms = $Form->DrawForm(array($lanSignUp));
+			//if($viewsonic!="view"){
+			//	$Forms=str_replace('$lan',"$lan",$Forms);
+			//}
+			Gardevoir($Forms);
+			break;
 }
 
 
