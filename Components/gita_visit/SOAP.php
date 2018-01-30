@@ -4,8 +4,10 @@ defined('GitaEmr') or Die($UnatuhorizedAccess);
 if(bouncer()){
 
     $layout= new GoodBoi('layout'); //Declare an Object "$su_field" with class that used to connect to database with table "pre_layout". GoodBoi is class used for MySQL DB things. You get it? Good Boi...
-	$MainTable = new GoodBoi('com_gita_visit'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
+	$MainTable = new GoodBoi('com_gita_visit_soap'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
 	$option = new GoodBoi ('list_list');
+	$symtomp = new GoodBoi ('com_gita_visit_symptomp');
+	$diagnosis = new GoodBoi ('com_gita_visit_diagnosis');
 	$FieldID = "gita_visit_soap";
     $Tid='visitid';
     
@@ -30,8 +32,11 @@ if(bouncer()){
 	
 
 
-	
-	// Entry Action
+	/*
+	========================================================================================
+	//--------------------POST -------------------
+	=======================================================================================
+	*/ 
 	if(!empty($_POST)){ // Check wether user already input data
 		
 
@@ -59,15 +64,7 @@ if(bouncer()){
 
 	}
 	
-	//===============================================================
-	//Display Method
-	//========================================================
 
-	if(!empty($_POST)){
-	$Px= $MainTable->GoFetch("WHERE $Tid='". $_POST['patientid'] ."'");
-	$PxId=$Px[0]['patientid'];
-	$PxName=NameArrangement($Px[0]['FName'],$Px[0]['MName'],$Px[0]['LName']);
-	}
 	/*
 	========================================================================================
 	//--------------------New Visit-------------------
@@ -152,6 +149,9 @@ if(bouncer()){
 			//if($viewsonic!="view"){
 			//	$Forms=str_replace('$lan',"$lan",$Forms);
 			//}
+			$Forms['grouping']= SOAPField($Forms['grouping']);
+			mark($Forms,"FORMS");
+
 			Gardevoir($Forms);
 			break;
 		case "list":
@@ -173,8 +173,85 @@ if(bouncer()){
 
 }
 
-
 $LogContent=array2arrow($registered); //For Logging
+
+	/*
+	=====================================================================================
+	// -----------------------------------ENGINE---------------------------
+	===========================================================================================
+	*/
+
+
+function SOAPField($Fields){
+	//DB handling
+	$symptomps=$GLOBALS['symtomp']->GoFetch();
+	$diagnose=$GLOBALS['diagnosis']->GoFetch();
+	mark("JSON");
+	echo "<div id=dxsamson hidden>". json_encode($diagnose) ."</div>";
+
+	//Making list
+	////Symptomp
+	$SYM = "<datalist id='symptomp'>";
+		foreach($symptomps as $x){
+			$li = SymptompPhraser($x);
+			$SYM .= "<option value='". SymptompPhraser($x,", ") ."'>". SymptompPhraser($x) ."</option>";
+		}
+	$SYM .= "</datalist>";
+	echo $SYM;
+
+	////Diagnosis
+	$Dx= "<datalist id='diagnosis'>";
+		$liDx=array();
+		foreach($diagnose as $x){
+			if(in_array($x['dx'],$liDx)){ continue; }
+			$Dx .= "<option value='". $x['dx'] ."'>". $x['dx']  ."</option>";
+			array_push($liDx,$x['dx']);
+		}
+	$Dx .= "</datalist>";
+	echo $Dx;
+
+	//Subject
+	$New=" <br>
+			<label for='SubjectF'>". $GLOBALS['lanSOAPSubject'] ."</label> : 
+			<input type=text list=symptomp id='SubjectF' size=60>
+			<span class=tooltiptext id='Subjectguide'>". $GLOBALS['lanSymptomp'] ."</span>
+			<div class=FieldList id='SubjectD'></div>
+			<input type=hidden id='SubjectH' value='empty' name='SubjectH'>		
+		";
+	$Fields['$lanSOAPSubject_fielding']=Pokeball($Fields['$lanSOAPSubject_fielding'],'soap_subject',array('New'=>$New));
+
+	//Diagnosis
+	$New="
+			<div class=FieldList id=DXD>
+			</div>
+			<input type=hidden id=DXH name=Diagnosis>
+		";
+	$Fields['$lanSOAPAssesment_fielding']=Pokeball($Fields['$lanSOAPAssesment_fielding'],'ob_dx_note',array('New2'=>$New),'After');
+	
+	//Planing
+	$New=" <br>
+			<label for=TXF>". $GLOBALS['lanSOAPPlaning'] ." : </label>
+			<input type=text id=TXF>
+			<div class=FieldList id=TXD>
+			</div>
+			<input type=hidden id=TXH name=Planing>
+		";
+	$Fields['$lanSOAPPlaning_fielding']=Pokeball($Fields['$lanSOAPPlaning_fielding'],'soap_planing',array('New3'=>$New));
+
+	//Blood Preassure
+	$New=" <input type=hidden id=vt_BP_Sys name=vt_BP_Sys>
+			<input type=hidden id=vt_BP_Dia name=vt_BP_Dia>
+		";
+	$Fields['$lanSOAPObject_fielding']=Pokeball($Fields['$lanSOAPObject_fielding'],'vt_BP',array('New4'=>$New),'After');
+
+	return $Fields;
+}
+
+
+
+//------------------------DAUH TUKAD SCRIPT-------------------------
+echo "<script src=Engine/jsaction.js></script>";
+
 
 
 ?>

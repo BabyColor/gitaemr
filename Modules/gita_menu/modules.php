@@ -4,7 +4,7 @@ $Root = $Argument;
 $Menu= new GoodBoi('mod_gita_menu');
 if(empty($Root)) { $Root='root'; }
 $Menu1=$Menu->GoFetch("WHERE parent='". $Root ."' ORDER BY short"); //Nge Fetch dari DB mysql, dadi multidimension array([0]=>array(kolom1=>value1, kolom2=>value2),[1]=>array(kolom1=>value1, kolom2=>value2)... dst)
-
+echo "<div class=w3-theme-l5>";
 foreach($Menu1 as $b=>$a){
     echo "<div class=dropdown>";
     echo "<button class='dropbtn'>". lan2Var($a['menu']) ."</button>";

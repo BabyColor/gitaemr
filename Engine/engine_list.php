@@ -110,8 +110,17 @@ function ArraySerialize($A){
   if (is_array($A)){ return json_encode($A); } else { return $A; }
 }
 function ArrayUnserialize($A){
-  $B=@json_decode($A);
-  if ($B !== false){
+  $B=json_decode($A);
+  if ($B == JSON_ERROR_NONE){
+    return $B;
+  } else {
+    return $A;
+  }
+}
+
+function UnJson($A){
+  $B=json_decode($A);
+  if ($B == JSON_ERROR_NONE){
     return $B;
   } else {
     return $A;
@@ -259,6 +268,21 @@ function POSTName($array){
     $array['LName']=$Name['LName'];
   }
   return $array;
+}
+
+//Insert to Array to specific location
+function Pokeball($array,$key,$new,$Insert='Before'){
+  // (Original array, Key mark, New data as array, inster 'Before' or 'After' the $key)
+  foreach($array as $y=>$x){
+    if ($Insert=='After'){ $Res[$y]=$x; }
+    if($y==$key){ 
+      foreach($new as $b=>$a){
+        $Res[$b]=$a;
+      }
+     }
+    if ($Insert=='Before'){ $Res[$y]=$x; }
+  }
+  return $Res;
 }
 
 /*
@@ -446,7 +470,55 @@ function Gardevoir($Draw){
                          
                          
 
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===============  FILE HANDLER ================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
 
+// Image Upload Checker
+function UploadFiles($File,$Allowed,$Dir=null){
+  // (The input file id, array of allowed file extension, diresctory)
+  $Error=array();
+  $MediaDir= $GLOBALS['settingDirMedia'] ."/";
+  $Dir = empty($Dir)? $MediaDir . $GLOBALS['settingDirDefault'] ."/" : $MediaDir . $Dir;
+  $Dir = $Dir . basename($_FILES[$File]["name"]);
+  $FileType = strtolower(pathinfo($Dir,PATHINFO_EXTENSION));
+  if(isset($_POST["submit"])) {
+    // Check if image file is a actual image or fake image
+    $check = getimagesize($_FILES[$File]["tmp_name"]);
+    if($check === false) { array_push($Error, "Error1"); }
+  }
+  // Check if file already exists
+  if (file_exists($Dir)) { array_push($Error, "Error2"); } 
+   // Check file size
+  if ($_FILES[$File]["size"] > 1024000) { array_push($Error, "Error3");  }
+  // Allow certain file formats
+  if(in_array($FileType, $Allowed )) { array_push($Error, "Error4"); }  
+
+
+  if (!empty($Error)) {
+    return "Sorry, your file was not uploaded.";
+  // if everything is ok, try to upload file
+  } else {
+      if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+          return "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+      } else {
+          return "Sorry, there was an error uploading your file.";
+      }
+  }
+}
+
+
+
+
+/*
 ************************************************************************************************
              /<                                             
             /<                                              
@@ -702,8 +774,45 @@ function SniffButt($DBase=null, $Server=null){
 ==========================================================================================================
 
 
+██████╗ 
+██╔══██╗
+██████╔╝
+██╔═══╝ 
+██║     
+╚═╝     
+
+************************************************************************************************
+             /<                                             
+            /<                                              
+  |\_______{o}----------------------------------------------------------_
+ [\\\\\\\\\\\{*}:::<===================  PHRASE   =================-       >
+  |/~~~~~~~{o}----------------------------------------------------------~
+            \<
+             \<
+              \>
+************************************************************************************************
+*/
+
+function SymptompPhraser($x,$space=null){
+  // (Array of GoFetch from Symptomp DB, seperator (if null, use default))
+  if (empty($space)){
+    $n= -1;
+    foreach($x as $b=>$a){
+      if(!empty($a) AND $b!='id'){
+        $symtpomp .= $GLOBALS["lanSymtompSep$n"] . " " . $a . " ";
+      }
+      $n++;
+    }
+  return $symtpomp;
+  } else {
+    return $x['symptomp'] ." $space ". $x['location'] ." $space ". $x['reffered_pain'] ." $space ". $x['duraiton'] ." $space ". $x['frequency'] ." $space ". $x['qualitiy'] ." $space ". $x['worsened by'] ." $space ". $x['relieved_by'];
+  }
+}
 
 
+
+/*
+==========================================================================================================
 
 
 
@@ -1053,10 +1162,10 @@ class Smeargle{
    
     $URI = GetGET();
     //Draw form opening ( <form> and <table>)
-    $Draw['pre'] = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ."><div class=". $this->Style .">"; 
+    $Draw['pre'] = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ." enctype=multipart/form-data id=". $this->Layout . "><div class=". $this->Style .">"; 
     
     //---Draw form
-   $Draw['goruping']= $this->Grouping(); //  Go to function Grouping to draw each group
+   $Draw['grouping']= $this->Grouping(); //  Go to function Grouping to draw each group
    
    //Setting default values of buttons depending on languages
    global $lanSubmit;
@@ -1139,14 +1248,27 @@ class Smeargle{
     foreach($Field as $F){ // Script for each found filed
       
       // Assign attributes
+      $Hidden= strpos($F['field_id'], 'hidden_') !== false? "hidden" : "";
+      $F['field_id']=str_replace("hidden_","",$F['field_id']);
       $minlength= empty($F['field_minlength']) ? "" : "minlength=". $F['field_minlength'] ;
-			$placeholder= empty($F['field_placeholder'] ) ? "" : "placeholder=". lan2var($F['field_placeholder']) ;
-      $validator= empty($F['field_validation'] ) ? "" : "pattern=". $F['field_validation'] ;
+			$placeholder= empty($F['field_placeholder'] ) ? "" : "placeholder='". lan2var($F['field_placeholder'])  ."'";
+      $validator= empty($F['field_validation'] ) ? "" : "pattern='". $F['field_validation'] ."'" ;
       $required= empty($F['required'] ) ? "" : "required" ;
-      $GLOBALS['SideHelper'] = empty($F['field_side'] ) ? "" : lan2var($F['field_side']) ;
+      $GLOBALS['SideHelper'] = empty($F['field_side'] ) ? "" : lan2var($F['field_side'])  ;
       $Width= empty($F['field_col'])? "18" : $F['field_col'];
       $Height= empty($F['field_row'])? "1" : $F['field_row'];
       $Label= empty($F['field_label'])? " " : "<label for=". $F['field_id'] .">". lan2var($F['field_label']) ."</label> : ";
+      
+
+      $Tooltip= empty($F['field_tooltip'])? "" : "<span class=tooltiptext id=tip_". $F['field_id'] .">". lan2var($F['field_tooltip']) ."</span>
+      <script>
+        $('#".  $F['field_id'] ."').focus(function(){
+          $('#tip_". $F['field_id'] ."').css('visibility', 'visible')
+        });
+        $('#".  $F['field_id'] ."').blur(function(){
+          $('#tip_". $F['field_id'] ."').css('visibility', 'hidden')
+        });
+      </script>  ";
 
       $LineBreak= empty($F['field_seperator'])? "<br/>" : $F['field_seperator'];
 
@@ -1185,9 +1307,9 @@ class Smeargle{
           $InputContent = $Options;
           break;
         case "datalist":
-          $Input="input size=$Width $d list=". $F['field_id'];
+          $Input="input size=$Width $d list=". $F['field_list'];
           $Close="input";
-          $InputContent = "<datalist id=". $F['field_id'] .">". $Options ."</datalist>";
+          $InputContent = "<datalist id=". $F['field_list'] .">". $Options ."</datalist>";
           break;
         case "auto":
           $Input="input value='". AutoField($F['field_id']) ."' type=hidden $placeholder $minlength ";
@@ -1221,10 +1343,10 @@ class Smeargle{
       
       $Draw[$F['field_id']] .= "$LineBreak $Pre
                           $Label
-                          <$Input name=".  $F['field_id'] ." id=".  $F['field_id'] ."$required>
+                          <$Input name=".  $F['field_id'] ." id=".  $F['field_id'] ."$required $Hidden>
                             $InputContent
-                          </$Close>     
-                          ". $GLOBALS['SideHelper'] ."
+                          </$Close> 
+                          <span id=side_". $F['field_id'] .">".  $GLOBALS['SideHelper'] ."</span> $Tooltip  
                       $Additional
                       "; // Input
                       unset($InputContent);
@@ -1633,15 +1755,17 @@ class Snorlax{
   protected $LaxIncense; // ARRAY of additional data to be insterted into the NEW entry of subversion
   protected $OldData; // ARRAY contain the old data from original DB
   protected $NewData; // ARRAY contain the the submited data that different with the old data
+  public $listfield;
    
-  function __Construct($DataID,$OriTab,$Data,$Method='Edit',$TargetClass=null){
-    //Data ID (e.g. usrid for staff_list), Original Tab (e.g. staff_list), Meyhod (New, Edit), Submited Data in array as column=>value, Class ro connect to target
+  function __Construct($DataID,$OriTab,$Data,$listfield=null,$Method='Edit',$TargetClass=null){
+    //Data ID (e.g. usrid for staff_list), Original Tab (e.g. staff_list), additional $_POST[x] that contain datalist but didn't exist in 'Layout' table, Meyhod (New, Edit), Submited Data in array as column=>value, Class ro connect to target
 
     DeFlea("SNORLAX");  //========================== DEBUG===========================
    $this->GoodBoi_Version = new GoodBoi("snorlax"); // Connect to snorlax DB
    if(empty($TargetClass)){ $this->GoodBoi_Target = new GoodBoi($Target);  } else {$this->GoodBoi_Target=$TargetClass;  } //connect to target DB
    $CulpirtInfo = json_encode(WhosKnock());
    $Culpirt = empty($_SESSION['Person'])? 0 : $_SESSION['Person'] ;
+   $this->listfield = $listfield;
    $this->TargetID = $DataID;
    $this->TargetTab = $OriTab;   
    $this->LaxIncense = array('timest'=>Date2SQL(),'culpirt'=>$Culpirt, 'culpirt_info'=>$CulpirtInfo, 'facility'=>$GLOBALS['SettingCurrentFacility'],'original_table'=>$OriTab, 'edited_id'=>$Data[$DataID]);
@@ -1674,7 +1798,7 @@ class Snorlax{
     mark($Snore, __FUNCTION__ . "Snore List "); //==================================DEBUG=======================
     //GO
     $this->PulverizingPancake($Ditto,$Snore);
-    $BURK= new AddList ($this->Data);
+    $BURK= new AddList ($this->Data, $this->listfield);
   }
 
   function IVs(){
@@ -1697,7 +1821,7 @@ class Snorlax{
     $DataOne= json_encode($DataOne);
     $VHC= array('edited_data'=>$DataOne,'version'=>'current','edited_id'=>$Pokeball) + $this->LaxIncense;
     $this->GoodBoi_Version->GoBark($VHC);
-    $BURK= new AddList ($this->Data);
+    $BURK= new AddList ($this->Data, $this->listfield);
   }
 
   //1. Fetch column list with '1' [ColumnList] in Subversion DB where version=current AND edited_id= current edited id (ATR1) AND original_table = edited table (ATR2) [CurentVerRow].
@@ -1915,13 +2039,16 @@ class AddList{
   protected $Data; // Array containing POST of form
   protected $Layout; // Object of GoodBoi layout
   protected $List; //Object of GoodBoi List
+  public $Additional; // additional $_POST[x] that contain datalist but didn't exist in 'Layout' table
 
-  function __Construct($Data,$Layout=null,$List=null){
+  function __Construct($Data,$Additional=null,$Layout=null,$List=null){
+    //(Data: array(field_id:value) || Additional: additional $_POST[x] that contain datalist but didn't exist in 'Layout' table) || Lauout&List: GoodBoi object of 'layout'&'list' db
     if (empty($Layout)) { $Layout= new GoodBoi('layout'); }
     if (empty($List)) { $List= new GoodBoi('list_list'); }
     $this->Layout = $Layout;
     $this->List = $List;
     $this->Data=$Data;
+    $this->Additional = $Additional;
     mark($this->Data, "DATA ");
     $this->InsertList();
   }
@@ -1934,6 +2061,7 @@ class AddList{
 
   function InsertList(){
     $Layout=$this->Layout->GoFetch("WHERE field_type='datalist' && field_list_table IS NULL", "field_id, field_list");
+    $Layout =array_merge($Layout,$this->Additional);
     $Lay=array(); //Lay is array (field_id => field_list) of those field type datalist
     //Make $Lay
     foreach($Layout as $x){
@@ -1943,11 +2071,12 @@ class AddList{
 
     foreach($this->Data as $y=>$x){
       if(array_key_exists($y,$Lay)){
+        $x= UnJson($x);
+        $x= is_array($x)? $x : array($x);
         if($this->CekIfNew($x,$Lay[$y]) === TRUE && !empty($x)){
           $Kue=$this->MakeQuery($x,$Lay[$y]);
           DeFlea($Kue, "Kue ");
           $this->List->GoBark($Kue);
-          
         }
       }
     }
@@ -1988,6 +2117,8 @@ function AutoField($Type,$Argument=null){
       $Name= FullName($Dr[0]);
       $GLOBALS['SideHelper']=  $Name;
       return $Dr[0]['usrid'];
+    case 'stat_BMI':
+    break;
   }
 }
 

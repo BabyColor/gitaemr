@@ -88,6 +88,10 @@ $lanContact="Kontak";
 $lanDetail="SARA";
 $lanJobs="Pekerjaan";
 $lanGuardian="Penanggung Jawab";
+$lanAllergies="Alergi";
+$lanHistory="Riwayat Penyakit";
+$lanFHistory="Riwayat Penyakit Keluarga";
+$lanCurrentIllness="Masih";
 
 
 
@@ -174,6 +178,7 @@ $lanReset="Hapus";
 $lanSearch="Cari";
 $lanAll='Semua';
 $lanNoResult='Tidak ada data yang ditemukan';
+$lanNotes='Catatan';
 
 
 //-------------------Visit--------------------------
@@ -191,16 +196,17 @@ $lanSOAPPlaning='Planing';
 $lanPulse='Nadi';
 $lanRespirationRate='Respirasi';
 $lanTemp='Temp';
-$lanSystole="Tekanan Darah";
-$lanDiastole="";
+$lanBP='Tekanan Darah';
+$lanSystole="Tekanan Darah Sistolik";
+$lanDiastole="Tekanan Darah Diastolik";
 $lanHeight='Tinggi Badan';
 $lanWeight='Berat Badan';
 $lanBMI='BMI';
 $lanBMIString='BMI';
 $lanVisitData='Data Kunjungan';
-$lanBPM="'Denyut / Menit'";
-$lanRPM="'Respirasi / Menit'";
-$lanDegree="'Derajat Selsius'";
+$lanBPM="Denyut / Menit";
+$lanRPM="Respirasi / Menit";
+$lanDegree="Derajat Selsius";
 $lanKM='Kilometer';
 $lanKG='Kilogram';
 $lanNewCase='Kasus Baru';
@@ -274,4 +280,20 @@ $lanLogout="Keluar";
 $lanVisit="Kunjungan";
 $lanVisitNew="Kunjungan Baru";
 $lanVisitList='Daftar Kunjungan';
+
+//////////////////////////////////////////////////
+////////////  VISIT /////////////////////////////
+////////////////////////////////////////////////
+$lanSymtompSep1="di";
+$lanSymtompSep2="menjalar ke";
+$lanSymtompSep3="sejak";
+$lanSymtompSep4="frekuensi";
+$lanSymtompSep5="kualitas";
+$lanSymtompSep6="memberat dengan";
+$lanSymtompSep7="membaik dengan";
+$lanSymtompSep8="tambahan";
+$lanSymptomp="Keluhan";
+$lanAdditionalNote="Catatan Tambahan";
+$lanAdditionalBP="Sistolik/Diastolik";
+
 ?>

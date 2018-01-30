@@ -6,6 +6,7 @@ if(bouncer()){
 	$option = new GoodBoi ('list_list');
 	$FieldID = "gita_patient";
 	$Tid='patientid';
+	$diagnosis = new GoodBoi ('com_gita_visit_diagnosis');
 
 
 	
@@ -28,6 +29,7 @@ if(bouncer()){
 
 		$registered=array_merge ($newera,$Additional);
 		$registered=POSTName($registered);
+		$registered=RemahRemah($registered);
 		
 		
 		//DEBUG
@@ -148,6 +150,8 @@ if(bouncer()){
 			//if($viewsonic!="view"){
 			//	$Forms=str_replace('$lan',"$lan",$Forms);
 			//}
+			$Forms['grouping']= History($Forms['grouping']);
+			mark($Forms,"FORMS");
 			Gardevoir($Forms);
 			break;
 		case "list":
@@ -168,6 +172,70 @@ if(bouncer()){
 	}
 
 }
+/*
+	=====================================================================================
+	// -----------------------------------ENGINE---------------------------
+	===========================================================================================
+	*/
+
+
+	function History($Fields){
+		//DB handling
+		$diagnose=$GLOBALS['diagnosis']->GoFetch();
+		mark("JSON");
+		echo "<div id=dxsamson hidden>". json_encode($diagnose) ."</div>";
+	
+		//Making list
+
+		////Diagnosis
+		$Dx= "<datalist id='diagnosis'>";
+			$liDx=array();
+			foreach($diagnose as $x){
+				if(in_array($x['dx'],$liDx)){ continue; }
+				$Dx .= "<option value='". $x['dx'] ."'>". $x['dx']  ."</option>";
+				array_push($liDx,$x['dx']);
+			}
+		$Dx .= "</datalist>";
+		echo $Dx;
+	
+	
+		//Med History
+		$New="
+				<div class=FieldList id=DXD>
+				</div>
+				<input type=hidden id=DXH name=PastIllness>
+			";
+		$Fields['$lanDetail_fielding']=Pokeball($Fields['$lanDetail_fielding'],'ob_dx_note',array('New2'=>$New),'After');
+		//Fam History
+		$New="
+				<div class=FieldList id=FDXD>
+				</div>
+				<input type=hidden id=FDXH name=FamillyHistories>
+			";
+		$Fields['$lanDetail_fielding']=Pokeball($Fields['$lanDetail_fielding'],'ob_fdx_who',array('New4'=>$New),'After');
+		//Allergies
+		$New="
+				<div class=FieldList id=AllD>
+				</div>
+				<input type=hidden id=AllH name=Allergies>
+			";
+		$Fields['$lanDetail_fielding']=Pokeball($Fields['$lanDetail_fielding'],'allergies_reaction',array('New3'=>$New),'After');
+		
+		return $Fields;
+	}
+	
+	function RemahRemah($crumb){
+		foreach($crumb as $y => $x){
+			if(strpos($y, 'ob_') !== false || in_array($y,array('allergies','allergies_reaction','DXF','FDXF'))){
+				unset($crumb[$y]);
+			}
+		}
+		return $crumb;
+	}
+
+
+	//------------------------DAUH TUKAD SCRIPT-------------------------
+	//require "Components/gita_visit/jsaction.php";
 
 
 $LogContent=array2arrow($registered); //For Logging

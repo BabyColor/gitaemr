@@ -26,6 +26,7 @@ $SettingSuperAdminLevel= 9999; //Those who have user level past this number bypa
 
 
 
+
 //----Account Setting-----
 $NewUserApproved=0;
 $NewUserLevel=1;
@@ -39,6 +40,18 @@ $LoginErrorMessage="Each" ; // Each [Tell user wether they have wrong password o
 $HRDAdminGroup=array("admin","HRD");
 $HRDAdminLevel=80;
 
+//-------------Directories-----------
+$settingDirMedia= "Media";
+$settingDirDefault= "Misc";
 
-
+//------__COMPONENT___-------------
+//--------Visit---------------------
+$comvisitBMIVSU="Very Severe Underweight";
+$comvisitBMISU="Severe Underweight";
+$comvisitBMIU="Underweight";
+$comvisitBMIN="Normal";
+$comvisitBMIO="Overweight";
+$comvisitBMIOI="Obese Class I";
+$comvisitBMIOII="Obese Class II";
+$comvisitBMIOIII="Obese Class III";
 ?>

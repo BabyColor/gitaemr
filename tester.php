@@ -2,11 +2,10 @@
 if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
 Login(1);
-$Namaewa=array('rett'=>'sdfsafdsadf','sdffdsaffdsa'=>'rgaregaergaerg','greaagregerg'=>"sad");
-$Json= json_encode($Namaewa);
-var_dump($Json);
-$Json= json_decode($Json);
-var_dump($Json);
+
+$jonson = $_POST['Diagnosis'];
+
+mark(json_decode($jonson), "JONSON ");
 
 //$registered=$_POST;
 //$BURK= new AddList ($registered);
