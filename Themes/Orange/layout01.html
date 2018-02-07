@@ -4,43 +4,113 @@
 		<link rel="stylesheet" href="Themes/Orange/green.css">
 		<link rel="stylesheet" href="Themes/Orange/font_awesome.css">
 		<link rel="stylesheet" href="Themes/Orange/w3css4w3.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		<?php require "Engine/head.php"; ?>
 	</head>
-	<body>
-		<table>
-			<tr class='Top1'>
-				<td colspan=3>
-					<?php Modules('top1'); ?>
-			<tr class='Top2'>
-				<td colspan=3><?php Modules('top2'); ?>
-			<tr class='Top3'>
-				<td colspan=3><?php Modules('top3'); ?>
-			<tr>
-				<td>
-					<table>
-						<tr class='Left1'>
-							<td></td><?php Modules('left1'); ?>
-						<tr class='Left2'>
-							<td><?php Modules('left2'); ?>
-						<tr class='Left3'>
-							<td><?php Modules('left3'); ?>
-					</table>
-				<td class='area_content'><?php require "Engine/content_display.php"; ?>
-				<td>
-					<table>
-						<tr class='Right1'>
-							<td></td><?php Modules('right1'); ?>
-						<tr class='Right2'>
-							<td><?php Modules('right2'); ?>
-						<tr class='Right3'>
-							<td><?php Modules('right3'); ?>
-					</table>
-				<tr class='Bottom1'>
-					<td colspan=3><?php Modules('bottom1'); ?>
-				<tr class='Bottom2'>
-					<td colspan=3><?php Modules('bottom2'); ?>
-				<tr class='Bottom3'>
-					<td colspan=3><?php Modules('bottom3'); ?>
-		</table>
+	<body class="w3-theme-l5">
+
+		<!-- Navbar -->
+<div >
+		<div id='topbar' class="w3-bar w3-black w3-card">
+				<?php Modules('top3'); ?>
+		</div>
+	  </div>
+	  
+	  <!-- Navbar on small screens -->
+	  <div id="navDemo" class="w3-bar-block w3-black w3-hide w3-hide-large w3-hide-medium w3-top" style="margin-top:46px">
+		<a href="#band" class="w3-bar-item w3-button w3-padding-large">BAND</a>
+		<a href="#tour" class="w3-bar-item w3-button w3-padding-large">TOUR</a>
+		<a href="#contact" class="w3-bar-item w3-button w3-padding-large">CONTACT</a>
+		<a href="#" class="w3-bar-item w3-button w3-padding-large">MERCH</a>
+	  </div>
+		
+		<!-- Page Container -->
+		<div class="w3-container w3-content" style="max-width:1400px;margin-top:80px">    
+		  <!-- The Grid -->
+		  <div class="w3-row">
+			<!-- Left Column -->
+			<div class="w3-col m2">
+			  <!-- Profile -->
+			  <div class="w3-card w3-round w3-white">
+					<div class="w3-container">
+				<?php Modules('left1'); ?>
+					</div>
+			  </div>
+			  <br>
+			  <div class="w3-card w3-round w3-white">
+					<div class="w3-container">
+				<?php Modules('left2'); ?>
+					</div>
+			  </div>
+			  <br>
+			  <div class="w3-card w3-round w3-white">
+					<div class="w3-container">
+				<?php Modules('left3'); ?>
+					</div>
+			  </div>
+			  <br>
+			  </div>
+			  
+			 
+			
+			<!-- Middle Column -->
+			<div class="w3-col m10">
+			
+			  <div class="w3-row-padding">
+				<div class="w3-col m12">
+				  
+						<?php require "Engine/content_display.php"; ?>
+				
+				</div>
+			  </div>
+			  
+			  
+			  
+			<!-- End Middle Column -->
+			</div>
+			
+			
+			
+		  <!-- End Grid -->
+		  </div>
+		  
+		<!-- End Page Container -->
+		</div>
+		<br>
+		
+		<!-- Footer -->
+		<footer class="w3-container w3-theme-d3 w3-padding-16">
+				<td colspan=3><?php Modules('bottom1'); ?>
+		</footer>
+		
+		<footer class="w3-container w3-theme-d5">
+		  <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+		</footer>
+		 
+		<script>
+		// Accordion
+		function BukaTutup(id) {
+			var x = document.getElementById(id);
+			if (x.className.indexOf("w3-show") == -1) {
+				x.className += " w3-show";
+				x.previousElementSibling.className += " w3-theme-d1";
+			} else { 
+				x.className = x.className.replace("w3-show", "");
+				x.previousElementSibling.className = 
+				x.previousElementSibling.className.replace(" w3-theme-d1", "");
+			}
+		}
+		
+		// Used to toggle the menu on smaller screens when clicking on the menu button
+		function openNav() {
+			var x = document.getElementById("navDemo");
+			if (x.className.indexOf("w3-show") == -1) {
+				x.className += " w3-show";
+			} else { 
+				x.className = x.className.replace(" w3-show", "");
+			}
+		}
+		
+		</script>
 	</body>
 </html>

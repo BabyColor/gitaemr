@@ -228,11 +228,12 @@ html {
   body {
     font-family: Verdana, sans-serif;
     font-size: 15px;
-    line-height: 1.5
+    line-height: 1.5;
+ 
   }
   
   html {
-    overflow-x: hidden
+    /* overflow-x: hidden */
   }
   
   h1 {

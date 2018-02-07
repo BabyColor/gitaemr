@@ -39,7 +39,7 @@ function array2csv($arr,$bra=null,$IgnoreBlank=null,$IgnoreExc=null,$sep=" , "){
     $counter++;
   }
   
-  if(!empty($_SESSION['DeFlea'])){ mark($aa,__FUNCTION__ ." Key ==> "); mark($bb,__FUNCTION__ ." Val ==> "); } //Debug
+  if(!empty($_SESSION['DeFlea'])){ markA($aa,__FUNCTION__ ." Key ==> "); markA($bb,__FUNCTION__ ." Val ==> "); } //Debug
   return array("Key"=>$aa,"Val"=>$bb);
 }
 
@@ -119,8 +119,9 @@ function ArrayUnserialize($A){
 }
 
 function UnJson($A){
-  $B=json_decode($A);
-  if ($B == JSON_ERROR_NONE){
+  $B=json_decode($A,true);
+  // Is passed arguments JSON?
+  if ($B){
     return $B;
   } else {
     return $A;
@@ -151,6 +152,88 @@ function NameSep($name){
   $name=implode(" ",$name);
   return array('FName'=>$name,'LName'=>$LName);
 }
+
+//For proccessin Diagnosis
+//Automatically detect wether the job is to write or read
+function DxEater($Alpha){
+  //$DxD = [ARRAY] data of diagnosis, to WRITE (dx=>x,type=>x,grade=>x,grade=>x... etc) will return a JSON ("dxid":"id","note":"note") from the diagnosis table that matched the input and the note inputed, or to READ (dxid=>x,note=>x) will return an array of mysql fetch from diagnosis table with id of dxid (also with the note)
+  $DB = new GoodBoi("com_gita_visit_diagnosis");
+  $Beta = UnJson($Alpha);
+  $jonson=array();
+  foreach($Beta as $c=>$DxD){
+    
+    $DxD = UnJson($DxD);
+    
+      
+      /*
+        'dxid' structure => name_#(random)
+      */
+
+      // WRITER
+      /*
+        Flow:
+          1. Check if diagnosis already exist =>No? Make it
+          2. Check if type, grade, stage, and causa for that diagnosis exist? =>No? Make it
+          4. Get the 'dxid' as $dxid
+          5. Return JSON of array(['dxid'] and ['note'])
+      */
+      if(array_key_exists('dx',$DxD)){ //Check if 'dx' key exist, therefore, the job is to WRITE
+        $Que = $DB->GoFetch("WHERE dx='". $DxD['dx'] ."'"); 
+        $NewDX=array('dx'=>$DxD['dx'], 'type'=>$DxD['type'],'stage'=>$DxD['stage'],'grade'=>$DxD['grade'],'causa'=>$DxD['causa'],'location'=>$DxD['location']); //Aray of data to be inserted as new dx if new dx needed to inserted
+        array_map('Empty2Null',$DxD); //Return empty value as Null
+
+        if($Que){ // #1 Check if diagnosis already exist
+          $dxid=$Que[0]['id'];
+          $dxidx=explode('_',$dxid);
+          $dxidx=$dxidx[0];
+          $Que = $DB->GoFetch("WHERE dx='". $DxD['dx'] ."' AND type='". $DxD['type'] ."' AND stage='". $DxD['stage'] ."' AND grade='". $DxD['grade'] ."' AND causa='". $DxD['causa'] ."' AND location='". $DxD['location'] ."'"); 
+          $NewDX +=array('walkthrough'=>$Que[0]['walkthrough']);
+
+
+            if($Que){// #2 Check if diagnosis with indentical attributs already exist
+              $dxid=$Que[0]['id']; //#4
+            } 
+
+          else { //Write dx with new attributes
+            do { // Generate new 'dxid' with dxname+_random number, if already exist, repeat
+              $dxid=$dxidx ."_". rand(1,1000);
+            } while ($DB->GoFetch("WHERE id = '$dxid'"));
+            $NewDX +=array('id'=>$dxid);
+            new Snorlax('id','com_gita_visit_diagnosis',$NewDX,null,'New');
+          }
+        } 
+
+        else { //Wirte new dx
+          $dxid_pre=strtolower(str_replace(" ","-",$DxD['dx']));
+        while ($DB->GoFetch("WHERE dx LIKE '$dxid_pre%'")){// Generate new 'dxid' with dxname+_random number, if already exist same dx prefix, use dxname+randomnumber+_randomnumber
+            $dxid_pre=$dxid_pre . rand(1,100);
+          }
+          $dxid=$dxid_pre . "_1";
+          $NewDX +=array('id'=>$dxid);
+          new Snorlax('id','com_gita_visit_diagnosis',$NewDX,null,'New');
+        }
+        $Inserted = array("dxid"=>$dxid, "note"=>$DxD['note']);
+        if($DxD['susp']) { $Inserted += array("suspect"=>TRUE); }
+        array_push($jonson,json_encode($Inserted)); // #5 Return WRITER
+      } 
+      
+      // READER
+      elseif(array_key_exists('dxid',$DxD)){ //Check if 'dxid' key exist, therefore, the job is to READ
+        $Que = $DB->GoFetch("WHERE id='". $DxD['dxid'] ."'");
+        $Qlue[$c] = $Que[0] + array('Thisnote'=>$DxD['note'],'Susp'=>$DxD['suspect']);
+      }
+  }
+  if($jonson) { return json_encode($jonson); }
+  if($Qlue) { return $Qlue; }
+  
+}
+
+// Turn empty string into null (Good for MySQL)
+function Empty2Null($Data){
+  if(!$Data){
+    return 'null';
+  }
+}
 /*
 ************************************************************************************************
              /<                                             
@@ -166,15 +249,10 @@ function NameSep($name){
 
 //------------------Get Age from MySQL Date (YY-mm-dd)
 function getAge($BD){
-  $BD = explode("-", $BD);
-  $date = "$BD[0]-$BD[1]-$BD[2]";
-  if(version_compare(PHP_VERSION, '5.3.0') >= 0){
-      $dob = new DateTime($date);
-      $now = new DateTime();
-      return $now->diff($dob)->y;
-  }
-  $difference = time() - strtotime($date);
-  return floor($difference / 31556926);
+  $birthday = new DateTime($BD);
+  $diff = $birthday->diff(new DateTime());
+  mark($diff->format('%m'),'AGE');
+  return $diff->format('%m') + 12 * $diff->format('%y');
 }
 
 /*
@@ -221,25 +299,48 @@ function WhosKnock(){ //Return the visiting user as array (Person[UserId], ULeve
 }
 
 //Make <option> from list_list (List Cluster,Class connecting to List table)
-function DrawOption($cluster,$ListDB=null,$orderby="ASC",$CustomDBVal=null,$CustomDBOpt=null,$CustomDBWhr=null){
-  //(List's cluster (Default Table), GoodBoi class to access lis_list or custom table[default is list_list],Column as Value, Column as Option, Where condition for custom table)
-  $ListDB= empty($ListDB)? new GoodBoi("list_list") : $ListDB;
-  switch($orderby){
-    case "ASC":
-      $orderby=" list_order ASC";
-    break;
-    case "DESC":
-      $orderby=" list_order DESC";
-    break;
+function DrawOption($array,$Arguments){
+  /*
+  $array=ARRAY of fetched layout row
+  ==========$ARGUMENTS OPTION=========
+  default=Wich default option to chose
+  orderby=Order by ASC or DESC
+
+  
+  Custom list:
+    >>Table = DB Table
+    >>Option = Option Column
+    >>Value = Value Column
+    >>Order = Order By Column
+    >>WhereQuery = Where Query
+    >>Select = MySQL Select Query (Default is all (*))
+  */
+  $default= $Arguments['default']? $Arguments['default'] : null;
+  $orderby= $Arguments['orderby']? $Arguments['orderby'] : "ASC";
+
+  $CustomListDB= UnJson($array['field_list_table']);
+  $ListDB= empty($CustomListDB)? new GoodBoi("list_list") : new GoodBoi($CustomListDB['Table']);
+  $Opt= $CustomListDB? $CustomListDB['Option']: "list_name";
+  $Val= $CustomListDB? $CustomListDB['Value']: "list_value";
+  if($CustomListDB){ // Make list using custom table
+    $CustomListDB['WhereQuery'] = $CustomListDB['WhereQuery']? "WHERE ". $CustomListDB['WhereQuery'] : "";
+    $orderby= $CustomListDB['Order']? "ORDER BY ". $CustomListDB['Order'] ." $orderby" : "" ;
+    $select= $CustomListDB['Select']? $CustomListDB['Select']: "*";
+    $Selection=$ListDB-> GoFetch($CustomListDB['WhereQuery'] ." $orderby", $select);
+  } else { // Make list using 'list_list' table
+    $orderby="ORDER BY list_order $orderby";
+    $Selection=$ListDB-> GoFetch("WHERE cluster='". $array['field_list'] ."' $orderby"); 
   }
-  $cluster= empty($CustomDBWhr)? " cluster = '". $cluster ."' AND active <> 0" : " $CustomDBWhr "; 
-  $Val= empty($CustomDBVal)? 'list_value'  : $CustomDBVal; 
-  $Opt= empty($CustomDBOpt)? 'list_name' : $CustomDBOpt; 
-  $Selection=$ListDB-> GoFetch("WHERE $cluster"); //Chose list in certain cluster which active (active not null)
+  
+  //Chose list in certain cluster which active (active not null)
   
     foreach($Selection as $L){
-      if(!empty($L['default'])){ $Default="selected=selected"; }
-      $Options = $Options ."<option value=". $L[$Val] ." $Default>". lan2var($L[$Opt]) ."</option>";
+      // Decided if this option should be the default selection
+      if(!empty($L['default']) || $default==$L[$Val]){ $Selected="selected=selected"; } else {unset($Selected); }
+
+      //Draw
+      $Options = $Options ."<option value='". $L[$Val] ."' $Selected>". lan2var($L[$Opt]) ."</option>";
+
     }
   return $Options;
 }
@@ -256,7 +357,7 @@ function LogPatient($PID){
   $Px=$Pclass -> GoFetch("WHERE patientid='". $PID ."'");
   $_SESSION['Patient']=$PID;
   $_SESSION['PName']=FullName($Px[0]);
-  $_SESSION['Px']=$Px[0];
+  $_SESSION['Px']=json_decode($Px[0]);
 }
 
 //Seperate Name in Post
@@ -283,6 +384,46 @@ function Pokeball($array,$key,$new,$Insert='Before'){
     if ($Insert=='Before'){ $Res[$y]=$x; }
   }
   return $Res;
+}
+
+
+function MakeOptions($x){
+  //Make options from list
+  //$x : ARRAY of fetched layout row
+  $Option=new GoodBoi('list_list');
+            $Options= $Option->GoFetch("WHERE cluster='". $x['field_list'] ."' AND active=1 ORDER BY list_order");
+            foreach($Options as $x){
+              $Datalist .="<option value='". $x['list_value'] .">". lan2var($x['list_name']) ."</option>";
+            }
+            return $Datalist;
+}
+
+function RefinePost($Additional=null,$Remove=null,$Base=null){
+  // Refine $_POST, or any array [Usefull for preparing data to be shoved as whole into MySQL]
+  /*
+  $Additional = [ARRAY] automated to be added (key=>automaton type)
+  $Remove = [ARRAY] data to be removed (key)
+  $Base = [ARRAY] the processes array, (Default: $_POST)
+  */
+
+  $Base = $Base? $Base : $_POST;
+
+  //-----Action!--------
+  $_POST = array_map('strip_tags', $_POST); //STRIPPING
+  $newera=$_POST;
+  
+  //-----Add additional registration input-----
+  $Who=WhoAreYou();
+  $Who=json_encode($Who);
+  $Additional= array('register_date'=>Date2SQL(),'last_mod'=>Date2SQL(),"last_mod_by"=>$_SESSION['Person']); //Aditional values to record on DB on registration
+
+  if($_GET['job']==1){ // New Patient specific additional data
+    $Additional += array("registered_by"=>$_SESSION['Person'], 'registered_at'=>$SettingCurrentFacility);
+  }
+
+  $registered=array_merge ($newera,$Additional);
+  $registered=POSTName($registered);
+  $registered=RemahRemah($registered);
 }
 
 /*
@@ -342,30 +483,44 @@ function DeFlea($a,$Identifier,$Header,$post){
 
 function ErrorDialog($Title,$Content){
   Global $lanError;
-  echo "<table class=ErrorDialog><th>$lanError - $Title</th><tr><td>$Content</td></tr></table><br>";
+  echo "<div class='w3-center w3-card w3-panel w3-red'><h3>$lanError - $Title</h3><p>$Content</p></div>";
    
 }
 
 function OkDialog($Title,$Content){
   Global $lanOK;
-  echo "<table class=OkDialog><th>$lanOK - $Title</th><tr><td>$Content</td></tr></table><br>";
+  echo "<div class='w3-center w3-card w3-panel w3-green'><h3>$lanOK - $Title</h3><p>$Content</p></div>";
    
 }
 
 function WarningDialog($Title,$Content){
   Global $lanWarning;
-  echo "<table class=WarningDialog><th>$lanWarning - $Title</th><tr><td>$Content</td></tr></table><br>";
+  echo "<div class='w3-center w3-card w3-panel w3-yellow'><h3>$lanWarning - $Title</h3><p>$Content</p></div>";
    
 }
 
-function Mark($a,$pre=null,$post=null){ //DEBUGGING TOOLS
-  echo "<br><p class=Mark><strong>$pre </strong>";
+function Mark($a,$pre='Mark',$post=null){ //DEBUGGING TOOLS
+  $SID=rand();
+  echo "<div id='$SID' class='w3-tiny w3-hover-pale-blue w3-card-4 w3-panel w3-pale-yellow w3-small mark'><h6>$pre </h6><p>";
   if(is_array($a)){
     var_dump($a);
   } else {
     echo $a ;
   }
-  echo " $post</p>";
+  echo "</p><p>$post</p></div>";
+}
+
+function MarkA($a,$pre=null,$post=null){ //DEBUGGING TOOLS
+  $Mid=rand();
+  echo "<div class='w3-card-4 '><button class='w3-button w3-block w3-left-align w3-light-green' onclick=BukaTutup('". $Mid ."')><strong>$pre </strong></button>";
+  echo "<div id='". $Mid ."' class='w3-container w3-hide w3-pale-blue'><div>";
+  if(is_array($a)){
+    var_dump($a);
+  } else {
+    echo $a ;
+  }
+  echo "</div>";
+  echo "<div> $post</div></div></div><br />";
 }
 
 function LastSQLEntry($table,$short,$number=10,$print=1){
@@ -434,7 +589,28 @@ function ZebraList($Array,$NameColumn,$Label=null,$Argument=array('Listing','Ker
   return $Zebra;
 }
 
+function AangList($array){
+  //(Array of list('Main'[main text], 'Sub'[sub text], 'Aang'[avatar pic source], 'URI'[Edit URL], 'OK' [OK URL])
+  echo "<div class='w3-panel'>
+        <ul class='w3-ul w3-card-4'>";
+  foreach($array as $y=>$x){
+    // BUtton 1
+    echo "<li id='$y' class='w3-bar w3-white w3-hover-lime'>";
+    if(!empty($x['OK'])){ echo "<span class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['OK'] ." ><i class='material-icons'>person</i></a></span>"; }
+    // Button 2
+    if(!empty($x['URI'])){ echo "<span class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['URI'] ." ><i class='material-icons'>menu</i></a></span>"; }
+      if(!empty($x['Aang'])){ echo "<img src='Media/Korra/". $x['Aang'] ."' class='w3-bar-item w3-circle w3-hide-small' style='width:85px'>"; }
+      echo "<div class='w3-bar-item'>";
+       // Click URL
+    if(!empty($x['Click'])){ echo "<a class='w3-large' href=". $x['Click'] ." >". $x['Main'] ."<br></a>"; }
 
+        
+       echo "<span>". $x['Sub'] ."</span>
+      </div>
+    </li>";
+  }
+  echo "</ul> </div>";
+}
 //---------------The Main Drawer---------------------------
 //$Draw can be array or string
 function Gardevoir($Draw){
@@ -448,7 +624,103 @@ function Gardevoir($Draw){
   }
 }
 
+// Draw Diagnosis list on patient profile/visit data
+function DXFList($Dx,$Job='view'){
+  $Ran = rand(1,1000);
+  $Dx=DxEater($Dx);
+  foreach ($Dx as $y=>$x){
+    $lid = 'Li_'. $Ran .'_' . $y;
+    $Class = $x['Susp']? 'w3-container w3-padding-small w3-hover-orange w3-text-orange w3-hover-text-white' : 'w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white';
 
+    $PSxPIList .= "<li class='$Class' onclick=BukaTutup('$lid')>";
+
+    // Drawing the displayed diagnosis laong with their attributes if exist
+   if($x['Susp']){ $PSxPIList .= 'Suspect '; }
+   if($x['dx']){ $PSxPIList .= $x['dx']; }
+   if($x['location']){ $PSxPIList .= ", ". $x['location'] ; }
+   if($x['type']){ $PSxPIList .= " <span class=connector> type </span>". $x['type']; }
+   if($x['grade']){ $PSxPIList .= " <span class=connector> grade </span>". $x['grade']; }
+   if($x['stage']){ $PSxPIList .= " <span class=connector> stage </span>". $x['stage']; }
+   if($x['causa']){ $PSxPIList .= " <span class=connector> et causa </span>". $x['causa']; }
+   if($x['Thisnote']){ $PSxPIList .= ", ". $x['Thisnote']; }
+   
+   //Close button only appear ig job is edit or reg
+   if(in_array($Job,array('edit','reg'))){
+      $PSxPIList .= "<span class='w3-right-align w3-text-red rem'> [X]<script>$('.rem').on('click', function() {
+        $(this).parent().addClass('w3-red');
+        $(this).parent().remove();
+      });</script></span>";
+    }
+
+    $PSxPIList .= '<span class="jonson" hidden="">';
+    $PSxPIList .= json_encode($x);
+    $PSxPIList .= '</span>';
+    $PSxPIList .= "<div id='$lid' class='w3-container w3-hide w3-white'>". walkthrough($x['walkthrough']) ."</div>";
+    $PSxPIList .= "</li>";
+  }
+  return $PSxPIList;
+}
+
+
+function AllergiesList($All,$Job='view'){
+  $Ran = rand(1,1000);
+  $All=UnJson($All);
+  foreach ($All as $y=>$x){
+    $lid = 'Li_'. $Ran .'_' . $y;
+    $x=UnJson($x);
+    $x=UnJson($x);
+    $Class = $x['Susp']? 'w3-container w3-padding-small w3-hover-orange w3-text-orange w3-hover-text-white' : 'w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white';
+
+    $PSxPIList .= "<li class='$Class' onclick=BukaTutup('$lid')>";
+
+    // Drawing the displayed diagnosis laong with their attributes if exist
+   if($x['Susp']){ $PSxPIList .= 'Suspect '; }
+   if($x['all']){ $PSxPIList .= $x['all']; }
+   if($x['reaction']){ $PSxPIList .= " ==> ". $x['reaction'] ; }
+   if($x['Thisnote']){ $PSxPIList .= " ,". $x['Thisnote']; }
+   
+   //Close button only appear ig job is edit or reg
+   if(in_array($Job,array('edit','reg'))){
+      $PSxPIList .= "<span class='w3-right-align w3-text-red rem'> [X]<script>$('.rem').on('click', function() {
+        $(this).parent().addClass('w3-red');
+        $(this).parent().remove();
+      });</script></span>";
+    }
+
+    $PSxPIList .= '<span class="jonson" hidden="">';
+    $PSxPIList .= json_encode($x);
+    $PSxPIList .= '</span>';
+    $PSxPIList .= "<div id='$lid' class='w3-container w3-hide w3-white'>". walkthrough($x['walkthrough']) ."</div>";
+    $PSxPIList .= "</li>";
+  }
+  return $PSxPIList;
+}
+
+//Insert articels
+//(Walktrought ID) UNDER CONSTRUCTION
+function walkthrough($WID){
+  return "[Diagnosis Info cooming soon]<br /> id is $WID";
+}
+
+// Display Age with year/month
+// ($DOB=Date of birth, $Full=Display as full year-month?)
+function AgeText($DOB,$Full=true){
+  $birthday = new DateTime($DOB);
+  $diff = $birthday->diff(new DateTime());
+  mark($diff->format('%m'),'AGE');
+  $months = $diff->format('%m') + 12 * $diff->format('%y');
+  $years = $diff->format('%y');
+  if($Full){
+    return $years ." ". $GLOBALS['lanYear'] ." ". ($months-($years*12)) ." ". $GLOBALS['lanMonth'];
+  } else {
+    if($months<=12){ 
+      return $years ." ". $GLOBALS['lanYear']; 
+    } else {
+      return $months ." ". $GLOBALS['lanMonth'];
+    }
+    
+  }
+}
 /*
 ==========================================================================================================
 
@@ -1025,13 +1297,13 @@ class GoodBoi{
   public function GoFetch ($selection,$Method="*"){ // Method to SELECT database 
     $ewe = SniffButt();
     $query="SELECT ". $Method ." FROM ". $this->table ." $selection";
-    //Debug
-    if(!empty($_SESSION['DeFlea'])){ Mark($query,__CLASS__ ." ==> ". __FUNCTION__); echo debug_backtrace()[1]['function']; }
-    //Debug
-    $result = $ewe->query($query);
    
+    $result = $ewe->query($query);
+    //Debug
+    if(!empty($_SESSION['DeFlea'])){  echo "<div class='w3-card-4 w3-purple w3-panel backtrace ' >". debug_backtrace()[1]['function'] ."</div>"; Mark($query,__CLASS__ ." ==> ". __FUNCTION__,"Error :". $ewe->error ); }
+    //Debug
     $row = $result->fetch_all(MYSQLI_ASSOC); 
-
+    if(!empty($_SESSION['DeFlea'])){  markA($row,"Returned Row(s) : ". count($row)); }
    return $row;
   }
 
@@ -1041,10 +1313,10 @@ class GoodBoi{
     $filling=array2csv($dataesc,"'",null,1);
     $sausage= "INSERT INTO ". $this->table ." (". $filling['Key'] .") VALUES (". $filling['Val'] ."); ";
     //Debug
-    DeFlea($sausage, __CLASS__ . "++++" . __FUNCTION__);
+    MarkA($sausage, __CLASS__ . "++++" . __FUNCTION__);
    //Debug
     $bun->query($sausage) ;
-    DeFlea($bun->error, "Wan! Wan! Wan!");
+    Mark($bun->error, "Wan! Wan! Wan!");
     return $bun->insert_id;
   }
   public function GoCount($a){
@@ -1070,7 +1342,7 @@ class GoodBoi{
    if ($bun->query($sausage) === TRUE) {
     return $bun->insert_id;
   } else {
-    return $bun->error;
+    mark($bun->error,"Kaing Kaing");
   }
    //Debug
 
@@ -1101,287 +1373,6 @@ class GoodBoi{
 
 
 
-/*
-
-==============================================================================================================   
-███████╗███╗   ███╗███████╗ █████╗ ██████╗  ██████╗ ██╗     ███████╗
-██╔════╝████╗ ████║██╔════╝██╔══██╗██╔══██╗██╔════╝ ██║     ██╔════╝
-███████╗██╔████╔██║█████╗  ███████║██████╔╝██║  ███╗██║     █████╗  
-╚════██║██║╚██╔╝██║██╔══╝  ██╔══██║██╔══██╗██║   ██║██║     ██╔══╝  
-███████║██║ ╚═╝ ██║███████╗██║  ██║██║  ██║╚██████╔╝███████╗███████╗
-╚══════╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
-                                                                    
-==============================================================================================================
-
-
-
-Displaying Layout
-////////////////////////////////////////////////////////////////////*/
-
-
-
-class Smeargle{
-  protected $ViewMode; //----Which viewing mode ? "view", "new" or "edit"
-  protected $Layout; //----The Form Id
-  protected $admin; //-----admin access?
-  protected $Style; //---Style CSS
-  protected $MySQL_Object; //---Class that link to layout table
-  protected $MySQL_Data; //---Class that link to Data table
-  protected $Data; //---User ID Edited
-  protected $CustomList; //---Custom list
-  protected $UserData;
-  protected $DataID;
-
-  function __Construct($form,$view,$DataID,$mysqlclass=null,$datadbclass=null,$Data=null,$adminlevel=69,$style="layout_form"){ // (Form id, Viewing Mode (Edit, View), Class that handle linking to MySQL DB if available (if leave blank, this calss will make it's own conenction), same as previous, but this link to staff_list table, Minimal User Level to access admin-only-content, css style)
-    if(!empty($_SESSION['DeFlea'])){ mark("Drawed", __CLASS__ ." ----> ". __FUNCTION__ ."   "); } //DEBUG
-    $this->DataID=$DataID;
-    $this->ViewMode=$view;
-    $this->Layout=$form;
-    $this->adminlevel=$adminlevel;
-    $this->Style=$style;
-    $this->Data= empty($_GET['dataid'])? $Data: $_GET['dataid']; //If No Specific user, get own instead
-    //Make new class to link to layout table
-    if(empty($mysqlclass)){ 
-      $mysqlclass= new GoodBoi("layout"); 
-      if(!empty($_SESSION['DeFlea'])){ mark("Linking to GoodBoi Layout"); } }
-    //Make new class to link to staff_list table
-    if(empty($datadbclass)){ 
-      $datadbclass= new GoodBoi("staff_list"); 
-      if(!empty($_SESSION['DeFlea'])){ mark("Linking to GoodBoi Layout"); } }
-    $this->MySQL_Object=$mysqlclass;
-    $this->MySQL_Data=$datadbclass;
-    if($_SESSION['ULevel']>=$adminlevel){ $this->admin=" || field_visible_admin !=0"; } //If admin level is high enough, grant admin 
-  }
-
-  // Function for drawing: Work by putting the HTML code to a variable $Draw, and append ne HTML code to the variable each time it make new code, an then returned it as return, so it can be echoed with the caller to really draw the form (Use $Resultstring=str_replace('$lan',"$lan",$Resultstring) to convert all the 'turned to string' $lan... to proper variable $lan...)
-  function DrawForm($Button=null,$method="POST"){
-    //Button is array (Submit Edit,Cancel,Edit,Submit New)
-   
-    //Debug
-    if(!empty($_SESSION['DeFlea'])){ mark("Drawed", __CLASS__ ." ----> ". __FUNCTION__ ."   "); }
-   
-    $URI = GetGET();
-    //Draw form opening ( <form> and <table>)
-    $Draw['pre'] = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method class=". $this->Style ." enctype=multipart/form-data id=". $this->Layout . "><div class=". $this->Style .">"; 
-    
-    //---Draw form
-   $Draw['grouping']= $this->Grouping(); //  Go to function Grouping to draw each group
-   
-   //Setting default values of buttons depending on languages
-   global $lanSubmit;
-   global $lanEdit;
-   global $lanReset;
-   if(empty($Button[0])){ $Button[0]=$lanSubmit;}
-   if(empty($Button[1])){ $Button[1]=$lanReset;}
-   if(empty($Button[2])){ $Button[2]=$lanEdit;}
-   if(empty($Button[3])){ $Button[3]=$lanSubmit;}
-   //Drawing button for each viewing type
-   switch ($this->ViewMode){
-     case "new":
-      $Draw['post']= "<br/><input type=Submit value=$Button[0]></input> <input type=reset value=$Button[1]></input>";
-      break;
-    case "edit":
-    $Draw['post']= "<br/>
-                        <input type=hidden name=". $this->DataID ." value=". $this->UserData[$this->DataID] .">
-                        <input type=Submit value=$Button[2]></input> <input type=reset value=$Button[1]></input>"; 
-      break;
-    case "view":
-    $Draw['post']= "<br/><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=4>$lanEdit</a>";
-      break;
-   }
-
-   //Draw closur </table> and </form>"
-   $Draw['post'] .= "</div></form>";
-   return $Draw;
-  }
-
-  function Grouping($style="layout_group"){
-    // Fetching DB from layout table
-    $Group=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' ORDER BY group_order",'DISTINCT group_order, group_cap');
-    
-
-
-    //==================Drawing GROUPING============
-    foreach($Group as $g){
-      $Draw[$g['group_cap'] .'_pre'] = "<br/><fieldset id=". $g['group_cap'] ." class=$style>";
-        $Draw[$g['group_cap'] .'_fielding'] =  $this->Fielding($g['group_cap']); //Go to Fielding function to draw field
-      $Draw[$g['group_cap'] .'_post'] = "</fieldset>";
-    }
-    return $Draw;
-  }
-
-  //==================Drawing FIELDING TRIAGE============
-  function Fielding($Group){
-    $View="field_visible_". $this->ViewMode;
-    $Field=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' AND group_cap='". $Group ."' AND ($View <> 0 $admin) ORDER BY field_order"); // Fetching from MySQL, the field with the same Group ID which is visible
-
-    switch($this->ViewMode){
-      case "edit":
-        $UserData=$this->MySQL_Data-> GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'" );
-        $this->UserData=$UserData[0];
-      case "new":
-        $Draw=$this->NewFielding($Field,$Group);
-        break;
-      case "view":
-        $Draw=$this->ViewFielding($Field,$Group);
-        break;
-    }
-    return $Draw;
-  }
-
-  //==================Drawing NEW FIELDING============
-  // Draw field if viewing mode is Edit or New
-  function NewFielding($Field,$Group){
-    
-    //Make connection to list_list/custom list table for use latter
-    $List=new GoodBoi("list_list");
-    //custom list
-    $Custom_List_Class=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' AND (field_list_table IS NOT NULL OR field_list_table <> 0)",'DISTINCT field_list_table');
-    $this->CustomList=array();
-    foreach($Custom_List_Class as $x){
-      if(!empty($x['field_list_table'])){
-        array_push($this->CustomList,$x['field_list_table']);
-      }
-    }
-
-
-    foreach($Field as $F){ // Script for each found filed
-      
-      // Assign attributes
-      $Hidden= strpos($F['field_id'], 'hidden_') !== false? "hidden" : "";
-      $F['field_id']=str_replace("hidden_","",$F['field_id']);
-      $minlength= empty($F['field_minlength']) ? "" : "minlength=". $F['field_minlength'] ;
-			$placeholder= empty($F['field_placeholder'] ) ? "" : "placeholder='". lan2var($F['field_placeholder'])  ."'";
-      $validator= empty($F['field_validation'] ) ? "" : "pattern='". $F['field_validation'] ."'" ;
-      $required= empty($F['required'] ) ? "" : "required" ;
-      $GLOBALS['SideHelper'] = empty($F['field_side'] ) ? "" : lan2var($F['field_side'])  ;
-      $Width= empty($F['field_col'])? "18" : $F['field_col'];
-      $Height= empty($F['field_row'])? "1" : $F['field_row'];
-      $Label= empty($F['field_label'])? " " : "<label for=". $F['field_id'] .">". lan2var($F['field_label']) ."</label> : ";
-      
-
-      $Tooltip= empty($F['field_tooltip'])? "" : "<span class=tooltiptext id=tip_". $F['field_id'] .">". lan2var($F['field_tooltip']) ."</span>
-      <script>
-        $('#".  $F['field_id'] ."').focus(function(){
-          $('#tip_". $F['field_id'] ."').css('visibility', 'visible')
-        });
-        $('#".  $F['field_id'] ."').blur(function(){
-          $('#tip_". $F['field_id'] ."').css('visibility', 'hidden')
-        });
-      </script>  ";
-
-      $LineBreak= empty($F['field_seperator'])? "<br/>" : $F['field_seperator'];
-
-      switch($this->ViewMode){
-        case "new":
-          $defaultvalue = empty($F['field_default']) ? "" : "value=". $F['field_default'] ;
-          break;
-        case "edit":
-          $defaultvalue = empty($this->UserData[$F['field_id']]) ? "" : "value=". $this->UserData[$F['field_id']] ;
-          break;
-      }
-     
-      switch($F['field_type']){
-        case "select":
-        case "datalist":
-          if(in_array($F['field_list_table'],$this->CustomList)){ 
-            $ListX=new GoodBoi($F['field_list_table']); 
-            $CustomDBVal=$F['field_list_value']; 
-            $CustomDBOpt=$F['field_list_option']; 
-            $CustomOrder=$F['field_order_by']; 
-            $CustomDBWhr=$F['field_custom_where'];
-            $Options=DrawOption($F['field_list'],$ListX, $CustomOrder, $CustomDBVal, $CustomDBOpt, $CustomDBWhr);
-            unset($CustomDBOpt,$CustomDBVal,$CustomDBWhr,$CustomOrder);
-          } else {
-            $Options=DrawOption($F['field_list'],$List);
-          }
-        }
-      
-       
-      // Determining input type, and how to draw them
-      //function DrawOption($cluster,$ListDB=null,$orderby="ASC",$CustomDBVal=null,$CustomDBOpt=null,$CustomDBWhr=null){
-      switch($F['field_type']){
-        case "select":
-          $Input="select";
-          $Close="select";
-          $InputContent = $Options;
-          break;
-        case "datalist":
-          $Input="input size=$Width $d list=". $F['field_list'];
-          $Close="input";
-          $InputContent = "<datalist id=". $F['field_list'] .">". $Options ."</datalist>";
-          break;
-        case "auto":
-          $Input="input value='". AutoField($F['field_id']) ."' type=hidden $placeholder $minlength ";
-          $Close="input";
-          break;
-        case "password":
-          $Input="input size=$Width type=password ";
-          $Close="input";
-          if($this->ViewMode=="edit"){
-            $Pre= "<br>". $GLOBALS['lanOldPass']. "<input type=password id=oldpsw name=Exc-". $F['field_id'] . "Old></input>" ;
-          }
-          $Additional="<br><label for=psw2>". $GLOBALS['lanConfirmPass'] ."</label> : <input id=psw2 type=password require name=Exc-".  $F['field_id'] ."Conf></input>
-          <div id=GEMRPidgey hidden>". $GLOBALS['lanPsMissmatched'] ."</div><script>$('#psw2').keyup(ConfirmPassword)</script>";
-          break;
-        case 'textarea':
-          $Input="textarea $defaultvalue $placeholder $minlength ";
-          $Close="textarea";
-          break;
-        default:
-          $Input="input type=". $F['field_type'] ." size=$Width $defaultvalue $placeholder $minlength";
-          $Close="input";
-          break;
-      }
-
-      //If ciled label contain $lan, get that into variable
-      $F['field_label'] = lan2var($F['field_label']);
-     
-
-      //The main drawing script
-      if(empty($Draw)){ $Draw[$F['field_id']]= "<legend>". lan2var($Group) ."</legend>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
-      
-      $Draw[$F['field_id']] .= "$LineBreak $Pre
-                          $Label
-                          <$Input name=".  $F['field_id'] ." id=".  $F['field_id'] ."$required $Hidden>
-                            $InputContent
-                          </$Close> 
-                          <span id=side_". $F['field_id'] .">".  $GLOBALS['SideHelper'] ."</span> $Tooltip  
-                      $Additional
-                      "; // Input
-                      unset($InputContent);
-                      unset($Additional);
-                      unset($Pre);
-                      unset($GLOBALS['SideHelper']);
-                    }
-                    
-                    return $Draw;
-                    
-  }
-
-    //==================Drawing VIEW FIELDING============
-  // Draw field if viewing mode is View
-  function ViewFielding($Field,$Group){
-    $Staff=$this->MySQL_Data->GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'");
-    foreach($Field as $F){ // Script for each found filed
-      
-      //Check if content is an Array
-        $FLabel=deserialization(lan2var($Staff[0][$F['field_id']]),1,array(":"));
-      
-
-      if(empty($Draw)){ $Draw[$F['field_id']]= "<tr><th colspan=2>". lan2var($Group) ."</th></tr>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
-      $Draw[$F['field_id']] .= "<tr>
-                        <td>
-                          ". lan2var($F['field_label']) ."
-                        </td>
-                        <td>
-                          ". $FLabel ."
-                        </td>
-                      </tr>"; // Input
-    }
-    return $Draw;
-  }
-}
 
 /*
   ===============================================================================================
@@ -1445,7 +1436,7 @@ class Smeargle{
       // ERROR 1 CHECK!! 
       //Check if there are Empty value on required field
       $this->Error1 = array();
-      $Required=$this->MyClass->GoFetch("WHERE form_id = '". $this->FormId ."' AND required <> 0","field_id, field_label");
+      $Required=$this->MyClass->GoFetch("WHERE form_id = '". $this->FormId ."' AND field_attrib LIKE '%\"required\":\"true\"%'","field_id, field_label");
       foreach($Required as $y){
         $field=$y['field_id'];
         if(empty($GLOBALS['newera'][$field])){
@@ -1475,7 +1466,7 @@ class Smeargle{
       // ERROR 3 CHECK!!
       //Validation chaarcter check
       $this->Error3=array();
-      $Validation=$this->MyClass->GoFetch("WHERE form_id = 'gita_login_signup' ","field_id, field_label, field_type, field_validation");
+      $Validation=$this->MyClass->GoFetch("WHERE form_id = 'gita_login_signup' ","field_id, field_label, field_type, field_attrib");
       foreach($Validation as $x){ // For each submited field, check what field type, and validate appropriatly
         $Filed2Validate=$GLOBALS['newera'][$x['field_id']];
         switch($x['field_type']){
@@ -1486,6 +1477,8 @@ class Smeargle{
             } 
             break;
           case "text":
+            $x['field_attrib'] = UnJson($x['field_attrib']);
+            $x['field_validation'] = $x['field_attrib']['pattern'];
             if(empty($x['field_validation'])) { continue; }
             if(!ValidateField($Filed2Validate,"/^". $x['field_validation'] ."*$/")){
               $InvField2Push=array($x['field_label']=>$Filed2Validate) ;
@@ -1755,14 +1748,19 @@ class Snorlax{
   protected $LaxIncense; // ARRAY of additional data to be insterted into the NEW entry of subversion
   protected $OldData; // ARRAY contain the old data from original DB
   protected $NewData; // ARRAY contain the the submited data that different with the old data
-  public $listfield;
+  public $listfield; // ARRAY of field that not datalist type, but should be treated as datalist
    
   function __Construct($DataID,$OriTab,$Data,$listfield=null,$Method='Edit',$TargetClass=null){
-    //Data ID (e.g. usrid for staff_list), Original Tab (e.g. staff_list), additional $_POST[x] that contain datalist but didn't exist in 'Layout' table, Meyhod (New, Edit), Submited Data in array as column=>value, Class ro connect to target
-
-    DeFlea("SNORLAX");  //========================== DEBUG===========================
+    /*
+    $DataID : Target Table's ID column (e.g. usrid for staff_list)
+    $OriTab : Target Table name (e.g. staff_list)
+    $Data : ARRAY of submited Data as (column=>value)
+    $Method : (New, Edit), Submited Data in array as column=>value
+    $TargetClass : Object GoodBoi to target table
+    */
+    
    $this->GoodBoi_Version = new GoodBoi("snorlax"); // Connect to snorlax DB
-   if(empty($TargetClass)){ $this->GoodBoi_Target = new GoodBoi($Target);  } else {$this->GoodBoi_Target=$TargetClass;  } //connect to target DB
+   if(empty($TargetClass)){ $this->GoodBoi_Target = new GoodBoi($OriTab);  } else {$this->GoodBoi_Target=$TargetClass;  } //connect to target DB
    $CulpirtInfo = json_encode(WhosKnock());
    $Culpirt = empty($_SESSION['Person'])? 0 : $_SESSION['Person'] ;
    $this->listfield = $listfield;
@@ -1770,6 +1768,7 @@ class Snorlax{
    $this->TargetTab = $OriTab;   
    $this->LaxIncense = array('timest'=>Date2SQL(),'culpirt'=>$Culpirt, 'culpirt_info'=>$CulpirtInfo, 'facility'=>$GLOBALS['SettingCurrentFacility'],'original_table'=>$OriTab, 'edited_id'=>$Data[$DataID]);
    $this->Data = $Data;
+   Mark($Method,"SNORLAX");  //========================== DEBUG===========================
    switch ($Method){
      case 'Edit':
       $this->EVs();
@@ -1781,7 +1780,7 @@ class Snorlax{
   }
 
   function EVs(){
-    DeFlea("SNORLAX EV"); //========================== DEBUG===========================
+    Mark("SNORLAX EV"); //========================== DEBUG===========================
     //[1]
     $ColumnList=$this->DayCareCouple();
     mark($ColumnList, __FUNCTION__ . "Column List "); //==================================DEBUG=======================
@@ -1802,7 +1801,7 @@ class Snorlax{
   }
 
   function IVs(){
-    DeFlea("SNORLAX IV"); //========================== DEBUG===========================
+    Mark("SNORLAX IV"); //========================== DEBUG===========================
     /*
     FLOW
     1. Add version=>1 to submited data, insert into target table
@@ -1810,8 +1809,13 @@ class Snorlax{
     
     */
      //[1]
-     $Insert = $this->Data + array('sversion'=>1);
-     $Pokeball=$this->GoodBoi_Target->GoBark($Insert);
+     $Insert = $this->Data + array('sversion'=>1); // Detect new row's ID: Is the ID supplied in the data? (Key of 'Target ID' exist in the supplied array), if yes, use that. If No, get the data automatically
+     if(array_key_exists($this->TargetID,$this->Data)){
+      $this->GoodBoi_Target->GoBark($Insert);
+      $Pokeball= $this->Data[$this->TargetID] ;
+     } else {
+      $Pokeball= $this->GoodBoi_Target->GoBark($Insert); 
+      }
      $GLOBALS['NewDex']=$Pokeball;
     //[2]
     $DataOne=array();
@@ -1959,12 +1963,48 @@ class Listing{
     }
    
     $this->Query=$GoodBoi->GoFetch($Where,$ColumnListed);
+    Gardevoir($this->SearchList());
     $this->DrawList();
   }
 
   function DrawList(){
-    $URI = GetGET();
-    $Draw=ZebraList($this->Query,$this->NameColumn,$this->Header,array(6=>$this->TID,5=>$URI));
+    $EURI=$_GET;
+    $EURI['job']=3;
+    $EURI = GetGET($EURI);
+    $CURI=$_GET;
+    $CURI['job']=4;
+    $CURI = GetGET($CURI);
+    foreach($this->Query as $x){
+      $y=$x[$this->TID];
+      $yoyo[$y]['Main']=FullName($x);
+      $yoyo[$y]['Sub']=$x['patientid'] ." ". lan2var($x['sex']);
+      $yoyo[$y]['URI']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$EURI" . "dataid=". $x[$this->TID];
+      $yoyo[$y]['Click']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$CURI" . "dataid=". $x[$this->TID];
+      $yoyo[$y]['OK']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=". $x[$this->TID];
+      //Menyamakan persepsi antara tabel pasien dan staff (Beda nama kolom)
+      if($x['Aang']) { $x['photo'] = $x['Aang']; }
+      if($x['Sex']) { $x['sex'] = $x['Sex']; }
+
+      if(empty($x['photo'])){
+        switch ($x['sex']){
+          case '$lanMale':
+          $yoyo[$y]['Aang']='def_male.png';
+          break;
+          case '$lanFemale':
+          $yoyo[$y]['Aang']='def_female.png';
+          break;
+          case '$lanAlien':
+          $yoyo[$y]['Aang']='def_alien.png';
+          break;
+          case '$lanUnidentified':
+          $yoyo[$y]['Aang']='def_unknown.png';
+          break;
+        }
+      }
+      
+    }
+    //$Draw=ZebraList($this->Query,$this->NameColumn,$this->Header,array(6=>$this->TID,5=>$URI));
+    $Draw = AangList($yoyo,$URI);
     $this->Gardevoir=$Draw;
     if(Empty($this->Query)){
       echo $GLOBALS['lanNoResult'];
@@ -1976,7 +2016,7 @@ class Listing{
       //Draw search form
       $URI = GetGET();
       
-      $Form= "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
+      $Form= "<div class='w3-card w3-white'><h3 class='w3-lime w3-container'>". $GLOBALS['lanSearch'] ."</h3><div class='w3-panel '><form  action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
       unset($_GET['listcrit']);
       unset($_GET['listcolumn']);
       $Form .= "<input name=listcrit type=search list=search>";
@@ -1997,7 +2037,7 @@ class Listing{
       }
       $Form .= "</datalist>";
 
-      $Form .= "<select name=listcolumn >";
+      $Form .= "<div class='w3-right'><select name=listcolumn >";
       $Form .= "<option value=ALL selected>". $GLOBALS['lanAll'] ."</option>";
 
       // Making the search column list
@@ -2011,14 +2051,14 @@ class Listing{
       foreach ($_GET as $y=>$x){
         $Form .= "<input type=hidden name=$y value=$x>";
       }
-      $Form .= "<input type=submit value=". $GLOBALS['lanSearch'] ."></input>";
-      $Form .= "</form>";
+      $Form .= " <input class='w3-button w3-blue' type=submit value=". $GLOBALS['lanSearch'] ."></input></div>";
+      $Form .= "</form></div></div>";
       return $Form;
      }
     }
 
     function Gardevoir(){
-      Gardevoir($this->SearchList());
+      
       Gardevoir($this->Gardevoir);
     }
 }
@@ -2055,28 +2095,28 @@ class AddList{
 
   function CekIfNew($ListID,$Cluster){
     $List=$this->List->GoCount("WHERE cluster='". $Cluster ."' AND list_value='". $ListID ."'");
-    mark($List,"LIST ");
     if($List == 0 ){ mark("NEW LIST"); return TRUE; } else { mark("OLD LIST"); return FALSE; }
   }
 
   function InsertList(){
-    $Layout=$this->Layout->GoFetch("WHERE field_type='datalist' && field_list_table IS NULL", "field_id, field_list");
-    $Layout =array_merge($Layout,$this->Additional);
+    $Layout=$this->Layout->GoFetch("WHERE field_type='datalist' && field_list_table IS NULL");
+    if($this->Additional){ $Layout =array_merge($Layout,$this->Additional); }
     $Lay=array(); //Lay is array (field_id => field_list) of those field type datalist
     //Make $Lay
     foreach($Layout as $x){
       $Lay += array($x['field_id']=>$x['field_list']);
     }
-    DeFlea($Lay, "Lay");
 
     foreach($this->Data as $y=>$x){
       if(array_key_exists($y,$Lay)){
         $x= UnJson($x);
         $x= is_array($x)? $x : array($x);
-        if($this->CekIfNew($x,$Lay[$y]) === TRUE && !empty($x)){
-          $Kue=$this->MakeQuery($x,$Lay[$y]);
-          DeFlea($Kue, "Kue ");
-          $this->List->GoBark($Kue);
+        foreach($x as $xx){
+          if($this->CekIfNew($xx,$Lay[$y]) === TRUE && !empty($xx)){
+            $Kue=$this->MakeQuery($xx,$Lay[$y]);
+            DeFlea($Kue, "Kue ");
+            $this->List->GoBark($Kue);
+          }
         }
       }
     }
@@ -2085,11 +2125,650 @@ class AddList{
   function MakeQuery($Data,$Cluster){
     $Ord=$this->List->GoCount("WHERE cluster='". $Cluster ."'");
     $Que=array('cluster'=>$Cluster,'list_name'=>$Data,'list_value'=>$Data,'active'=>1,'list_order'=>$Ord+1,'creator'=>$_SESSION['Person']);
-    $BARK= new Snorlax ('id','com_list_list',$Que,'New',$this->List);
+    $BARK= new Snorlax ('id','com_list_list',$Que,null,'New',$this->List);
     return $Que;
 
   }
 }
+
+/*
+
+==============================================================================================================   
+███████╗███╗   ███╗███████╗ █████╗ ██████╗  ██████╗ ██╗     ███████╗
+██╔════╝████╗ ████║██╔════╝██╔══██╗██╔══██╗██╔════╝ ██║     ██╔════╝
+███████╗██╔████╔██║█████╗  ███████║██████╔╝██║  ███╗██║     █████╗  
+╚════██║██║╚██╔╝██║██╔══╝  ██╔══██║██╔══██╗██║   ██║██║     ██╔══╝  
+███████║██║ ╚═╝ ██║███████╗██║  ██║██║  ██║╚██████╔╝███████╗███████╗
+╚══════╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
+                                                                    
+==============================================================================================================
+
+
+
+Displaying Layout
+////////////////////////////////////////////////////////////////////
+
+
+
+Class for drawing form utilizing the 'layout' table.
+To use: Declare the object, then use object->start() to return array contain the drawed list, which can be drawn using 'Gardevoir' function [ Gardevoir(object) ]
+
+Arguments:
+
+($FormID,$Job,$Arguments)
+
+>> $FormID = The form's id (column 'form_id' in Layout table)
+>> $Job = what job currenty is ('reg','view','edit')
+===========Arguments ARRAY=================
+>> Reg = [ARRAY] class for the 'reg' job (element:class) : see element list [Default=Setting]
+>> View = [ARRAY] class for the 'view' job (element:class) : see element list [Default=Setting]
+>> Edit = [ARRAY] class for the 'edit' job (element:class) : see element list [Default=Setting]
+>>FHeader = Form Header
+>>DataID = Which row to show on 'view' and 'edit' [Default=$_GET['dataid'] ]
+>>Button = Array of Button
+>>DataTable = MySQL Table to be used for data in edit/view mode
+>>DataKey = The column thet contain key column of DataTable
+>>DataID = The Row ID of the DataTable (Default is supplied from $_GET['dataid'])
+>>Hide = [TRUE/FALSE] Hide the form (nested by groups, can be shown by clicking each group's header) except for the first group? (Default is TRUE)
+>> Auto = Auto Run the process on construct [Default=True]
+===========Arguments=================
+>>$SuppliedData = ARRAY (field_id:value) to be assigned in edit/view if no table and parameters supplied
+
+Element List:
+-FormDiv
+-FormHeader
+-Form
+-GroupDiv
+-GroupHeader
+-GroupContainerDiv
+-InputDiv
+-Input
+-Select
+-datalist
+-InputLabel
+-Tooltip
+-SideLabel
+-SubmitButton
+-ResetButton
+-EditButton
+
+Flow
+1. Prepare the DB and Draw the main form pre and post
+2. Draw group
+3. Draw each field
+    -Set attribute
+    -Set label
+    -Draw the field
+*/
+
+
+class Smeargle{
+  protected $FormID,$Job,$ContentTable,$ContentTableID,$Class,$FHeader,$Layout,$Data,$SuppliedData,$FormHide;
+
+  function __Construct($FormID,$Job,$Arguments=null,$SuppliedData=null){
+    $CReg = Empty($Arguments['Reg'])? $GLOBALS['SettingDefaultSmeargleRegClass'] : $Arguments['Reg'] ;
+    $CView = Empty($Arguments['View'])? $GLOBALS['SettingDefaultSmeargleViewClass'] : $Arguments['View'] ;
+    $CEdit = Empty($Arguments['Edit'])? $GLOBALS['SettingDefaultSmeargleEditClass'] : $Arguments['Edit'] ;
+    $Auto = Empty($Arguments['Auto'])? True : $Arguments['Auto'] ;
+    $this->FormHide = $Arguments['Hide']? $Arguments['Hide'] : TRUE ; 
+
+    $this->DataID = Empty($Arguments['DataID'])? $_GET['dataid'] : $Arguments['DataID'] ;
+
+    $this->FormID = $FormID;
+    $this->Job = $Job;
+    $this->FHeader = $Arguments['FHeader'];
+    $this->ContentTable = $ContentTable;
+    $this->ContentTableID = $ContentTableID;
+  
+    // Fetching the content data on edit and view job
+    switch ($Job){
+      case 'edit':
+      case 'view':
+      // If Arguments DataTable, DataKey, DataID given, use that to fetch data, otherwise, use $SuppliedData
+      if (empty($Arguments['DataTable'] . $Arguments['DataKey'])){
+        $this->SuppliedData=$SuppliedData;
+      } else {
+        $DataSup = new GoodBoi($Arguments['DataTable']);
+        $DataRow= $Arguments['DataID']? $Arguments['DataID'] : $_GET['dataid']; // If Arguments['DataID'] is empty, use default instead (which is $_GET['dataid'])
+        $this->SuppliedData = $DataSup->GoFetch("WHERE ". $Arguments['DataKey'] ."='". $DataRow ."'");
+      }
+     
+        break;
+    }
+    
+   
+
+    // Decided class based on Job
+    switch ($Job){
+      case ('reg'):
+        $this->Class=$CReg;
+        break;
+      case ('view'):
+        $this->Class= empty($CView)? $CReg : $CView ;
+        break;
+      case ('edit'):
+        $this->Class= $CEdit? $CEdit : $CReg ;
+        break;
+    }
+
+  
+
+
+    // Auto Run if $Auto is true
+    // if ($Auto){ $Draw = $this->Start(); }
+  }  
+
+
+  //Start the draw
+  function Start(){
+    $this->Layout = new GoodBoi("layout");
+    $this->Data = new GoodBoi($this->ContentTable);
+    $Group=$this->Layout->GoFetch("WHERE form_id='". $this->FormID ."' ORDER BY group_order","DISTINCT group_cap, group_order");
+
+      // Pre
+      $URI=GetGET();
+    $Draw['Pre'] = "<div  class='". $this->Class['FormDiv'] ."'>
+                    <h3 class='". $this->Class['FormHeader'] ."'>". $this->FHeader ."</h3>
+                    <form id='". $this->FormID ."' class='". $this->Class['Form'] ."' action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='POST' enctype=multipart/form-data >";
+
+      // Grouping
+    foreach($Group as $x){
+      $Draw['Group_'.$x['group_cap']] = $this-> Grouping($x['group_cap']);
+    }
+
+    //Post
+    $Mod =$_GET['mod']; // Get current mod for edit button
+    $Button['Submit']="<input type=submit class='w3-button w3-blue ' value=". $GLOBALS['lanSubmit'] .">";
+    $Button['Reset']="<button type=reset class='w3-button w3-blue '>". $GLOBALS['lanReset'] ."</button>";
+    $Button['Edit']="<a  href='". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=$Mod&job=3&dataid=".$this->DataID."' link class='w3-button w3-blue '>". $GLOBALS['lanEdit'] ."</a>";
+      //Button
+        $ButtonSet="<div class='w3-row'>";
+        switch($this->Job){
+          case 'reg':
+          case 'edit':
+            $ButtonSet.= "<div class='w3-col m6 w3-center'>". $Button['Submit'] ."</div>" ;
+            $ButtonSet.= "<div class='w3-col m6 w3-center'>". $Button['Reset'] ."</div>" ;
+            break;
+          case 'view':
+            $ButtonSet.= "<div class='w3-col m12 w3-center'>". $Button['Edit'] ."</div>" ;
+            break;
+        }
+        $ButtonSet.="</div>";
+
+    $Draw['Post'] = "$ButtonSet</form></div>";
+    
+    return $Draw;
+  }
+  
+  //Decided what method to drew the fields
+  function Grouping($Group){
+    switch ($this->Job){
+      case 'reg':
+      case 'edit':
+        return $this->RegEdit($Group);
+        break;
+      case 'view':
+      return $this->View($Group);
+        break;
+    }
+
+  }
+
+  //Draw the field
+  function RegEdit($Group){
+    //Fetch Fields from each group
+    $Fields = $this->Layout->GoFetch("WHERE form_id='". $this->FormID ."' AND group_cap='$Group' ORDER BY field_order");
+
+    //Draw Group Header
+
+    if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
+    $this->HideGroup = TRUE;
+
+    $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('". $Group ."')>". lan2var($Group) ."</h4><div id='$Group' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
+
+    //Process each Fields
+    foreach($Fields as $x){
+
+      //Check for available display options ($DpOpt)
+      $DpOpt=UnJson($x['field_options']);
+      if($DpOpt['DivClass']){ $DivClass=$DpOpt['DivClass']; unset($FieldDivClosue); }
+      /*
+        // w3row : Make a div w3-row class that can be used to clumps together several field into single line.
+        //It work by changing $Display to 'w3row', therefore, in drawing process in latter part of this function, it will skip the usual <div> and </div> drawing, instead, it will draw <div class='w3-row'> on field with w3row=start and draw div closur at w3row=end, also, it make $DisplaySpecificClass into 'w3-col 3' which will be inserted at the end of the field
+        if($DpOpt['w3row']){ 
+          switch ($DpOpt['w3row']){
+            // Check if it is first field of the groups(w3row=start), if yes, make a div with w3-row class
+            case 'start': 
+              $Draw[$x['field_id']] = "<div class='w3-row'>";
+              break;
+              // Check if it is last field of the groups(w3row=end), if yes, make a div closure
+            case 'end':
+              $FieldDivClosue= "</div>";
+              break;
+          }
+            $Display = 'w3row';
+            $DisplaySpecificClass='w3-col 3';
+        } else { unset($Display); }
+        */
+        
+
+
+      $Visible=UnJson($x['field_permission']);
+      
+      if($Visible[$this->Job]<1){ continue; } // If supposed to be not vissible, stop and skip to the next field
+
+      //Assign attributs
+      foreach(UnJson($x['field_attrib']) as $b=>$a){
+        $Attribs= " $b='$a' ";
+      }
+
+      //Assign value
+      $FieldValue= $this->SuppliedData[0][$x['field_id']];
+
+      //Tooltips
+      $tooltip = $x['field_tooltip']? "<span class='". $this->Class['Tooltip'] ."' id=tip_". $x['field_id'] .">". lan2var($x['field_tooltip']) ."</span><script>
+      $('#".  $x['field_id'] ."').focus(function(){
+        $('#tip_". $x['field_id'] ."').css('visibility', 'visible')
+      });
+      $('#".  $x['field_id'] ."').blur(function(){
+        $('#tip_". $x['field_id'] ."').css('visibility', 'hidden')
+      });
+    </script>  " : "" ;
+
+      //Input type
+      switch($x['field_type']){
+        case 'select':
+          $Input="select";
+          $Additional = DrawOption($x,array('default'=>$this->SuppliedData[0][$x['field_id']]));  
+          $Additional .="</select>";
+          $InputSpecificClass = $this->Class['input_select'];
+          break;
+        case "password":
+          $Input="input type=password ";
+          if($this->Job=="edit"){
+            $Pre= "<br>". $GLOBALS['lanOldPass']. "<input type=password id=oldpsw name=Exc-". $x['field_id'] . "Old></input>" ;
+          }
+          $Additional="<label for=psw2>". $GLOBALS['lanConfirmPass'] ."</label> : <input id=psw2 type=password require name=Exc-".  $x['field_id'] ."Conf>
+          <div id=GEMRPidgey hidden>". $GLOBALS['lanPsMissmatched'] ."</div><script>$('#psw2').keyup(ConfirmPassword)</script>";
+          break;
+        case 'textarea':
+          $Input="textarea ";
+          $Additional="</textarea>";
+          break;
+        case 'auto':
+          $autoval = AutoField($x['field_id']);
+          $Input = "input type='hidden' value='". $autoval['val'] ."'";
+          $InputSpecificClass = $this->Class['input_'. $x['field_type']];
+          $Additional = "<span id='auto_". $x['field_id'] ."' class='". $this->Class['Input'] ." $InputSpecificClass ". $x['field_class'] ."'>". $autoval['text'] ."</span>";
+          break;
+        default:
+          $Input = "input type='". $x['field_type'] ."'";
+          $InputSpecificClass = $this->Class['input_'. $x['field_type']];
+          if($x['field_type']=='datalist'){
+            $Input .=" list='list_". $x['field_id'] ."'";
+            $Additional = "<datalist id='list_". $x['field_id'] ."'>";
+            $Additional .= DrawOption($x);  
+            $Additional .="</datalist>";
+            
+          }
+          if($this->Job=='edit'){
+            $Attribs .= " value='". lan2var($FieldValue) ."'"; // Add value to attribs if in edit mode
+           }
+          break;
+      }
+
+      //Main drawer
+
+
+          $Draw[$x['field_id']] .= "<div class='". $this->Class['inputdiv'] ."  $DivClass'>";
+          
+          
+          if(!empty($x['field_label'])){ 
+          $Draw[$x['field_id']] .= "<label for='". $x['field_id'] ."' class='". $this->Class['InputLabel'] ."'>". lan2var($x['field_label']) ."</label>"; // Label
+          }
+
+
+          $Draw[$x['field_id']].= "<$Input name='". $x['field_id'] ."' id='". $x['field_id'] ."' class='". $this->Class['Input'] ." $InputSpecificClass ". $x['field_class'] ."' $Attribs >$Additional"; // Draw input and additional
+
+          $Draw[$x['field_id']].= $tooltip; //Tooltip
+
+          $Draw[$x['field_id']] .="<span id='side_". $x['field_id'] ."' class='". $this->Class['SideLabel'] ."'>". lan2var($x['field_side']) ."</span>"; // Side Label
+
+          $Draw[$x['field_id']].= "</div>";
+
+    
+
+
+          
+          
+      //Unset Var
+      unset($Additional);
+      unset($Attribs);
+      unset($InputSpecificClass);
+      unset($DivClass);
+    }
+
+    
+
+    //Draw Group Footer
+    $Draw['Footer']= "</div></div>";
+    if($Fields){ return $Draw; } //return only if there is field visible in a group, otherwise, dont'return (empty)
+    
+  }
+
+
+  function View($Group){
+    
+
+        //Fetch Fields from each group
+        $Fields = $this->Layout->GoFetch("WHERE form_id='". $this->FormID ."' AND group_cap='$Group' ORDER BY field_order");
+
+        //Draw Group Header
+        if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
+          $this->HideGroup = TRUE;
+
+          $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('". $Group ."')>". lan2var($Group) ."</h4><div id='$Group' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
+
+        //Process each Fields
+        foreach($Fields as $x){
+
+          //Visibility
+          $Visible=UnJson($x['field_permission']);
+          if($Visible[$this->Job]<1){ continue; } // If supposed to be not vissible, stop and skip to the next field
+
+
+          //Main drawer
+          $Draw[$x['field_id']] = "<div class='". $this->Class['Datadiv'] ."'>";
+
+          if(!empty($x['field_label'])){ 
+            $Draw[$x['field_id']] .= "<span class='". $this->Class['DataLabel'] ."'>". lan2var($x['field_label']) ."</span> : "; // Label
+          }
+
+          $Draw[$x['field_id']].= "<span id='". $x['field_id'] ."' class='". $this->Class['Data'] ." $InputSpecificClass ". $x['field_class'] ."'>". lan2var($this->SuppliedData[0][$x['field_id']]) ."</span>"; // Draw input and additional
+
+          $Draw[$x['field_id']].= "</div>";
+
+          //Unset Var
+          unset($InputSpecificClass);
+        }
+
+        
+    //Draw Group Footer
+    $Draw['Footer']= "</div></div>";
+    if($Fields){ return $Draw; } //return only if there is field visible in a group, otherwise, dont'return (empty)
+    }
+  
+}
+
+/*
+
+================== OLD SMEARGLE========================
+
+class Smeargle{
+  protected $ViewMode; //----Which viewing mode ? "view", "new" or "edit"
+  protected $Layout; //----The Form Id
+  protected $admin; //-----admin access?
+  protected $Style; //---Style CSS
+  protected $MySQL_Object; //---Class that link to layout table
+  protected $MySQL_Data; //---Class that link to Data table
+  protected $Data; //---User ID Edited
+  protected $CustomList; //---Custom list
+  protected $UserData;
+  protected $DataID;
+
+  function __Construct($form,$view,$DataID,$mysqlclass=null,$datadbclass=null,$Data=null,$adminlevel=69,$style="layout_form"){ // (Form id, Viewing Mode (Edit, View), Class that handle linking to MySQL DB if available (if leave blank, this calss will make it's own conenction), same as previous, but this link to staff_list table, Minimal User Level to access admin-only-content, css style)
+    if(!empty($_SESSION['DeFlea'])){ mark("Drawed", __CLASS__ ." ----> ". __FUNCTION__ ."   "); } //DEBUG
+    $this->DataID=$DataID;
+    $this->ViewMode=$view; 
+    $this->Layout=$form;
+    $this->adminlevel=$adminlevel;
+    $this->Style=$style;
+    $this->Data= empty($_GET['dataid'])? $Data: $_GET['dataid']; //If No Specific user, get own instead
+    //Make new class to link to layout table
+    if(empty($mysqlclass)){ 
+      $mysqlclass= new GoodBoi("layout"); 
+      if(!empty($_SESSION['DeFlea'])){ mark("Linking to GoodBoi Layout"); } }
+    //Make new class to link to staff_list table
+    if(empty($datadbclass)){ 
+      $datadbclass= new GoodBoi("staff_list"); 
+      if(!empty($_SESSION['DeFlea'])){ mark("Linking to GoodBoi Layout"); } }
+    $this->MySQL_Object=$mysqlclass;
+    $this->MySQL_Data=$datadbclass;
+    if($_SESSION['ULevel']>=$adminlevel){ $this->admin=" || field_visible_admin !=0"; } //If admin level is high enough, grant admin 
+  }
+
+  // Function for drawing: Work by putting the HTML code to a variable $Draw, and append ne HTML code to the variable each time it make new code, an then returned it as return, so it can be echoed with the caller to really draw the form (Use $Resultstring=str_replace('$lan',"$lan",$Resultstring) to convert all the 'turned to string' $lan... to proper variable $lan...)
+  function DrawForm($Button=null,$method="POST"){
+    //Button is array (Submit Edit,Cancel,Edit,Submit New)
+   
+    //Debug
+    if(!empty($_SESSION['DeFlea'])){ mark("Drawed", __CLASS__ ." ----> ". __FUNCTION__ ."   "); }
+   
+    $URI = GetGET();
+    //Draw form opening ( <form> and <table>)
+    $Draw['pre'] = "<form action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method=$method enctype=multipart/form-data id=". $this->Layout . ">"; 
+    
+    //---Draw form
+   $Draw['grouping']= $this->Grouping(); //  Go to function Grouping to draw each group
+   
+   //Setting default values of buttons depending on languages
+   global $lanSubmit;
+   global $lanEdit;
+   global $lanReset;
+   if(empty($Button[0])){ $Button[0]=$lanSubmit;}
+   if(empty($Button[1])){ $Button[1]=$lanReset;}
+   if(empty($Button[2])){ $Button[2]=$lanEdit;}
+   if(empty($Button[3])){ $Button[3]=$lanSubmit;}
+   //Drawing button for each viewing type
+   switch ($this->ViewMode){
+     case "new":
+      $Draw['post']= "<br/><input class='w3-button w3-red' type=Submit value=$Button[0]></input> <input class='w3-button w3-red' type=reset value=$Button[1]></input>";
+      break;
+    case "edit":
+    $Draw['post']= "<br/>
+                        <input type=hidden name=". $this->DataID ." value=". $this->UserData[$this->DataID] .">
+                        <input type=Submit value=$Button[2]></input> <input type=reset value=$Button[1]></input>"; 
+      break;
+    case "view":
+    $Draw['post']= "<br/><a href='". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=4' class='w3-button w3-red'>$lanEdit</a>";
+      break;
+   }
+
+   //Draw closur </table> and </form>"
+   $Draw['post'] .= "</form>";
+   return $Draw;
+  }
+
+  function Grouping($style="layout_group"){
+    // Fetching DB from layout table
+    $Group=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' ORDER BY group_order",'DISTINCT group_order, group_cap');
+    
+
+
+    //==================Drawing GROUPING============
+    foreach($Group as $g){
+      $Draw[$g['group_cap'] .'_pre'] = "<br/><div class='w3-card w3-round w3-white' >
+      <h5 class='w3-button w3-block w3-left-align w3-lime' onclick=BukaTutup('". $g['group_cap'] ."')>". lan2var($g['group_cap']) ."</h5>
+      <fieldset class='w3-container w3-padding w3-margin' id=". $g['group_cap'] ." class=$style>";
+        $Draw[$g['group_cap'] .'_fielding'] =  $this->Fielding($g['group_cap']); //Go to Fielding function to draw field
+      $Draw[$g['group_cap'] .'_post'] = "</fieldset></div>";
+    }
+    return $Draw;
+  }
+
+  //==================Drawing FIELDING TRIAGE============
+  function Fielding($Group){
+    $View="field_visible_". $this->ViewMode;
+    $Field=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' AND group_cap='". $Group ."' AND ($View <> 0 $admin) ORDER BY field_order"); // Fetching from MySQL, the field with the same Group ID which is visible
+
+    switch($this->ViewMode){
+      case "edit":
+        $UserData=$this->MySQL_Data-> GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'" );
+        $this->UserData=$UserData[0];
+      case "new":
+        $Draw=$this->NewFielding($Field,$Group);
+        break;
+      case "view":
+        $Draw=$this->ViewFielding($Field,$Group);
+        break;
+    }
+    return $Draw;
+  }
+
+  //==================Drawing NEW FIELDING============
+  // Draw field if viewing mode is Edit or New
+  function NewFielding($Field,$Group){
+    
+    //Make connection to list_list/custom list table for use latter
+    $List=new GoodBoi("list_list");
+    //custom list
+    $Custom_List_Class=$this->MySQL_Object-> GoFetch("WHERE form_id = '". $this->Layout ."' AND (field_list_table IS NOT NULL OR field_list_table <> 0)",'DISTINCT field_list_table');
+    $this->CustomList=array();
+    foreach($Custom_List_Class as $x){
+      if(!empty($x['field_list_table'])){
+        array_push($this->CustomList,$x['field_list_table']);
+      }
+    }
+
+
+    foreach($Field as $F){ // Script for each found filed
+      
+      // Assign attributes
+      $Hidden= strpos($F['field_id'], 'hidden_') !== false? "hidden" : "";
+      $F['field_id']=str_replace("hidden_","",$F['field_id']);
+      $minlength= empty($F['field_minlength']) ? "" : "minlength=". $F['field_minlength'] ;
+			$placeholder= empty($F['field_placeholder'] ) ? "" : "placeholder='". lan2var($F['field_placeholder'])  ."'";
+      $validator= empty($F['field_validation'] ) ? "" : "pattern='". $F['field_validation'] ."'" ;
+      $required= empty($F['required'] ) ? "" : "required" ;
+      $GLOBALS['SideHelper'] = empty($F['field_side'] ) ? "" : lan2var($F['field_side'])  ;
+      $Width= empty($F['field_col'])? "18" : $F['field_col'];
+      $Height= empty($F['field_row'])? "1" : $F['field_row'];
+      $Label= empty($F['field_label'])? " " : "<label class=w3-input for=". $F['field_id'] .">". lan2var($F['field_label']) ."</label>";
+      
+
+      $Tooltip= empty($F['field_tooltip'])? "" : "<span class=tooltiptext id=tip_". $F['field_id'] .">". lan2var($F['field_tooltip']) ."</span>
+      <script>
+        $('#".  $F['field_id'] ."').focus(function(){
+          $('#tip_". $F['field_id'] ."').css('visibility', 'visible')
+        });
+        $('#".  $F['field_id'] ."').blur(function(){
+          $('#tip_". $F['field_id'] ."').css('visibility', 'hidden')
+        });
+      </script>  ";
+
+      $LineBreak= empty($F['field_seperator'])? "<br/>" : $F['field_seperator'];
+
+      switch($this->ViewMode){
+        case "new":
+          $defaultvalue = empty($F['field_default']) ? "" : "value=". $F['field_default'] ;
+          break;
+        case "edit":
+          $defaultvalue = empty($this->UserData[$F['field_id']]) ? "" : "value=". $this->UserData[$F['field_id']] ;
+          break;
+      }
+     
+      switch($F['field_type']){
+        case "select":
+        case "datalist":
+          if(in_array($F['field_list_table'],$this->CustomList)){ 
+            $ListX=new GoodBoi($F['field_list_table']); 
+            $CustomDBVal=$F['field_list_value']; 
+            $CustomDBOpt=$F['field_list_option']; 
+            $CustomOrder=$F['field_order_by']; 
+            $CustomDBWhr=$F['field_custom_where'];
+            $Options=DrawOption($F['field_list'],$ListX, $CustomOrder, $CustomDBVal, $CustomDBOpt, $CustomDBWhr);
+            unset($CustomDBOpt,$CustomDBVal,$CustomDBWhr,$CustomOrder);
+          } else {
+            $Options=DrawOption($F['field_list'],$List);
+          }
+        }
+      
+       
+      // Determining input type, and how to draw them
+      //function DrawOption($cluster,$ListDB=null,$orderby="ASC",$CustomDBVal=null,$CustomDBOpt=null,$CustomDBWhr=null){
+      switch($F['field_type']){
+        case "select":
+          $Input="select class='w3-select w3-border'";
+          $Close="select";
+          $InputContent = $Options;
+          break;
+        case "datalist":
+          $Input="input size=$Width $d list=". $F['field_list'];
+          $Close="input";
+          $InputContent = "<datalist id=". $F['field_list'] .">". $Options ."</datalist>";
+          break;
+        case "auto":
+          $Input="input value='". AutoField($F['field_id']) ."' type=hidden $placeholder $minlength ";
+          $Close="input";
+          break;
+        case "password":
+          $Input="input size=$Width type=password ";
+          $Close="input";
+          if($this->ViewMode=="edit"){
+            $Pre= "<br>". $GLOBALS['lanOldPass']. "<input type=password id=oldpsw name=Exc-". $F['field_id'] . "Old></input>" ;
+          }
+          $Additional="<br><label for=psw2>". $GLOBALS['lanConfirmPass'] ."</label> : <input id=psw2 type=password require name=Exc-".  $F['field_id'] ."Conf></input>
+          <div id=GEMRPidgey hidden>". $GLOBALS['lanPsMissmatched'] ."</div><script>$('#psw2').keyup(ConfirmPassword)</script>";
+          break;
+        case 'textarea':
+          $Input="textarea $defaultvalue $placeholder $minlength ";
+          $Close="textarea";
+          break;
+        default:
+          $Input="input type=". $F['field_type'] ." size=$Width $defaultvalue $placeholder $minlength";
+          $Close="input";
+          break;
+      }
+
+      //If ciled label contain $lan, get that into variable
+      $F['field_label'] = lan2var($F['field_label']);
+     
+
+      //The main drawing script
+      if(empty($Draw)){ $Draw[$F['field_id']]= "<legend class='w3-panel w3-green'>". lan2var($Group) ."</legend>"; } //Group Header (Drawed only when at least one element showed, and only once in each group)
+      
+      $Draw[$F['field_id']] .= "$LineBreak $Pre
+                          $Label
+                          <$Input  name=".  $F['field_id'] ." id=".  $F['field_id'] ."$required $Hidden>
+                            $InputContent
+                          </$Close> 
+                          <span id=side_". $F['field_id'] .">".  $GLOBALS['SideHelper'] ."</span> $Tooltip  
+                      $Additional
+                      "; // Input
+                      unset($InputContent);
+                      unset($Additional);
+                      unset($Pre);
+                      unset($GLOBALS['SideHelper']);
+                    }
+                    
+                    return $Draw;
+                    
+  }
+
+    //==================Drawing VIEW FIELDING============
+  // Draw field if viewing mode is View
+  function ViewFielding($Field,$Group){
+    $Staff=$this->MySQL_Data->GoFetch("WHERE ". $this->DataID ." = '". $this->Data ."'");
+    foreach($Field as $F){ // Script for each found filed
+      
+      //Check if content is an Array
+        $FLabel=deserialization(lan2var($Staff[0][$F['field_id']]),1,array(":"));
+      
+
+      if(empty($Draw)){ $Draw[$F['field_id']]= ""; } //Group Header (Drawed only when at least one element showed, and only once in each group)
+      $Draw[$F['field_id']] .= "
+                        
+                          ". lan2var($F['field_label']) ."
+                        
+                          ". $FLabel ."
+                        "; // Input
+    }
+    return $Draw;
+  }
+}
+
+*/
+
 
 //////////////////////////////////////////////////////////////////////////
 ///////////////   AUTO                                     ///////////////
@@ -2101,22 +2780,17 @@ function AutoField($Type,$Argument=null){
      $Patient= new GoodBoi('com_gita_patient');
      $PX = $Patient->GoFetch("WHERE patientid='". $_SESSION['Patient'] ."'","patientid,prefix,FName,LName");
      DeFlea($PX[0]['prefix'] ." ". $PX[0]['FName'] ." ". $PX[0]['LName']);
-      $GLOBALS['SideHelper']= FullName($PX[0]);
-      return $PX[0]['patientid'];
+      return array('val'=>$PX[0]['patientid'],'text'=>FullName($PX[0]));
       break;
     case 'age':
       $Patient= new GoodBoi('com_gita_patient');
       $PX = $Patient->GoFetch("WHERE patientid='". $_SESSION['Patient'] ."'","dob");
       $BD = $PX[0]['dob'];
-      $Age= getAge($BD);
-      $GLOBALS['SideHelper']= $Age;
-      return $Age;
+      return array('val'=>getAge($BD),'text'=>AgeText($BD));
     case 'provider':
       $Prov= new GoodBoi('staff_list');
       $Dr = $Prov->GoFetch("WHERE usrid='". $_SESSION['Person'] ."'","usrid,BName,FName,MName,LName");
-      $Name= FullName($Dr[0]);
-      $GLOBALS['SideHelper']=  $Name;
-      return $Dr[0]['usrid'];
+      return array('val'=>$Dr[0]['usrid'],'text'=>FullName($Dr[0]));;
     case 'stat_BMI':
     break;
   }

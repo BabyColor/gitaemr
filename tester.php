@@ -3,13 +3,17 @@ if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
 Login(1);
 
-$jonson = $_POST['Diagnosis'];
+  mark( '"C","Cth"',"AGE");
 
-mark(json_decode($jonson), "JONSON ");
+markA($_POST, "Raw POST ");
+
+
+
+/*
+mark(DxEater($NewDX),"NEW DX");
 
 //$registered=$_POST;
 //$BURK= new AddList ($registered);
-/*
 
 $AA=new GoodBoi('layout');
 $E=$AA->GoFetch("WHERE form_id='gita_patient'","field_id, field_label");

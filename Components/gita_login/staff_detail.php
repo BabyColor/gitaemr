@@ -284,7 +284,7 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 
 if($_GET['job']==5){
 	$List= new Listing($staff,$layout,array(7=>'gita_login_signup',6=>'form_id',2=>"usrid, BName, FName, MName, LName, Job, Departement, Specialty",8=>'FName',9=>"BName, FName, MName, LName, Job, Departement, Specialty", 4=>'usrid'));
-	$List->DrawList();
+	$List->Gardevoir();
 }
 
 

@@ -14,7 +14,7 @@ $lanPassword= "Kata sandi";
 $lanPName= "Nama Bali";
 $lanFName= "First Name";
 $lanMName= "Middle Name";
-$lanLName= "Last Name";
+$lanLName= "Nama Belakang";
 $lanNName= "Nick Name";
 $lanDOB= "Tanggal Lahir";
 $lanSex= "Jenis Kelamin";
@@ -64,7 +64,7 @@ $lanSignUp="Daftar";
 $lanOccupation="Pekerjaan";
 $lanOldPass="Kata sandi lama";
 $lanConfirmPass="Ulangi kata sandi";
-$lanBName='Awalan Nama';
+$lanBName='Awalan';
 $lanECell='Telepon Darurat';
 $lanReligion='Agama';
 $lanRace='Ras';
@@ -77,7 +77,7 @@ $lanGuardianFName='Nama Depan';
 $lanGuardianMName='Nama Tengah';
 $lanGuardianLName='Nama Belakang';
 $lanGuardianTitle='Titel';
-$lanGuardianBName='Awalan Nama';
+$lanGuardianBName='Awalan';
 $lanGuardianSex='Jenis Kelamin';
 $lanGuardianRelationship='Hubungan';
 $lanGuardianAddress='Alamat';
@@ -179,6 +179,10 @@ $lanSearch="Cari";
 $lanAll='Semua';
 $lanNoResult='Tidak ada data yang ditemukan';
 $lanNotes='Catatan';
+$lanSearchForm='Cari Pasien';
+$lanPatientDetailFormHeader='Data Pasien';
+$lanYear = "Tahun";
+$lanMonth = "Bulan";
 
 
 //-------------------Visit--------------------------
@@ -295,5 +299,11 @@ $lanSymtompSep8="tambahan";
 $lanSymptomp="Keluhan";
 $lanAdditionalNote="Catatan Tambahan";
 $lanAdditionalBP="Sistolik/Diastolik";
-
+$lanQDay="Berapa kali sehari?";
+$lanQTT="Berapa unit tiap pemberian?";
+$lanForm="Sediaan?";
+$lanAdm="Lewat?";
+$lanDrugRule="Kapan?";
+$lanDrugExtra="Catatan Tambahan";
+$lanSOAPMed="Medikamentosa";
 ?>

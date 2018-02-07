@@ -1,7 +1,12 @@
+
 var suspstring = ['susp', 'Susp', 'suspect', 'Suspect', 'Suspek', 'suspek'];
+
 var SuspMarker, EditedDX;
+if($('#dxsamson').text()){
 var dxsamson = $('#dxsamson').text();
 dxsamson = JSON.parse(dxsamson);
+}
+
 var dxn = [];
 var lelepecel = [];
 $(dxsamson).each(function(k, v) {
@@ -18,18 +23,12 @@ $(dxsamson).each(function(k, v) {
 
 
 
-$('#SubjectF').keyup(function(e) {
-    if (e.which == 13) {
-      var tuk = $('#SubjectF').val();
-      Pokeball(tuk, '#SubjectD', '#SubjectF', tuk);
-			e.preventDefault();
-    }
-  });
 
 	$('#DXF').keyup(function(e) {
 		if (e.which == 13) {
-			DXF('#DXF', 1);
 			e.preventDefault();
+			DXF('#DXF', 1);
+			
 		}
 	});
 
@@ -67,52 +66,49 @@ $('#SubjectF').keyup(function(e) {
 		return JSON.stringify(oye);
 	 }
 
+//Subject Field
   $('#SubjectF').keyup(function(e) {
- var tuk = $('#SubjectF').val();
-   vanir(tuk, "<? $GLOBALS['lanSymtompSep1']  ?>", "<? $GLOBALS['lanSymtompSep2']  ?>", "<? $GLOBALS['lanSymtompSep3']  ?>", "<? $GLOBALS['lanSymtompSep4']  ?>", "<? $GLOBALS['lanSymtompSep5']  ?>", "<? $GLOBALS['lanSymtompSep6']  ?>", "<? $GLOBALS['lanSymtompSep7']  ?>","<? $GLOBALS['lanSymtompSep8']  ?>");  });
+		var tuk = $('#SubjectF').val();
+		e.preventDefault();
+		//When entered
+		if (e.which == 13) {
+			var jon = {'additional':''} ;
+			var tuksplit = tuk.split(',');
+			var ver = tuksplit[0];
+			// Make var 'ver' for readable entry
+			if(!!tuksplit[1]){ ver += " <span class=connector>di</span> " +  tuksplit[1]; }
+			if(!!tuksplit[2]){ ver += " <span class=connector>, menjalar ke</span> " +  tuksplit[2]; }
+			if(!!tuksplit[3]){ ver += " <span class=connector>, sejak</span> " +  tuksplit[3]; }
+			if(!!tuksplit[4]){ ver += " <span class=connector>, frekuensi</span> " +  tuksplit[4]; }
+			if(!!tuksplit[5]){ ver += " <span class=connector>, kualitas</span> " +  tuksplit[5]; }
+			if(!!tuksplit[6]){ ver += " <span class=connector>, memberat dengan</span> " +  tuksplit[6]; }
+			if(!!tuksplit[7]){ ver += " <span class=connector>, membaik dengan</span> " +  tuksplit[7]; }
+			for(var i = 8; i <= (tuksplit.length - 1); i++) { ver += " <span class=connector>, </span> " +  tuksplit[i]; } 
+			//Make object 'jon' (associatove array) to be truned into json and passed to the hiddun input to be passed to form
+			jon['symptomp']=tuksplit[0];
+			jon['location']=tuksplit[1];
+			jon['reffered_pain']=tuksplit[2];
+			jon['duration']=tuksplit[3];
+			jon['frequency']=tuksplit[4];
+			jon['quality']=tuksplit[5];
+			jon['worsened_by']=tuksplit[6];
+			jon['relieved_by']=tuksplit[7];
+			for(var i = 8; i <= (tuksplit.length - 1); i++) {jon['additional'] += "," +  tuksplit[i]; } 
+
+
+		Pokeball(ver, '#SubjectD', '#SubjectF', JSON.stringify(jon));				
+		}	
+	// When comma is used
+   vanir(tuk, JSON.parse($('#lanSymptomp').text()));  });
    
-   $('#SubjectF').focus(function() {
-	$('#Subjectguide').css('visibility', 'visible');
-   });
-   $('#SubjectF').blur(function() {
-	$('#Subjectguide').css('visibility', 'hidden');
-   });
+ 
 
    
- function vanir(oke, a, b, c, d, e, f, g, h){
-	 var defa="<? $GLOBALS['lanSymptomp']  ?>";
- var count = (oke.split(',').length - 1);
- switch (count) {
-  case 1:
-  var mes=a;
-  break;
-  case 2:
-  var mes=b;
-  break;
-  case 3:
-  var mes=c;
-  break;
-  case 4:
-  var mes=d;
-  break;
-  case 5:
-  var mes=e;
-  break;
-  case 6:
-  var mes=f;
-  break;
-  case 7:
-  var mes=g;
-  break;
-  case 8:
-  var mes=h;
-  break;
-  default:
-	 var mes=defa;
-	 break;
- }
- $('#Subjectguide').text(mes);
- }
+ function vanir(oke, message){
+		var count = (oke.split(',').length - 1);
+		mes=message[count];
+		$('#tip_SubjectF').text(mes);
+ 	}
 
  
  function BMICal(weight, height) {
@@ -122,35 +118,39 @@ $('#SubjectF').keyup(function(e) {
   }
   
   function BMIInt(BMI) {
+	var languageBMI = JSON.parse($("#languageBMI").text());
+	var x = 0;
 	switch (true) {
 	  case (BMI < 15):
-		return "<? $GLOBALS['comvisitBMIVSU']  ?>";
+		x = 1;
 		break;
 	  case (BMI >= 15 && BMI < 16):
-		return "<? $GLOBALS['comvisitBMISU']  ?>";
+	 	 x = 2;
 		break;
 	  case (BMI >= 16 && BMI < 18.5):
-		return "<? $GLOBALS['comvisitBMIU']  ?>";
+	 	 x = 3;
 		break;
 	  case (BMI >= 18.5 && BMI < 25):
-		return "<? $GLOBALS['comvisitBMIN']  ?>";
+		  x = 4
 		break;
 	  case (BMI >= 25 && BMI < 30):
-		return "<? $GLOBALS['comvisitBMIO']  ?>";
+		  x = 5;
 		break;
 	  case (BMI >= 30 && BMI < 35):
-		return "<? $GLOBALS['comvisitBMIOI']  ?>";
+		  x = 6;
 		break;
 	  case (BMI >= 35 && BMI < 40):
-		return "<? $GLOBALS['comvisitBMIOII']  ?>";
+		  x = 7;
 		break;
 	  case (BMI >= 40):
-		return "<? $GLOBALS['comvisitBMIOIII']  ?>";
+	 	 x = 8;
 		break;
 	}
+	return languageBMI[x];
   }
   
-  $('#stat_weight').keyup(function() {
+  $('#stat_weight , #stat_height').keyup(function() {
+	  
 	BMI();
   });
   
@@ -158,11 +158,12 @@ $('#SubjectF').keyup(function(e) {
 	var Wg = parseInt($('#stat_weight').val());
 	var Hg = parseInt($('#stat_height').val());
 	var BMI = BMICal(Wg, Hg);
-	$('#stat_BMI').val(BMI.toFixed(2));
-	$('#side_stat_BMI').text(BMI.toFixed(2));
+	console.log("WEIH");
+	$('#stat_BMI').val(BMI);
+	$('#auto_stat_BMI').text(BMI);
 	var BMII = BMIInt(BMI);
 	$('#stat_BMI_int').val(BMII);
-	$('#side_stat_BMI_int').text(BMII);
+	$('#auto_stat_BMI_int').text(BMII);
   }
   
   function BP_GoGo(Sys,Dia){
@@ -222,6 +223,7 @@ $('#SubjectF').keyup(function(e) {
 		}
 	});
 	
+	//The LAST attributes, on enter, goes to list
 	$('#ob_dx_note').keyup(function(e) {
 		if (e.which == 13) {
 			e.preventDefault();
@@ -275,14 +277,22 @@ $('#SubjectF').keyup(function(e) {
 				
 			});
 			Pokeball(lobo, '#DXD', '#DXF', atuk);
+
+			//clean up
 			HideEraseAll(['#ob_dx_location', '#ob_dx_type', '#ob_dx_grade', '#ob_dx_stage', '#ob_dx_causa', '#ob_dx_note']);
-	
+			$("#list_ob_dx_type").empty();
+			$("#list_ob_dx_location").empty();
+			$("#list_ob_dx_grade").empty();
+			$("#list_ob_dx_stage").empty();
+			$("#list_ob_dx_causa").empty();
 			
 		}
 	});
+	// Fungsi bila field diagnosis di tekan enter
 	function DXF(e, n) {
-
 		var dx = $(e).val();
+
+		//Check if diagnosis is suspect
 		var toto = StrChecker(dx, suspstring);
 		if (toto) {
 			SuspMarker = 1;
@@ -291,7 +301,21 @@ $('#SubjectF').keyup(function(e) {
 		} else {
 			SuspMarker = false;
 		}
+
+	
 		var jonox = AOFilter(lelepecel, 'dx', dx);
+		jonox = jonox[0];
+		
+
+			//Fill datalist to each attributes
+			
+			MakeList(dxsamson,'dx', dx, '#list_ob_dx_type','type', 'type');
+			MakeList(dxsamson,'dx', dx, '#list_ob_dx_location','location', 'location');
+			MakeList(dxsamson,'dx', dx, '#list_ob_dx_grade','grade', 'grade');
+			MakeList(dxsamson,'dx', dx, '#list_ob_dx_stage','stage', 'stage');
+			MakeList(dxsamson,'dx', dx, '#list_ob_dx_causa','causa', 'causa');
+
+
 		if (jonox) {
 			EditedDX = jonox;
 			DXJumper(n);
@@ -356,6 +380,7 @@ $('#SubjectF').keyup(function(e) {
 
 	$('#allergies').keyup(function(e){
 		if (e.which==13){
+			$('#allergies_reaction').removeClass("w3-hide").addClass("w3-show");
 			$('#allergies_reaction').focus();
 			e.preventDefault();
 		}
@@ -370,13 +395,21 @@ $('#SubjectF').keyup(function(e) {
 			tuk = tuk +"-->"+ tak;
 			Pokeball(tuk, '#AllD', '#allergies', tok);
 			$('#allergies_reaction').val('');
-			console.log("6");
+			$('#allergies_reaction').removeClass("w3-show").addClass("w3-hide");
     }
   });
 
+  // Prevent submit on enter
 	$('#gita_patient').on('keypress', function(e) {
-    return e.which !== 13;
-});
+		return e.which !== 13;
+		});
+	$('#gita_visit_soap').on('keypress', function(e) {
+		return e.which !== 13;
+		});
+
+
+
+
 	$('#gita_patient').submit(function() {
 		var dxjonson = $('#DXD .jonson').toArray();
 		jonson = jQuery.map(dxjonson, function(a) {
@@ -402,12 +435,7 @@ $('#SubjectF').keyup(function(e) {
 		});
 
 
-		$('#FDXF').keyup(function(e) {
-			if (e.which == 13) {
-				DXF('#DXF', 1);
-				e.preventDefault();
-			}
-		});
+		
 	
 	
 	
@@ -510,7 +538,15 @@ $('#SubjectF').keyup(function(e) {
 					
 				});
 				Pokeball(lobo, '#FDXD', '#FDXF', atuk);
+				
+				//Clean Up
+				
 				HideEraseAll(['#ob_fdx_location', '#ob_fdx_type', '#ob_fdx_grade', '#ob_fdx_stage', '#ob_fdx_causa', '#ob_fdx_note', '#ob_fdx_who']);
+				$("#list_ob_fdx_type").empty();
+				$("#list_ob_fdx_location").empty();
+				$("#list_ob_fdx_grade").empty();
+				$("#list_ob_fdx_stage").empty();
+				$("#list_ob_fdx_causa").empty();
 				
 			}
 		});
@@ -526,6 +562,18 @@ $('#SubjectF').keyup(function(e) {
 				SuspMarker = false;
 			}
 			var jonox = AOFilter(lelepecel, 'dx', dx);
+			jonox = jonox[0];
+		
+
+			//Fill datalist to each attributes
+			
+			MakeList(dxsamson,'dx', dx, '#list_ob_fdx_type','type', 'type');
+			MakeList(dxsamson,'dx', dx, '#list_ob_fdx_location','location', 'location');
+			MakeList(dxsamson,'dx', dx, '#list_ob_fdx_grade','grade', 'grade');
+			MakeList(dxsamson,'dx', dx, '#list_ob_fdx_stage','stage', 'stage');
+			MakeList(dxsamson,'dx', dx, '#list_ob_fdx_causa','causa', 'causa');
+
+
 			if (jonox) {
 				EditedDX = jonox;
 				FDXJumper(n);
@@ -573,11 +621,9 @@ $('#SubjectF').keyup(function(e) {
 						break;
 					}
 				case 6:
-					if (x.causa) {
 						FieldSwitch('#ob_fdx_note');
 						RevealAll(['#ob_fdx_location', '#ob_fdx_type', '#ob_fdx_grade', '#ob_fdx_stage', '#ob_fdx_causa', '#ob_fdx_who']);
 						break;
-					}
 				default:
 					FieldSwitch('#ob_fdx_who');
 					break;
@@ -595,15 +641,67 @@ $('#SubjectF').keyup(function(e) {
 				e.preventDefault();
 			}
 		});
+		
+		$("#guardianid").keyup(function(e){
+			if (e.which == 13){
+			if ($("#guardianid").val() != 0) {
+				var pxson = JSON.parse($('#pxson').text());
+				console.log(pxson);
+				$(pxson).each(function(y,x){
+					if (x.patientid == $("#guardianid").val()){
+						$("#pxinfo").addClass('w3-show');
+						$("#pxinfoname").text(x.FName + " " + x.LName);
+						$("#pxinfosub").text(x.patientid);
+						if(!x.photo){
+							switch (x.sex){
+							  case '$lanMale':
+							  var aang='def_male.png';
+							  break;
+							  case '$lanFemale':
+							  var aang='def_female.png';
+							  break;
+							  case '$lanAlien':
+							  var aang='def_alien.png';
+							  break;
+							  case '$lanUnidentified':
+							  var aang='def_unknown.png';
+							  break;
+							}
+						  }
+						  $("#pxinfoaang").attr("src","Media/Korra/"+aang);
+						  $("#guardianfname").val(x.FName);
+						  $("#guardianlname").val(x.LName);
+						  $("#guardianprefix").val(x.prefix);
+						  $("#guardiansex").val(x.sex);
+						  $("#guardianfname, #guardianlname, #guardiansex, #guardianprefix").attr("disabled","TRUE");
+						  
+					}
+				});
+			} else {
+				ClearGuardian();
+			}
+		}
+		});
+		$("#removeguardian").click(function(){
+			ClearGuardian();
+		});
 
+		function ClearGuardian(){
+			$("#guardianid").val("");
+			$("#pxinfo").removeClass('w3-show');
+			$("#guardianfname, #guardianlname, #guardiansex, #guardianprefix").removeAttr("disabled");
+			$("#guardianfname").val("");
+			$("#guardianlname").val("");
+			$("#guardianprefix").val("");
+		}
 
 		//---Template
 
-function myFunction(id) {
+function BukaTutup(id) {
     var x = document.getElementById(id);
-    if (x.className.indexOf("w3-show") == -1) {
-        x.className += " w3-show";
+    if (x.className.indexOf("w3-hide") == -1) {
+        x.className += " w3-hide";
     } else {
-        x.className = x.className.replace(" w3-show", "");
+        x.className = x.className.replace(" w3-hide", "");
     }
 }

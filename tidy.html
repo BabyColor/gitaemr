@@ -1,527 +1,624 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org" />
-
-  <title>Gita EMR</title>
-  <link rel="stylesheet" href="Themes/Orange/green.css" type="text/css" />
-</head>
-
-<body>
-  <br />
-
-  <p class="Mark">DEBUG MODE</p>=================TESTER===========================<br />
-  <br />
-  <br />
-
-  <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_staff_list
-  WHERE usrid='1'</p>Login<br />
-
-  <p class="Mark"><strong>Age is</strong> 30</p><br />
-
-  <p class="Mark"><strong>This Session<br /></strong> DeFlea ==&gt; '1'<br />
-  Person ==&gt; '1'<br />
-  UserN ==&gt; 'BabyColor'<br />
-  Name ==&gt; 'Gita/Prasetya/Adiguna'<br />
-  ULevel ==&gt; '9999'<br />
-  UGroup ==&gt; 'user, Arceus'<br />
-  Patient ==&gt; '45454687'</p><br />
-  <br />
-  ===================END OF TESTER===========<br />
-  <br />
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity=
-  "sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous" type=
-  "text/javascript">
-</script>
-
-  <table>
-    <tr class='Top1'>
-      <td colspan="3">
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='top1' ORDER BY short ASC</p>Modules
-      </td>
-    </tr>
-
-    <tr class='Top2'>
-      <td colspan="3">
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='top2' ORDER BY short ASC</p>Modules
-      </td>
-    </tr>
-
-    <tr class='Top3'>
-      <td colspan="3">
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='top3' ORDER BY short ASC</p>Modules<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_mod_gita_menu WHERE parent='1' ORDER BY short</p>include
-
-        <div class="dropdown">
-          <button onclick="DropButton('2MD')" class='dropbtn'>Pasien</button>
-
-          <div id="2MD" class="dropdown-content">
-            <br />
-
-            <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-            gemr_mod_gita_menu WHERE parent='2' ORDER BY short</p>include<a href=
-            "/gitaemr/index.php?mod=gita_patient&amp;job=1">Pasien Baru</a><a href=
-            "/gitaemr/index.php?mod=gita_patient&amp;job=2">Daftar Pasien</a>
-          </div>
+<html>
+	<head>
+		<link rel="stylesheet" href="Themes/Orange/green.css">
+		<link rel="stylesheet" href="Themes/Orange/font_awesome.css">
+		<link rel="stylesheet" href="Themes/Orange/w3css4w3.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		
+	</head>
+	<body class="w3-theme-l5">
+<form id="gita_patient" class="" action="/gitaemr/index.php?mod=gita_patient&amp;job=1&amp;" method="POST" enctype="multipart/form-data">
+  <div class="w3-card-4 w3-white">
+    <h4 class="w3-panel w3-lime" onclick="BukaTutup('$lanIdentitiy')">Identitas</h4>
+    <div id="$lanIdentitiy" class="w3-panel ">
+      <div class="  ">
+        <label for="patientid" class="w3-text-teal">No.RM</label>
+        <input id="patientid" class="w3-input w3-border  0" required="true" type="autoinc">
+        <span class=""></span>
+      </div>
+      <div class="w3-row">
+        <div class="  w3-col m2 w3-panel">
+          <label for="prefix" class="w3-text-teal">Awalan</label>
+          <input list="list_prefix" id="prefix" class="w3-input w3-border  " type="datalist">
+          <datalist id="list_prefix">
+            <option value="Wayan">Wayan</option>
+            <option value="Putu">Putu</option>
+            <option value="Made">Made</option>
+            <option value="Kadek">Kadek</option>
+            <option value="Ketut">Ketut</option>
+          </datalist>
+          <span class=""></span>
         </div>
-
-        <div class="dropdown">
-          <button onclick="DropButton('5MD')" class='dropbtn'>Staff</button>
-
-          <div id="5MD" class="dropdown-content">
-            <br />
-
-            <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-            gemr_mod_gita_menu WHERE parent='5' ORDER BY short</p>include<a href=
-            "/gitaemr/index.php?mod=gita_login&amp;job=5">Daftar Staff</a><a href=
-            "/gitaemr/index.php?mod=gita_login&amp;job=2">Keluar</a><a href=
-            "/gitaemr/index.php?mod=gita_login&amp;job=1">Daftar Staff</a>
-          </div>
+        <div class="  w3-col m5 w3-panel">
+          <label for="FName" class="w3-text-teal">Nama</label>
+          <input id="FName" class="w3-input w3-border  " type="text">
+          <span class=""></span>
         </div>
-
-        <div class="dropdown">
-          <button onclick="DropButton('9MD')" class='dropbtn'>Kunjungan</button>
-
-          <div id="9MD" class="dropdown-content">
-            <br />
-
-            <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-            gemr_mod_gita_menu WHERE parent='9' ORDER BY short</p>include<a href=
-            "/gitaemr/index.php?mod=gita_visit&amp;job=1">Kunjungan Baru</a><a href=
-            "/gitaemr/index.php?mod=gita_visit&amp;job=2">Daftar Kunjungan</a>
-          </div>
-        </div><script type="text/javascript">
-//<![CDATA[
-        /* When the user clicks on the button, 
-        toggle between hiding and showing the dropdown content */
-        function DropButton(xclass) {
-        document.getElementById(xclass).classList.toggle('show');
-        }
-
-        // Close the dropdown if the user clicks outside of it
-        window.onclick = function(event) {
-        if (!event.target.matches('.dropbtn')) {
-
-        var dropdowns = document.getElementsByClassName('dropdown-content');
-        var i;
-        for (i = 0; i < dropdowns.length; i++) {
-        var openDropdown = dropdowns[i];
-        if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-        }
-        }
-        }
-        }
-
-        //]]>
+        <div class="  w3-col m5 w3-panel">
+          <label for="LName" class="w3-text-teal">Nama Belakang</label>
+          <input id="LName" class="w3-input w3-border  " type="text">
+          <span class=""></span>
+        </div>
+      </div>
+      <div class="  ">
+        <label for="dob" class="w3-text-teal">Tanggal Lahir</label>
+        <input id="dob" class="w3-input w3-border  0" required="true" type="date">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="sex" class="w3-text-teal">Jenis Kelamin</label>
+        <select id="sex" class="w3-input w3-border w3-select 0" required="true">
+          <option value="$lanMale">Laki-Laki</option>
+          <option value="$lanFemale">Perempuan</option>
+          <option value="$lanAlien">Alien</option>
+          <option value="$lanUnidentified">Tidak diketahui</option>
+        </select>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="photo" class="w3-text-teal">Avatar</label>
+        <input id="photo" class="w3-input w3-border  0" type="file">
+        <span class=""></span>
+      </div>
+    </div>
+  </div>
+  <div class="w3-card-4 w3-white">
+    <h4 class="w3-panel w3-lime" onclick="BukaTutup('$lanContact')">Kontak</h4>
+    <div id="$lanContact" class="w3-panel w3-hide w3-animate-slide">
+      <div class="  ">
+        <label for="idcardtype" class="w3-text-teal">Jenis Identitas</label>
+        <select id="idcardtype" class="w3-input w3-border w3-select 0">
+          <option value="$lanCountryStandard">KTP</option>
+          <option value="$lanDriverLicense1">SIM</option>
+          <option value="$lanStudentID">Kartu Pelajar</option>
+          <option value="$lanPassport">Passport</option>
+        </select>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="idcard" class="w3-text-teal">Nomer KITAS</label>
+        <input id="idcard" class="w3-input w3-border  0" required="true" type="text">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="marital" class="w3-text-teal">Status</label>
+        <select id="marital" class="w3-input w3-border w3-select 0">
+          <option value="$lanSingle">Lajang</option>
+          <option value="$lanMarried">Menikah</option>
+          <option value="$lanWidowed">Pasangan Meninggal</option>
+          <option value="$lanComplicated">Ribet</option>
+          <option value="$lanDivorced">Bercerai</option>
+        </select>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="address" class="w3-text-teal">Alamat</label>
+        <input id="address" class="w3-input w3-border  0" type="text">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="desa" class="w3-text-teal">Desa</label>
+        <input list="list_desa" id="desa" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_desa">
+          <option value="Blahkiuh">Blahkiuh</option>
+          <option value="Abiansemal">Abiansemal</option>
+          <option value="Punggul">Punggul</option>
+          <option value="Petang">Petang</option>
+          <option value="Taman">Taman</option>
+          <option value="Sangeh">Sangeh</option>
+          <option value="Ayunan">Ayunan</option>
+          <option value="Perean">Perean</option>
+          <option value="Jimbaran">Jimbaran</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="district" class="w3-text-teal">Kecamatan</label>
+        <input list="list_district" id="district" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_district">
+          <option value="Abiansemal">Abiansemal</option>
+          <option value="Petang">Petang</option>
+          <option value="Mengwi">Mengwi</option>
+          <option value="Baturiti">Baturiti</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="city" class="w3-text-teal">Kabupaten</label>
+        <input list="list_city" id="city" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_city">
+          <option value="Badung">Badung</option>
+          <option value="Denpasar">Denpasar</option>
+          <option value="Tabanan">Tabanan</option>
+          <option value="Gianyar">Gianyar</option>
+          <option value="Klungkung">Klungkung</option>
+          <option value="Karangasem">Karangasem</option>
+          <option value="Buleleng">Buleleng</option>
+          <option value="Negara">Negara</option>
+          <option value="Bangli">Bangli</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="Province" class="w3-text-teal">Provinsi</label>
+        <input list="list_Province" id="Province" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_Province">
+          <option value="Bali">Bali</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="country" class="w3-text-teal">Negara</label>
+        <input list="list_country" id="country" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_country">
+          <option value="Indonesia">Indonesia</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="tlpnumb" class="w3-text-teal">Nomer HP</label>
+        <input id="tlpnumb" class="w3-input w3-border  0" type="tel">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="emergencynumb" class="w3-text-teal">Telepon Darurat</label>
+        <input id="emergencynumb" class="w3-input w3-border  0" type="tel">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="email" class="w3-text-teal">Surel</label>
+        <input id="email" class="w3-input w3-border  0" type="email">
+        <span class=""></span>
+      </div>
+    </div>
+  </div>
+  <div class="w3-card-4 w3-white">
+    <h4 class="w3-panel w3-lime" onclick="BukaTutup('$lanDetail')">SARA</h4>
+    <div id="$lanDetail" class="w3-panel w3-hide w3-animate-slide">
+      <div class="  ">
+        <label for="religion" class="w3-text-teal">Agama</label>
+        <select id="religion" class="w3-input w3-border w3-select 0"></select>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="race" class="w3-text-teal">Ras</label>
+        <input list="list_race" id="race" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_race"></datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="allergies" class="w3-text-teal">Alergi</label>
+        <input list="list_allergies" id="allergies" class="w3-input w3-border  " type="datalist">
+        <datalist id="list_allergies"></datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <input list="list_allergies_reaction" id="allergies_reaction" class="w3-input w3-border  w3-hide " type="datalist">
+        <datalist id="list_allergies_reaction"></datalist>
+        <span class="tooltiptext" id="tip_allergies_reaction">Reaction</span>
+        <script>
+          $('#allergies_reaction').focus(function () {
+            $('#tip_allergies_reaction').css('visibility', 'visible')
+          });
+          $('#allergies_reaction').blur(function () {
+            $('#tip_allergies_reaction').css('visibility', 'hidden')
+          });
         </script>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='left1' ORDER BY short ASC</p>Modules
-
-        <table>
-          <tr class='Left1'>
-            <td></td>
-          </tr>
-
-          <tr class='Left2'>
-            <td>
-              <br />
-
-              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-              gemr_modules_deployment WHERE position='left2' ORDER BY short
-              ASC</p>Modules
-            </td>
-          </tr>
-
-          <tr class='Left3'>
-            <td>
-              <br />
-
-              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-              gemr_modules_deployment WHERE position='left3' ORDER BY short
-              ASC</p>Modules
-            </td>
-          </tr>
-        </table>
-      </td>
-
-      <td class='area_content'>
-        <br />
-
-        <p class="Mark"><strong>Smeargle ----&gt; __Construct</strong> Drawed</p><br />
-
-        <p class="Mark"><strong>Smeargle ----&gt; DrawForm</strong> Drawed</p><br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
-        group_order, group_cap FROM gemr_layout WHERE form_id = 'gita_visit_soap' ORDER
-        BY group_order</p>Grouping<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
-        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanVisitData' AND
-        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
-        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
-        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
-        0)</p>NewFielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT
-        prefix,fname,mname,lname FROM gemr_com_gita_patient WHERE
-        patientid='45454687'</p>AutoField<br />
-
-        <p class="DeFlea"><br />
-        <br />
-        Ketut Omeprazole Ranitidine Organophosfate on line <b>262</b></p><br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT dob FROM
-        gemr_com_gita_patient WHERE patientid='45454687'</p>AutoField<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT
-        BName,FName,MName,LName FROM gemr_staff_list WHERE usrid='1'</p>AutoField<br />
-
-        <p class="Mark"><strong>array2csv Key ==&gt;</strong> FName MName LName</p><br />
-
-        <p class="Mark"><strong>array2csv Val ==&gt;</strong> Gita Prasetya
-        Adiguna</p><br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_list_list WHERE cluster = 'VisitType' AND active &lt;&gt;
-        0</p>DrawOption<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_com_gita_visit WHERE visitid</p>DrawOption<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
-        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPSubject' AND
-        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
-        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
-        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
-        0)</p>NewFielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
-        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPObject' AND
-        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
-        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
-        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
-        0)</p>NewFielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
-        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPAssesment' AND
-        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
-        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
-        (field_list_table IS NOT NULL OR field_list_table &lt;&gt;
-        0)</p>NewFielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM gemr_layout
-        WHERE form_id = 'gita_visit_soap' AND group_cap='$lanSOAPPlaning' AND
-        (field_visible_new &lt;&gt; 0 ) ORDER BY field_order</p>Fielding<br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT DISTINCT
-        field_list_table FROM gemr_layout WHERE form_id = 'gita_visit_soap' AND
-        (field_list_table IS NOT NULL OR field_list_table &lt;&gt; 0)</p>NewFielding
-
-        <form action="/gitaemr/index.php?mod=gita_visit&amp;job=1&amp;" method="post"
-        class="layout_form">
-          <table class="layout_form">
-            <tr>
-              <td>
-                <table id="$lanVisitData" class="layout_group">
-                  <tr>
-                    <th colspan="2">Data Kunjungan</th>
-                  </tr>
-
-                  <tr>
-                    <td><label for="patient">Pasien</label></td>
-
-                    <td><input value='Ketut Omeprazole Ranitidine Organophosfate' type=
-                    "text" disabled="disabled" name="patient" id="patient" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="age">Usia</label></td>
-
-                    <td><input value='49' type="text" disabled="disabled" name="age" id=
-                    "age" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="provider">Pemberi Layanan</label></td>
-
-                    <td><input value='Gita Prasetya Adiguna' type="text" disabled=
-                    "disabled" name="provider" id="provider" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="visit_type">Jenis Kunjungan</label></td>
-
-                    <td><select name="visit_type" id="visit_type">
-                      <option value="$lanNewCase">
-                        Kasus Baru
-                      </option>
-
-                      <option value="$lanFollowUp">
-                        Follow Up
-                      </option>
-
-                      <option value="$lanEmergency">
-                        Gawat Darurat
-                      </option>
-                    </select></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="linked_visit">Kunjungan lain</label></td>
-
-                    <td><input list="linked_visit" name="linked_visit" id=
-                    "linked_visit" /></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <table id="$lanSOAPSubject" class="layout_group">
-                  <tr>
-                    <th colspan="2">Subjek</th>
-                  </tr>
-
-                  <tr>
-                    <td><label for="soap_subject">Subjek</label></td>
-
-                    <td><input type="textarea" name="soap_subject" id=
-                    "soap_subject" /></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <table id="$lanSOAPObject" class="layout_group">
-                  <tr>
-                    <th colspan="2">Objek</th>
-                  </tr>
-
-                  <tr>
-                    <td><label for="soap_object">Objek</label></td>
-
-                    <td><input type="textarea" name="soap_object" id=
-                    "soap_object" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="vt_HR">Nadi</label></td>
-
-                    <td><input type="text" placeholder='Denyut / Menit' name="vt_HR" id=
-                    "vt_HR" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="vt_RR">Respirasi</label></td>
-
-                    <td><input type="text" placeholder='Respirasi / Menit' name="vt_RR"
-                    id="vt_RR" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="vt_Temp">Temp</label></td>
-
-                    <td><input type="text" placeholder='Derajat Selsius' name="vt_Temp"
-                    id="vt_Temp" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="vt_BP_Sys">'TD Sistolik'</label></td>
-
-                    <td><input type="number" placeholder='TD Sistolik' name="vt_BP_Sys"
-                    id="vt_BP_Sys" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="vt_BP_Dia">'TD Diastolik'</label></td>
-
-                    <td><input type="number" placeholder='TD Diastolik' name="vt_BP_Dia"
-                    id="vt_BP_Dia" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="stat_height">Tinggi Badan</label></td>
-
-                    <td><input type="text" placeholder="Kilometer" name="stat_height" id=
-                    "stat_height" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="stat_weight">Berat Badan</label></td>
-
-                    <td><input type="text" placeholder="Kilogram" name="stat_weight" id=
-                    "stat_weight" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="stat_BMI">BMI</label></td>
-
-                    <td><input value='' type="text" disabled="disabled" name="stat_BMI"
-                    id="stat_BMI" /></td>
-                  </tr>
-
-                  <tr>
-                    <td><label for="stat_BMI_int">BMI</label></td>
-
-                    <td><input value='' type="text" disabled="disabled" name=
-                    "stat_BMI_int" id="stat_BMI_int" /></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <table id="$lanSOAPAssesment" class="layout_group">
-                  <tr>
-                    <th colspan="2">Assessment</th>
-                  </tr>
-
-                  <tr>
-                    <td><label for="soap_assesment">Assessment</label></td>
-
-                    <td><input type="textarea" name="soap_assesment" id=
-                    "soap_assesment" /></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <table id="$lanSOAPPlaning" class="layout_group">
-                  <tr>
-                    <th colspan="2">Planing</th>
-                  </tr>
-
-                  <tr>
-                    <td><label for="soap_planing">Planing</label></td>
-
-                    <td><input type="textarea" name="soap_planing" id=
-                    "soap_planing" /></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <tr>
-              <td colspan="2"><input type="submit" value="Daftar" /> <input type="reset"
-              value="Hapus" /></td>
-            </tr>
-          </table>
-        </form>
-      </td>
-
-      <td>
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='right1' ORDER BY short ASC</p>Modules
-
-        <table>
-          <tr class='Right1'>
-            <td></td>
-          </tr>
-
-          <tr class='Right2'>
-            <td>
-              <br />
-
-              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-              gemr_modules_deployment WHERE position='right2' ORDER BY short
-              ASC</p>Modules
-            </td>
-          </tr>
-
-          <tr class='Right3'>
-            <td>
-              <br />
-
-              <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-              gemr_modules_deployment WHERE position='right3' ORDER BY short
-              ASC</p>Modules
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <tr class='Bottom1'>
-      <td colspan="3">
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='bottom1' ORDER BY short ASC</p>Modules
-      </td>
-    </tr>
-
-    <tr class='Bottom2'>
-      <td colspan="3">
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='bottom2' ORDER BY short ASC</p>Modules
-      </td>
-    </tr>
-
-    <tr class='Bottom3'>
-      <td colspan="3">
-        <br />
-
-        <p class="Mark"><strong>GoodBoi ==&gt; GoFetch</strong> SELECT * FROM
-        gemr_modules_deployment WHERE position='bottom3' ORDER BY short ASC</p>Modules
-      </td>
-    </tr>
-  </table><br />
-
-  <p class="Mark"><strong>Date2SQL ==&gt;</strong> 2018-01-23 23:15:18</p><br />
-
-  <p class="Mark"><strong>[</strong> UPDATE gemr_staff_list SET
-  LastActiveTime='2018-01-23 23:15:18' , LastActiveIP='127.0.0.1' ,
-  LastActiveInfo='a:6:{s:7:\"Browser\";s:76:\"Mozilla/5.0 (X11; Ubuntu; Linux x86_64;
-  rv:57.0) Gecko/20100101
-  Firefox/57.0\";s:2:\"IP\";s:9:\"127.0.0.1\";s:4:\"Port\";s:5:\"45286\";s:3:\"URI\";s:39:\"/gitaemr/index.php?mod=gita_visit&amp;job=1\";s:3:\"sIP\";s:9:\"127.0.0.1\";s:5:\"sPort\";s:2:\"80\";}'
-  WHERE usrid=1 ]</p><br />
-
-  <p class="DeFlea"><strong>GoodBoi++++GoBurry</strong><br />
-  <br />
-  UPDATE gemr_staff_list SET LastActiveTime='2018-01-23 23:15:18' ,
-  LastActiveIP='127.0.0.1' , LastActiveInfo='a:6:{s:7:\"Browser\";s:76:\"Mozilla/5.0
-  (X11; Ubuntu; Linux x86_64; rv:57.0) Gecko/20100101
-  Firefox/57.0\";s:2:\"IP\";s:9:\"127.0.0.1\";s:4:\"Port\";s:5:\"45286\";s:3:\"URI\";s:39:\"/gitaemr/index.php?mod=gita_visit&amp;job=1\";s:3:\"sIP\";s:9:\"127.0.0.1\";s:5:\"sPort\";s:2:\"80\";}'
-  WHERE usrid=1 on line <b>262</b></p>
+        <span class=""></span>
+      </div>
+      <ul class="w3-ul" id="AllD">
+      </ul>
+      <input id="AllH" name="Allergies" type="hidden">
+      <div class="  ">
+        <label for="DXF" class="w3-text-teal">Riwayat Penyakit</label>
+        <input list="list_DXF" id="DXF" class="w3-input w3-border  " type="datalist">
+        <datalist id="list_DXF">
+          <option value="Hipertensi">Hipertensi</option>
+          <option value="DM">DM</option>
+          <option value="Nephrolitiasis">Nephrolitiasis</option>
+        </datalist>
+        <span class="tooltiptext" id="tip_DXF">Diagnosis</span>
+        <script>
+          $('#DXF').focus(function () {
+            $('#tip_DXF').css('visibility', 'visible')
+          });
+          $('#DXF').blur(function () {
+            $('#tip_DXF').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="w3-row">
+        <div class="  w3-col m2">
+          <input id="ob_dx_location" class="w3-input w3-border  w3-hide" type="text">
+          <span class="tooltiptext" id="tip_ob_dx_location">Location</span>
+          <script>
+            $('#ob_dx_location').focus(function () {
+              $('#tip_ob_dx_location').css('visibility', 'visible')
+            });
+            $('#ob_dx_location').blur(function () {
+              $('#tip_ob_dx_location').css('visibility', 'hidden')
+            });
+          </script>
+          <span class=""></span>
+        </div>
+        <div class="  w3-col m2">
+          <input id="ob_dx_type" class="w3-input w3-border  w3-hide" type="text">
+          <span class="tooltiptext" id="tip_ob_dx_type">Type</span>
+          <script>
+            $('#ob_dx_type').focus(function () {
+              $('#tip_ob_dx_type').css('visibility', 'visible')
+            });
+            $('#ob_dx_type').blur(function () {
+              $('#tip_ob_dx_type').css('visibility', 'hidden')
+            });
+          </script>
+          <span class=""></span>
+        </div>
+        <div class="  w3-col m2">
+          <input id="ob_dx_grade" class="w3-input w3-border  w3-hide" type="text">
+          <span class="tooltiptext" id="tip_ob_dx_grade">Grade</span>
+          <script>
+            $('#ob_dx_grade').focus(function () {
+              $('#tip_ob_dx_grade').css('visibility', 'visible')
+            });
+            $('#ob_dx_grade').blur(function () {
+              $('#tip_ob_dx_grade').css('visibility', 'hidden')
+            });
+          </script>
+          <span class=""></span>
+        </div>
+        <div class="  w3-col m2">
+          <input id="ob_dx_stage" class="w3-input w3-border  w3-hide" type="text">
+          <span class="tooltiptext" id="tip_ob_dx_stage">Stage</span>
+          <script>
+            $('#ob_dx_stage').focus(function () {
+              $('#tip_ob_dx_stage').css('visibility', 'visible')
+            });
+            $('#ob_dx_stage').blur(function () {
+              $('#tip_ob_dx_stage').css('visibility', 'hidden')
+            });
+          </script>
+          <span class=""></span>
+        </div>
+        <div class="  w3-col m2">
+          <input id="ob_dx_causa" class="w3-input w3-border  w3-hide" type="text">
+          <span class="tooltiptext" id="tip_ob_dx_causa">Et Causa</span>
+          <script>
+            $('#ob_dx_causa').focus(function () {
+              $('#tip_ob_dx_causa').css('visibility', 'visible')
+            });
+            $('#ob_dx_causa').blur(function () {
+              $('#tip_ob_dx_causa').css('visibility', 'hidden')
+            });
+          </script>
+          <span class=""></span>
+        </div>
+        <div class="  w3-col m2">
+          <input id="ob_dx_note" class="w3-input w3-border  w3-hide" type="text">
+          <span class="tooltiptext" id="tip_ob_dx_note">Note</span>
+          <script>
+            $('#ob_dx_note').focus(function () {
+              $('#tip_ob_dx_note').css('visibility', 'visible')
+            });
+            $('#ob_dx_note').blur(function () {
+              $('#tip_ob_dx_note').css('visibility', 'hidden')
+            });
+          </script>
+          <span class=""></span>
+        </div>
+      </div>
+      <ul class="w3-ul" id="DXD">
+      </ul>
+      <input id="DXH" name="PastIllness" type="hidden">
+      <div class="  ">
+        <label for="FDXF" class="w3-text-teal">Riwayat Penyakit Keluarga</label>
+        <input list="list_FDXF" id="FDXF" class="w3-input w3-border  " type="datalist">
+        <datalist id="list_FDXF">
+          <option value="Hipertensi">Hipertensi</option>
+          <option value="DM">DM</option>
+          <option value="Nephrolitiasis">Nephrolitiasis</option>
+        </datalist>
+        <span class="tooltiptext" id="tip_FDXF">Diagnosis</span>
+        <script>
+          $('#FDXF').focus(function () {
+            $('#tip_FDXF').css('visibility', 'visible')
+          });
+          $('#FDXF').blur(function () {
+            $('#tip_FDXF').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  w3-col m2">
+        <input id="ob_fdx_location" class="w3-input w3-border  w3-hide" type="text">
+        <span class="tooltiptext" id="tip_ob_fdx_location">Location</span>
+        <script>
+          $('#ob_fdx_location').focus(function () {
+            $('#tip_ob_fdx_location').css('visibility', 'visible')
+          });
+          $('#ob_fdx_location').blur(function () {
+            $('#tip_ob_fdx_location').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  w3-col m2">
+        <input id="ob_fdx_type" class="w3-input w3-border  w3-hide" type="text">
+        <span class="tooltiptext" id="tip_ob_fdx_type">Type</span>
+        <script>
+          $('#ob_fdx_type').focus(function () {
+            $('#tip_ob_fdx_type').css('visibility', 'visible')
+          });
+          $('#ob_fdx_type').blur(function () {
+            $('#tip_ob_fdx_type').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  w3-col m2">
+        <input id="ob_fdx_grade" class="w3-input w3-border  w3-hide" type="text">
+        <span class="tooltiptext" id="tip_ob_fdx_grade">Grade</span>
+        <script>
+          $('#ob_fdx_grade').focus(function () {
+            $('#tip_ob_fdx_grade').css('visibility', 'visible')
+          });
+          $('#ob_fdx_grade').blur(function () {
+            $('#tip_ob_fdx_grade').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  w3-col m2">
+        <input id="ob_fdx_stage" class="w3-input w3-border  w3-hide" type="text">
+        <span class="tooltiptext" id="tip_ob_fdx_stage">Stage</span>
+        <script>
+          $('#ob_fdx_stage').focus(function () {
+            $('#tip_ob_fdx_stage').css('visibility', 'visible')
+          });
+          $('#ob_fdx_stage').blur(function () {
+            $('#tip_ob_fdx_stage').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  w3-col m2">
+        <input id="ob_fdx_causa" class="w3-input w3-border  w3-hide" type="text">
+        <span class="tooltiptext" id="tip_ob_fdx_causa">Et Causa</span>
+        <script>
+          $('#ob_fdx_causa').focus(function () {
+            $('#tip_ob_fdx_causa').css('visibility', 'visible')
+          });
+          $('#ob_fdx_causa').blur(function () {
+            $('#tip_ob_fdx_causa').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  w3-col m2">
+        <input id="ob_fdx_note" class="w3-input w3-border  w3-hide" type="text">
+        <span class="tooltiptext" id="tip_ob_fdx_note">Note</span>
+        <script>
+          $('#ob_fdx_note').focus(function () {
+            $('#tip_ob_fdx_note').css('visibility', 'visible')
+          });
+          $('#ob_fdx_note').blur(function () {
+            $('#tip_ob_fdx_note').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <input list="list_ob_fdx_who" id="ob_fdx_who" class="w3-input w3-border  w3-hide" type="datalist">
+        <datalist id="list_ob_fdx_who">
+          <option value="$lanChild">Anak</option>
+          <option value="$lanSibling">Saudara Kandung</option>
+          <option value="$lanParent">Orangtua</option>
+          <option value="$lanGrandParrent">Kakek/Nenek</option>
+          <option value="$lanGrandChild">Cucu</option>
+          <option value="$lanSpouse">Suami/Istri</option>
+          <option value="$lanLover">Pacar</option>
+          <option value="$lanFriends">Teman</option>
+          <option value="$lanAcquaintance">Kenalan</option>
+          <option value="$lanCoworker">Rekan Kerja</option>
+          <option value="$lanEmployee">Karyawan</option>
+          <option value="$lanEmployer">Atasan</option>
+          <option value="$lanMoreThanFriendButLessThanLover">TTM</option>
+          <option value="$lanFriendZone">Friend Zone</option>
+          <option value="$lanWaifu">Waifu</option>
+          <option value="$lanOther">Orang Lain</option>
+          <option value="$lanCousin">Sepupu</option>
+          <option value="$lanOtherFamilly">Keluarga</option>
+          <option value="$lanGreatGrandParent">Buyut</option>
+          <option value="$lanGreatGrandChildern">Cicit</option>
+          <option value="$lanAncestor">Bethara Hyang Guru</option>
+        </datalist>
+        <span class="tooltiptext" id="tip_ob_fdx_who">Hubungan dengan pasien</span>
+        <script>
+          $('#ob_fdx_who').focus(function () {
+            $('#tip_ob_fdx_who').css('visibility', 'visible')
+          });
+          $('#ob_fdx_who').blur(function () {
+            $('#tip_ob_fdx_who').css('visibility', 'hidden')
+          });
+        </script>
+        <span class=""></span>
+      </div>
+      <ul class="w3-ul" id="FDXD">
+      </ul>
+      <input id="FDXH" name="FamillyHistories" type="hidden">
+    </div>
+  </div>
+  <div class="w3-card-4 w3-white">
+    <h4 class="w3-panel w3-lime" onclick="BukaTutup('$lanJob')">Jenis</h4>
+    <div id="$lanJob" class="w3-panel w3-hide w3-animate-slide">
+      <div class="  ">
+        <label for="occupation" class="w3-text-teal">Pekerjaan</label>
+        <input list="list_occupation" id="occupation" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_occupation"></datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="employee" class="w3-text-teal">Karyawan</label>
+        <input list="list_employee" id="employee" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_employee"></datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="workaddress" class="w3-text-teal">Alamat Kerja</label>
+        <input id="workaddress" class="w3-input w3-border  0" type="text">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="workcity" class="w3-text-teal">Kabupaten</label>
+        <input list="list_workcity" id="workcity" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_workcity">
+          <option value="Badung">Badung</option>
+          <option value="Denpasar">Denpasar</option>
+          <option value="Tabanan">Tabanan</option>
+          <option value="Gianyar">Gianyar</option>
+          <option value="Klungkung">Klungkung</option>
+          <option value="Karangasem">Karangasem</option>
+          <option value="Buleleng">Buleleng</option>
+          <option value="Negara">Negara</option>
+          <option value="Bangli">Bangli</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+    </div>
+  </div>
+  <div class="w3-card-4 w3-white">
+    <h4 class="w3-panel w3-lime" onclick="BukaTutup('$lanGuardian')">Penanggung Jawab</h4>
+    <div id="$lanGuardian" class="w3-panel w3-hide w3-animate-slide">
+      <div class="  ">
+        <label for="guardianid" class="w3-text-teal">No RM</label>
+        <input list="list_guardianid" id="guardianid" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_guardianid">
+          <option value="1">pikolo</option>
+          <option value="345">Adi</option>
+          <option value="324543">Bagus</option>
+          <option value="345543"></option>
+          <option value="3422123">Ayu</option>
+          <option value="34535253">Bejita</option>
+          <option value="45454687">Omeprazole</option>
+          <option value="52334656">Ayu</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="w3-hide w3-bar" id="pxinfo">
+        <span class="w3-bar-item w3-button w3-xlarge w3-right" id="removeguardian">×</span>
+        <img id="pxinfoaang" src="img_avatar2.png" class="w3-bar-item w3-circle" style="width:85px">
+        <div class="w3-bar-item">
+          <span class="w3-large" id="pxinfoname"></span>
+          <br>
+          <span id="pxinfosub"></span>
+        </div>
+      </div>
+      <div class="  {">
+        <label for="guardianfname" class="w3-text-teal">Nama Depan</label>
+        <input id="guardianfname" class="w3-input w3-border  " type="text">
+        <span class=""></span>
+      </div>
+      <div class="  {">
+        <label for="guardianmname" class="w3-text-teal">Nama Tengah</label>
+        <input id="guardianmname" class="w3-input w3-border  " type="text">
+        <span class=""></span>
+      </div>
+      <div class="  {">
+        <label for="guardianlname" class="w3-text-teal">Nama Belakang</label>
+        <input id="guardianlname" class="w3-input w3-border  " type="text">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardianprefix" class="w3-text-teal">Awalan</label>
+        <input list="list_guardianprefix" id="guardianprefix" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_guardianprefix">
+          <option value="Wayan">Wayan</option>
+          <option value="Putu">Putu</option>
+          <option value="Made">Made</option>
+          <option value="Kadek">Kadek</option>
+          <option value="Ketut">Ketut</option>
+        </datalist>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardiansex" class="w3-text-teal">Jenis Kelamin</label>
+        <select id="guardiansex" class="w3-input w3-border w3-select 0">
+          <option value="$lanMale">Laki-Laki</option>
+          <option value="$lanFemale">Perempuan</option>
+          <option value="$lanAlien">Alien</option>
+          <option value="$lanUnidentified">Tidak diketahui</option>
+        </select>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardianrelationship" class="w3-text-teal">Hubungan</label>
+        <select id="guardianrelationship" class="w3-input w3-border w3-select 0">
+          <option value="$lanChild">Anak</option>
+          <option value="$lanSibling">Saudara Kandung</option>
+          <option value="$lanParent">Orangtua</option>
+          <option value="$lanGrandParrent">Kakek/Nenek</option>
+          <option value="$lanGrandChild">Cucu</option>
+          <option value="$lanSpouse">Suami/Istri</option>
+          <option value="$lanLover">Pacar</option>
+          <option value="$lanFriends">Teman</option>
+          <option value="$lanAcquaintance">Kenalan</option>
+          <option value="$lanCoworker">Rekan Kerja</option>
+          <option value="$lanEmployee">Karyawan</option>
+          <option value="$lanEmployer">Atasan</option>
+          <option value="$lanMoreThanFriendButLessThanLover">TTM</option>
+          <option value="$lanFriendZone">Friend Zone</option>
+          <option value="$lanWaifu">Waifu</option>
+          <option value="$lanOther">Orang Lain</option>
+          <option value="$lanCousin">Sepupu</option>
+          <option value="$lanOtherFamilly">Keluarga</option>
+          <option value="$lanGreatGrandParent">Buyut</option>
+          <option value="$lanGreatGrandChildern">Cicit</option>
+          <option value="$lanAncestor">Bethara Hyang Guru</option>
+        </select>
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardianaddress" class="w3-text-teal">Alamat</label>
+        <input id="guardianaddress" class="w3-input w3-border  0" type="text">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardiannumber" class="w3-text-teal">No Telepon</label>
+        <input id="guardiannumber" class="w3-input w3-border  0" type="tel">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardianemail" class="w3-text-teal">Surel</label>
+        <input id="guardianemail" class="w3-input w3-border  0" type="email">
+        <span class=""></span>
+      </div>
+      <div class="  ">
+        <label for="guardianoccupation" class="w3-text-teal">Pekerjaan</label>
+        <input list="list_guardianoccupation" id="guardianoccupation" class="w3-input w3-border  0" type="datalist">
+        <datalist id="list_guardianoccupation"></datalist>
+        <span class=""></span>
+      </div>
+    </div>
+  </div>
+  <div class="w3-row">
+    <div class="w3-col m6 w3-center">
+      <input class="w3-button w3-blue " value="Kirim" type="submit">
+    </div>
+    <div class="w3-col m6 w3-center">
+      <button type="reset" class="w3-button w3-blue ">Hapus</button>
+    </div>
+  </div>
+</form>
+<script>
+function BukaTutup(id) {
+  var x = document.getElementById(id);
+  if (x.className.indexOf("w3-hide") == -1) {
+      x.className += " w3-hide";
+  } else {
+      x.className = x.className.replace(" w3-hide", "");
+  }
+}
+</script>
 </body>
 </html>
