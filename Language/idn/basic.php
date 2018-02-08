@@ -183,6 +183,7 @@ $lanSearchForm='Cari Pasien';
 $lanPatientDetailFormHeader='Data Pasien';
 $lanYear = "Tahun";
 $lanMonth = "Bulan";
+$lanSave = "Simpan";
 
 
 //-------------------Visit--------------------------
@@ -306,4 +307,5 @@ $lanAdm="Lewat?";
 $lanDrugRule="Kapan?";
 $lanDrugExtra="Catatan Tambahan";
 $lanSOAPMed="Medikamentosa";
+$lanNewMedicineHeader="Buat Obat Baru";
 ?>

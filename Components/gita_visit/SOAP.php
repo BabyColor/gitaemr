@@ -1,4 +1,6 @@
 <?
+include "Components/gita_visit/newMedicine.html";
+echo "<button id='newMed'>Modal</button>";
 defined('GitaEmr') or Die($UnatuhorizedAccess);
 
 if(bouncer()){
@@ -210,9 +212,12 @@ if(bouncer()){
 			foreach($Singkatan as $x){
 				$AbvJonson[$x['abv']]['name']=$x['name'];
 				$AbvJonson[$x['abv']]['exp']=$x['explanation'];
+				$AbvJonson[$x['abv']]['place']=$x['place'];
 			}
 			$AbvJonson = json_encode($AbvJonson);
 			echo "<div id='abv_jonson' class='w3-hide' hidden>$AbvJonson</div>";
+
+			
 
 
 			//Language
@@ -311,10 +316,25 @@ if(bouncer()){
 				$Fields['Group_$lanSOAPAssesment']=Pokeball($Fields['Group_$lanSOAPAssesment'],'ob_dx_note',array('New9'=>$New),'After');
 
 				///Planning
+				$New="<div id=editedP class='w3-row w3-hide'>
+						<div id=PID hidden></div>
+						<div id=PName class='w3-col m6'></div>
+						<div id=PForm class='w3-col m3'></div>
+						<div id=PNoDiv class='w3-col m3'>
+							<label for=PNo>NO </label>
+							<input type=number id=PNo hidden />
+							<span hidden id='DataListHolder'></span>
+						</div>
+						</div>";
+				$Fields['Group_$lanSOAPPlaning']=Pokeball($Fields['Group_$lanSOAPPlaning'],'PlanningF',array('New871'=>$New),'After');
+
 				$New="<div id='MedAttr' class='w3-row w3-cell-row'>";
 				$Fields['Group_$lanSOAPPlaning']=Pokeball($Fields['Group_$lanSOAPPlaning'],'ob_qday',array('New33'=>$New),'Before');
 				$New="</div>";
 				$Fields['Group_$lanSOAPPlaning']=Pokeball($Fields['Group_$lanSOAPPlaning'],'ob_extra',array('New34'=>$New),'After');
+
+				$New="<ul id=teraphy class='w3-ul w3-card-4' style=width:300px></ul>";
+				$Fields['Group_$lanSOAPPlaning']=Pokeball($Fields['Group_$lanSOAPPlaning'],'New34',array('New3412'=>$New),'After');
 	
 	
 			//Fam History
@@ -478,5 +498,5 @@ function SOAPField($Fields){
 //------------------------DAUH TUKAD SCRIPT-------------------------
 */
 
-
+echo "<script src=Engine/medicine.js></script>";
 ?>

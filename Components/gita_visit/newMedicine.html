@@ -1,0 +1,34 @@
+<div id="newMedicine" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom">
+  
+      <header class="w3-container w3-teal">
+        <span onclick="document.getElementById('newMedicine').style.display='none'"
+        class="w3-button w3-display-topright">&times;</span>
+        <h2><?php echo $GLOBALS['lanNewMedicineHeader'] ?></h2>
+      </header>
+  
+      <div class="w3-container">
+        <label for="Name">Name</label>
+            <input type="text" id="Name" class='w3-input' >
+        <label for="Name">Type</label>
+            <input type="text" id="Type" class='w3-input' >
+        <label for="Name">Comp</label>
+            <input type="text" id="Comp" class='w3-input' >
+        <label for="Name">Form Name</label>
+            <input type="text" id="Form_N" class='w3-input' >
+        <label for="Name">Form</label>
+            <input type="text" id="Form" class='w3-input' >
+        <label for="Name">Adm</label>
+            <input type="text" id="Adm" class='w3-input' >
+        <label for="Name">Rule</label>
+            <input type="text" id="Rule" class='w3-input' >
+        <label for="Name">Ext</label>
+            <input type="text" id="Ext" class='w3-input' >
+      </div>
+  
+      <footer class="w3-container w3-teal">
+        <p class='w3-button' ><?php echo $GLOBALS['lanSave'] ?></p>
+      </footer>
+  
+    </div>
+  </div> 
