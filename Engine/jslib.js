@@ -18,7 +18,13 @@ function Echidona(){
   })
 }
 
-function Pokeball(ewe, ena, ene, atuk) {
+
+// Make list of entered data in multi line input (like symptomp, diagnosis, etc)
+// ewe = text to be displayed
+// ena = <ul> id
+// ene = input id (to be cleaned on list inserting and focused back)
+// atuk = array/object to be converted to JSON
+function Pokeball(ewe, ena, ene, atuk=[]) {
   var ran = Math.random();
   var lis = $('<li></li>').html(ewe);
   $(lis).addClass('w3-container w3-padding-small');
@@ -39,6 +45,7 @@ function Pokeball(ewe, ena, ene, atuk) {
     $(this).parent().addClass('w3-red');
     $(this).parent().remove();
   });
+  $(ene).focus();
 }
 
 function FieldSwitch(e) {

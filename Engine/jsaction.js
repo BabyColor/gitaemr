@@ -45,25 +45,21 @@ $(dxsamson).each(function(k, v) {
 
 
   $('#gita_visit_soap').submit(function() {
-		var dxjonson = $('#DXD .jonson').toArray();
-		jonson = jQuery.map(dxjonson, function(a) {
-			return $(a).text();
-		});
-		 var oye2 = JSON.stringify(jonson);
-		 var subjonson = $('#DXD .jonson').toArray();
-		jonson = jQuery.map(subjonson, function(a) {
-			return $(a).text();
-		});
-		 var oye1 = JSON.stringify(jonson);
-			var oye3 = li2json($('#TXD').text());
+		var oye1 = JSON.stringify(jonson);
 			$('#SubjectH').val(oye1);
-			$('#DXH').val(oye2);
-			$('#TXH').val(oye3);
+			$('#DXH').val(li2json('DXD'));
+			$('#PXH').val(li2json('PXD'));
+			$('#NewMedH').val(li2json('NewMedData'));
 		});
 		
-	function li2json(li){
-		var oye = li.split(' [X]')
-		return JSON.stringify(oye);
+	//Make json from list of div class .jonson on each list
+	function li2json(DList){
+		var jonson = $('#'+DList+' .jonson').toArray();
+		jonson = jQuery.map(jonson, function(a) {
+			return $(a).text();
+		});
+		console.log(jonson);
+		return jonson;
 	 }
 
 //Subject Field

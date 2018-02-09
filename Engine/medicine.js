@@ -1,9 +1,18 @@
-console.log ("MEDICINE LODADE");
-
 //Get the JSON from PHP thru element div id=planning_jonson (Medicine List)
 var medlist = JSON.parse($('#planning_jonson').text());
-//Get the JSON from PHP thru element div id=abv_jonson (Abbrevation List)
-var Abv = JSON.parse($("#abv_jonson").text());
+//Get the JSON from PHP thru element div id=abv_jonson (Abbrevation List) in var AbvOri, and make variable Abv into objetcs of Abv = {'name':name, 'exp':explanation}
+var AbvOri = JSON.parse($("#abv_jonson").text());
+var Abv={};
+for(var yaya = 0 ; yaya < AbvOri.length ; yaya++){
+  Abv[AbvOri[yaya].abv] = { "name":AbvOri[yaya].name ,  "exp":AbvOri[yaya].explanation };
+}
+//Medicine form name
+var MFormName = JSON.parse($("#MFormN_jonson").text());
+//Medicine type
+var MType = JSON.parse($("#MType_jonson").text());
+
+
+
 //Turn medlist into complete object along with json inside the json inside the json
 for (var x = 0; x < medlist.length; x++) {
   if (medlist[x].comp != "") {
@@ -199,10 +208,10 @@ function CompList(Med){
 //how = how many? if left null, all of the result
 
 function FetchArray(arr,prop,cond,how){
-	var callBack= []; 
-  if(!how || how==null){ how = arr.length; }
+  var callBack= []; 
+  if(!how || how==null || how==undefined){ how=arr.length; }
 	for(var x = 0 ; x < arr.length ; x++){
-  	if(arr[x][prop]==cond){ callBack.push(arr[x]); how--; }
+    if(arr[x][prop]==cond){ callBack.push(arr[x]); how--; }
     if(how <= 0) { break; }
   }
   return callBack;
@@ -221,6 +230,66 @@ function Resep(did, name, form) {
  // console.log("AEWA");
  // $("#TempMedJonson").text(jonson);
 }
+
+//Make <option></option> from array
+// data = the array of object [{obj1},{obj2},..]
+// val = which property to become option element's value?
+// txt = which property to become option element's text?
+function MakeOption(data,val,txt){
+  var Retur = [];
+  for(var o = 0 ; o < data.length ; o++){
+    Retur.push("<option value='"+ data[o][val] +"'>"+ data[o][txt] +"</option>");
+  }
+  return Retur;
+}
+
+//New Medicine Modal on call
+//medName = The new med name
+function NewMedModal(medName=""){
+  $("#NewName").val(medName);
+  //Make list of composition
+  var newCmopList=MakeCompList(medlist);
+  //Make abbeverabalahabalah list according to their group
+  var AbbForm = FetchArray(AbvOri,'place','form');
+  var AbbRule = FetchArray(AbvOri,'place','when');
+  var AbbAdm = FetchArray(AbvOri,'place','where');
+  var AbbExtra = FetchArray(AbvOri,'place','note');
+
+  
+  //make options and assign to datalist of each input
+  $("#NewAbvForm").append(MakeOption(AbbForm,'abv','explanation'));
+  $("#NewAbvRule").append(MakeOption(AbbRule,'abv','explanation'));
+  $("#NewAbvAdm").append(MakeOption(AbbAdm,'abv','explanation'));
+  $("#NewAbvExt").append(MakeOption(AbbExtra,'abv','explanation'));
+  $("#NewFormName").append(MakeOption(MFormName,'form_n','form_n'));
+  $("#NewCompList").append(MakeOption(newCmopList,'name','name'));
+  $("#NewTypeList").append(MakeOption(MType,'type','type'));
+
+  //Open Modal window
+  $("#newMedicine").css('display','block')
+}
+
+//Make composition list
+//med = variable containing medicine list from MySQL table com_gita_medicine
+function MakeCompList(med){
+  var CompListX="";
+  CompListX = [];
+  var match=false;
+  for(var p = 0 ; p < med.length ; p++){
+    for(var q = 0 ; q < med[p].comp.length ; q++){
+      if(FetchArray(CompListX,'name',med[p].comp[q].name,1) < 1){
+        CompListX.push({'name':med[p].comp[q].name})
+      }
+    }
+  }
+  
+  return CompListX;
+}
+
+
+
+
+
 
 
 
@@ -261,7 +330,7 @@ $('#PlanningF').keydown(function(e) {
     break;
   case 13:
   	//TempMed = newlist[MedCur];
-      if(!newlist[0] || newlist[0]=='') { $("#newMedicine").css('display','block'); }
+      if(!newlist[0] || newlist[0]=='') { NewMedModal($(this).val()); }
       Resep(newlist[MedCur].id,newlist[MedCur].name,newlist[MedCur].form_n);
     break;
   default:
@@ -433,4 +502,77 @@ $("#ob_extra").keyup(function(e){
   }
 });
 
-$("#newMed").click(function(){$("#newMedicine").css('display','block')});
+// New Med Modal Listener
+$("#NewForm , #NewRule , #NewAdm , #NewExt").keyup(function(e){
+  if(e.which == 13){
+    var ABBV = FetchArray(AbvOri,'abv',$(this).val(),1)[0];
+    Pokeball($(this).val() +" (" + ABBV.name +") : " + ABBV.explanation , "#"+$(this).prop('id')+"D" ,"#"+$(this).prop('id'),$(this).val());
+  }
+});
+
+$("#NewCompF , #NewCompD, #NewCompP, #NewCompPer").keyup(function(e){
+  if(e.which == 13){
+    console.log("ENTER");
+    if(!$("#NewCompF").val() || $("#NewCompF").val()==""){ $("#NewCompF").focus(); return; }
+    if(!$("#NewCompD").val() ||$("#NewCompD").val()==""){ $("#NewCompD").focus(); return; }
+    console.log("ENTER OKE");
+    var Comp = $("#NewCompF").val();
+    var Dose = $("#NewCompD").val();
+    var Prosent = $("#NewCompP").val();
+    var Per = $("#NewCompPer").val();
+    var Unit, DPer;
+    if(Prosent==true) {  Unit = "%"; } else {  Unit = "mg";}
+    if(Per == "") { DPer = ""; } else { DPer = " per "+Per; }
+    console.log([Comp,Dose,Prosent,Per,Unit,DPer]);
+    var jonson = {'name':Comp,'amount':Dose,'prosent':Prosent,'per':Per};
+    console.log(Comp + " " + Dose + Unit + DPer);
+    Pokeball(Comp + " " + Dose + Unit + DPer,"#NewCompDD","#NewCompF",jonson);
+    $("#NewCompF").val("");
+    $("#NewCompD").val("");
+    $("#NewCompPer").val("");
+  }
+});
+
+$("#NewMedSave").click(function(){
+  var DrugID = "NEW_"+Math.random();
+  Resep(DrugID, $("#NewName").val() , $("#Form_N").val())
+
+  var compJonson = $('#NewCompDD .jonson').toArray();
+  compJonson = jQuery.map(compJonson, function(a) {
+    return $(a).text();
+  });
+
+  var formJonson = $('#NewFormD .jonson').toArray();
+  formJonson = jQuery.map(formJonson, function(a) {
+    return $(a).text();
+  });
+
+  var admJonson = $('#NewAdmD .jonson').toArray();
+  admJonson = jQuery.map(admJonson, function(a) {
+    return $(a).text();
+  });
+
+  var ruleJonson = $('#NewRuleD .jonson').toArray();
+  ruleJonson = jQuery.map(ruleJonson, function(a) {
+    return $(a).text();
+  });
+
+  var extJonson = $('#NewExtD .jonson').toArray();
+  extJonson = jQuery.map(extJonson, function(a) {
+    return $(a).text();
+  });
+  
+  var DrugData= {"id" : DrugID,
+                  "name" : $("#NewName").val(),
+                  "comp" : compJonson,
+                  "type" :  $("#NewType").val(),
+                  "form_n" :  $("#NewFormNameD").val(),
+                  "form" : formJonson,
+                  "adm" : admJonson,
+                  "rule" : ruleJonson,
+                  "ext" : extJonson
+                }
+  medlist.push(DrugData);
+  $("#NewMedData").append("<li class='jonson'>"+JSON.stringify(DrugData)+"</li>");
+  $("#newMedicine").attr('style',"display='none'")
+});

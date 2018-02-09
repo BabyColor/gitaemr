@@ -8,26 +8,58 @@
       </header>
   
       <div class="w3-container">
-        <label for="Name">Name</label>
-            <input type="text" id="Name" class='w3-input' >
-        <label for="Name">Type</label>
-            <input type="text" id="Type" class='w3-input' >
-        <label for="Name">Comp</label>
-            <input type="text" id="Comp" class='w3-input' >
-        <label for="Name">Form Name</label>
-            <input type="text" id="Form_N" class='w3-input' >
-        <label for="Name">Form</label>
-            <input type="text" id="Form" class='w3-input' >
-        <label for="Name">Adm</label>
-            <input type="text" id="Adm" class='w3-input' >
-        <label for="Name">Rule</label>
-            <input type="text" id="Rule" class='w3-input' >
-        <label for="Name">Ext</label>
-            <input type="text" id="Ext" class='w3-input' >
+        <label for="NewName">Name</label>
+            <input type="text" id="NewName" class='w3-input'>
+        <label for="NewType">Type</label>
+            <input type="text" id="NewType" class='w3-input' list="NewTypeList" >
+                <datalist id='NewTypeList'></datalist>
+        <div class='w3-row'>
+            <div class='w3-col m6'>
+                <label for="NewCompF">Comp</label>
+                    <input type="text" id="NewCompF" class='w3-input' list='NewCompList'>
+                        <datalist id='NewCompList'></datalist>
+            </div>
+            <div class="w3-col m2">
+                <label for="NewCompD">Dosis</label>
+                    <input type="number" id="NewCompD" class='w3-input'>
+            </div>
+            <div class="w3-col m2">
+                <label for="NewCompP">Satuan</label>
+                    <select id="NewCompP">
+                        <option value=FALSE>mg</option>
+                        <option value=TRUE>%</option>
+                    </select>
+            </div>
+            <div class="w3-col m2">
+                <label for="NewCompPer">Per</label>
+                    <input type="text" id="NewCompPer" class='w3-input'>
+            </div>
+        </div>
+        <ul id="NewCompDD" class="w3-ul"></ul>
+        <label for="Form_N">Form Name</label>
+            <input type="text" id="Form_N" class='w3-input' list='NewFormName'>
+                <datalist id='NewFormName'></datalist>
+            <ul id="NewFormNameD" class="w3-ul"></ul>
+        <label for="NewForm">Form</label>
+            <input type="text" id="NewForm" class='w3-input' list='NewAbvForm'>
+                <datalist id='NewAbvForm'></datalist> 
+            <ul id="NewFormD" class="w3-ul"></ul> 
+        <label for="NewAdm">Adm</label>
+            <input type="text" id="NewAdm" class='w3-input' list='NewAbvAdm'>
+                <datalist id='NewAbvAdm'></datalist>
+            <ul id="NewAdmD" class="w3-ul"></ul>
+        <label for="NewRule">Rule</label>
+            <input type="text" id="NewRule" class='w3-input' list='NewAbvRule'>
+                <datalist id='NewAbvRule'></datalist>
+            <ul id="NewRuleD" class="w3-ul"></ul>
+        <label for="NewExt">Ext</label>
+            <input type="text" id="NewExt" class='w3-input' list='NewAbvExt'>
+                <datalist id='NewAbvExt'></datalist>
+            <ul id="NewExtD" class="w3-ul"></ul>
       </div>
   
       <footer class="w3-container w3-teal">
-        <p class='w3-button' ><?php echo $GLOBALS['lanSave'] ?></p>
+        <p class='w3-button' id='NewMedSave' ><?php echo $GLOBALS['lanSave'] ?></p>
       </footer>
   
     </div>

@@ -208,16 +208,16 @@ if(bouncer()){
 			echo "<div id='planning_jonson' class='w3-hide' hidden>$Planning</div>";
 			
 			$Abv = new GoodBoi('com_gita_medicine_abbreviation');
-			$Singkatan = $Abv -> GoFetch();
-			foreach($Singkatan as $x){
-				$AbvJonson[$x['abv']]['name']=$x['name'];
-				$AbvJonson[$x['abv']]['exp']=$x['explanation'];
-				$AbvJonson[$x['abv']]['place']=$x['place'];
-			}
-			$AbvJonson = json_encode($AbvJonson);
-			echo "<div id='abv_jonson' class='w3-hide' hidden>$AbvJonson</div>";
+			$Abv = $Abv -> GoFetch();
+			$Abv = json_encode($Abv);
+			echo "<div id='abv_jonson' class='w3-hide' hidden>$Abv</div>";
 
-			
+			$MFormN = $Plan -> GoFetch(null,"DISTINCT form_n");
+			$MFormN = json_encode($MFormN);
+			echo "<div id='MFormN_jonson' class='w3-hide' hidden>$MFormN</div>";
+			$MType = $Plan -> GoFetch(null,"DISTINCT type");
+			$MType = json_encode($MType);
+			echo "<div id='MType_jonson' class='w3-hide' hidden>$MType</div>";
 
 
 			//Language
@@ -293,9 +293,9 @@ if(bouncer()){
 			//Diagnosis
 			$New="
 					<ul class='w3-ul' id=DXD>
-					". DXFList($PSx[0]['PastIllness'],$GLOBALS['viewsonic']) ."
+					". DXFList($PSx[0]['Diagnosis'],$GLOBALS['viewsonic']) ."
 					</ul>
-					<input type=hidden id=DXH name=PastIllness>
+					<input type=hidden id=DXH name=DXH>
 				";
 			$Fields['Group_$lanSOAPAssesment']=Pokeball($Fields['Group_$lanSOAPAssesment'],'ob_dx_note',array('New2'=>$New),'After');
 
@@ -304,7 +304,9 @@ if(bouncer()){
 					<ul class='w3-ul' id=PXD>
 					". DXFList($PSx[0]['soap_planning'],$GLOBALS['viewsonic']) ."
 					</ul>
-					<input type=hidden id=PXH name=soap_planning>
+					<input type=hidden id=PXH name=PXH>
+					<ul id=NewMedData hidden></ul>
+					<input type=hidden id=NewMedH name=NewMedH>
 				";
 			$Fields['Group_$lanSOAPPlaning']=Pokeball($Fields['Group_$lanSOAPPlaning'],'ob_extra',array('New193'=>$New),'After');
 
