@@ -1,12 +1,12 @@
 <?
 include "Components/gita_visit/newMedicine.html";
-echo "<button id='newMed'>Modal</button>";
+
 defined('GitaEmr') or Die($UnatuhorizedAccess);
 
 if(bouncer()){
-
+	$MainTableName="com_gita_visit_soap";
     $layout= new GoodBoi('layout'); //Declare an Object "$su_field" with class that used to connect to database with table "pre_layout". GoodBoi is class used for MySQL DB things. You get it? Good Boi...
-	$MainTable = new GoodBoi('com_gita_visit_soap'); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
+	$MainTable = new GoodBoi($MainTableName); //Open MySQL connection to 'Staff' Table (Mainly for input to DB)
 	$option = new GoodBoi ('list_list');
 	$symtomp = new GoodBoi ('com_gita_visit_symptomp');
 	$diagnosis = new GoodBoi ('com_gita_visit_diagnosis');
@@ -52,11 +52,36 @@ if(bouncer()){
 
 	
 		$registered=array_merge ($newera,$Additional);
+		$Remover=array(
+			'stat_BMI_int',
+			'DXF',
+			'PlanningF',
+			'SubjectF',
+			'vt_BP',
+		//	'NewMedH'
+		);
+		$RemoverLike=array('ob_');
+		$registered=PhoenixDown($registered);
+
+		//New Diagnosis
+		//1. Check if Diagnosis is new.
+		//2. If yes, insert it into diagnosis list
+		DxEater($registered['DXH']);
+
+		//New Medicine
+		
+
+
+
+
+
+
+		$registered=RemahRemah($registered,$Remover,$RemoverLike);
 		
 		
 		//DEBUG
 		if(!empty($_SESSION['DeFlea'])){ 
-			mark(array2arrow($registered," ==> ","<br>"),"Refined POST<br>");
+			mark($registered,"Refined POST");
 		}
 
 
@@ -81,8 +106,7 @@ if(bouncer()){
 		if(empty($Validation->SignUpError)){ // Register if no error occured 
 			
 			
-			$BARK= new Snorlax ($Tid,$Field,$registered,'New',$MainTable);
-			
+			$BARK= new Snorlax ($Tid,$MainTableName,$registered,null,'New',$MainTable);
 			OkDialog($lanNewVisitT,$lanNewVisitC);
 
 			mark($NewDex,"LATEST VISIT ID");
@@ -152,7 +176,7 @@ if(bouncer()){
 			//}
 			$Forms['grouping']= History($Forms['grouping']);
 			*/
-			$Forms = new Smeargle($FieldID,$viewsonic,array('FHeader'=>$lanPatientDetailFormHeader,'DataTable'=>$MainTable,'DataKey'=>$Tid,'DataID'=>$PatientID));
+			$Forms = new Smeargle($FieldID,$viewsonic,array('FHeader'=>$lanPatientDetailFormHeader,'DataTable'=>$MainTableName,'DataKey'=>$Tid,'DataID'=>$PatientID));
 			$Forms = $Forms -> Start();
 			$Forms= DauhTukadScript($Forms); 
 			markA($Forms,"FORMS");
@@ -368,16 +392,10 @@ if(bouncer()){
 			return $Fields;
 		}
 		
-		function RemahRemah($crumb){
-			foreach($crumb as $y => $x){
-				if(strpos($y, 'ob_') !== false || in_array($y,array('allergies','allergies_reaction','DXF','FDXF'))){
-					unset($crumb[$y]);
-				}
-			}
-			return $crumb;
-		}
+		
 		$LogContent=array2arrow($registered); //For Logging
 
+		echo "<button id='LOLOK'>Modal</button>";
 	/*
 	=====================================================================================
 	// -----------------------------------Draw Signup Form---------------------------

@@ -45,8 +45,7 @@ $(dxsamson).each(function(k, v) {
 
 
   $('#gita_visit_soap').submit(function() {
-		var oye1 = JSON.stringify(jonson);
-			$('#SubjectH').val(oye1);
+			$('#SubjectH').val(li2json('SubjectD'));
 			$('#DXH').val(li2json('DXD'));
 			$('#PXH').val(li2json('PXD'));
 			$('#NewMedH').val(li2json('NewMedData'));
@@ -58,6 +57,7 @@ $(dxsamson).each(function(k, v) {
 		jonson = jQuery.map(jonson, function(a) {
 			return $(a).text();
 		});
+		jonson = JSON.stringify(jonson);
 		console.log(jonson);
 		return jonson;
 	 }
@@ -92,7 +92,7 @@ $(dxsamson).each(function(k, v) {
 			for(var i = 8; i <= (tuksplit.length - 1); i++) {jon['additional'] += "," +  tuksplit[i]; } 
 
 
-		Pokeball(ver, '#SubjectD', '#SubjectF', JSON.stringify(jon));				
+		Pokeball(ver, '#SubjectD', '#SubjectF', jon);				
 		}	
 	// When comma is used
    vanir(tuk, JSON.parse($('#lanSymptomp').text()));  });
@@ -154,7 +154,6 @@ $(dxsamson).each(function(k, v) {
 	var Wg = parseInt($('#stat_weight').val());
 	var Hg = parseInt($('#stat_height').val());
 	var BMI = BMICal(Wg, Hg);
-	console.log("WEIH");
 	$('#stat_BMI').val(BMI);
 	$('#auto_stat_BMI').text(BMI);
 	var BMII = BMIInt(BMI);
@@ -701,3 +700,17 @@ function BukaTutup(id) {
         x.className = x.className.replace(" w3-hide", "");
     }
 }
+
+
+
+
+///TESTER
+$('#LOLOK').on('click', function() {
+	//var oye1 = JSON.stringify(jonson);
+		$('#SubjectH').val(li2json('SubjectD'));
+		$('#DXH').val(li2json('DXD'));
+		$('#PXH').val(li2json('PXD'));
+		console.log(li2json('SubjectD'));
+		console.log(li2json('PXD'));
+		console.log(li2json('NewMedData'));
+	});

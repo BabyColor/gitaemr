@@ -234,6 +234,28 @@ function Empty2Null($Data){
     return 'null';
   }
 }
+
+
+//Put into data, if new medicine, and update attributes of already existed medicine
+//$Data = ARRAY of medicines
+//$New = ARRAY of New Medicines
+function NewMedicine($Data,$New){
+  $Data = PhoenixDown($Data);
+  //Check if there are new drugs, and add
+  foreach($New as $x){
+    $Ins=new Snorlax('id','com_gita_medicine',$x,null,'New',null,FALSE);
+    $NewID = $Ins -> IV();
+    foreach($Data as $b => $a){
+      if($a['id']==$x['id']){
+        $Data[$b]['id'] = $NewID; 
+        break;
+      }
+    } 
+  }
+  
+  //Check if attributes is new, and add
+  
+}
 /*
 ************************************************************************************************
              /<                                             
@@ -426,6 +448,39 @@ function RefinePost($Additional=null,$Remove=null,$Base=null){
   $registered=RemahRemah($registered);
 }
 
+
+//Remove specific key from an array, suefull to cleaning up the $_POST before inserting into MySQL
+		// $crumb = ARRAY The Proccesed Array
+		// $Remover = ARRAY of string, all keys that EQUAL the string will be removed
+		// $RemoverLike = ARRAY of string, all keys that CONTAIN the string will be removed 
+function RemahRemah($crumb,$Remover=null,$RemoverLike=null){
+  foreach($Remover as $x){
+    unset($crumb[$x]);
+  }
+  foreach($RemoverLike as $x){
+    foreach($crumb as $b=>$a){
+      if(strpos($b, $x) !== false){
+        unset($crumb[$b]);
+      }
+    }
+  }
+  return $crumb;
+}
+
+
+//Ressurect JSON into data (Array, Object) and all JSON inside the JSON inside the JSON...
+//$Data = ARRAY. All JSON inside the array, or including those inside another JSON, will be ressurected
+//$Keys = ARRAY. If defined, only the keys in this array ar resurrected, leaving other keys, whom might have other JSON, left dead as JSON corpses. Usefull if you want only specific keys to be converted while leave others json.
+function PhoenixDown($Data,$Keys=null){
+  foreach($Data as $y=>$x){
+    if($Keys){ if(!in_array($y,$Keys)){ continue; } } // If $Keys defined, skip if the keys isn't found on the $Keys Array
+    $Data[$y] = unJson($x);
+    if(is_array($Data[$y])){
+      $Data[$y] = PhoenixDown($Data[$y]);
+    }
+  }
+  return $Data;
+}
 /*
 ==========================================================================================================
 
@@ -1750,13 +1805,15 @@ class Snorlax{
   protected $NewData; // ARRAY contain the the submited data that different with the old data
   public $listfield; // ARRAY of field that not datalist type, but should be treated as datalist
    
-  function __Construct($DataID,$OriTab,$Data,$listfield=null,$Method='Edit',$TargetClass=null){
+  function __Construct($DataID,$OriTab,$Data,$listfield=null,$Method='Edit',$TargetClass=null,$Auto=TRUE){
     /*
     $DataID : Target Table's ID column (e.g. usrid for staff_list)
     $OriTab : Target Table name (e.g. staff_list)
     $Data : ARRAY of submited Data as (column=>value)
+    $listfield : ARRAY of field that not datalist type, but should be treated as datalist (For Adding to list_list or cust table)
     $Method : (New, Edit), Submited Data in array as column=>value
     $TargetClass : Object GoodBoi to target table
+    $Auto : If FALSE, the constructor won't do the inserting. Inserting job must manually declared, default is TRUE
     */
     
    $this->GoodBoi_Version = new GoodBoi("snorlax"); // Connect to snorlax DB
@@ -1769,14 +1826,16 @@ class Snorlax{
    $this->LaxIncense = array('timest'=>Date2SQL(),'culpirt'=>$Culpirt, 'culpirt_info'=>$CulpirtInfo, 'facility'=>$GLOBALS['SettingCurrentFacility'],'original_table'=>$OriTab, 'edited_id'=>$Data[$DataID]);
    $this->Data = $Data;
    Mark($Method,"SNORLAX");  //========================== DEBUG===========================
-   switch ($Method){
-     case 'Edit':
-      $this->EVs();
-      break;
-     case 'New';
-      $this->IVs();
-      break;
-   }
+   if($Auto){
+      switch ($Method){
+        case 'Edit':
+          $this->EVs();
+          break;
+        case 'New';
+          $this->IVs();
+          break;
+      }
+    }
   }
 
   function EVs(){
@@ -1824,8 +1883,9 @@ class Snorlax{
     }
     $DataOne= json_encode($DataOne);
     $VHC= array('edited_data'=>$DataOne,'version'=>'current','edited_id'=>$Pokeball) + $this->LaxIncense;
-    $this->GoodBoi_Version->GoBark($VHC);
+    $NewID = $this->GoodBoi_Version->GoBark($VHC);
     $BURK= new AddList ($this->Data, $this->listfield);
+    return $NewID
   }
 
   //1. Fetch column list with '1' [ColumnList] in Subversion DB where version=current AND edited_id= current edited id (ATR1) AND original_table = edited table (ATR2) [CurentVerRow].

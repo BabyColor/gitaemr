@@ -29,7 +29,7 @@ if(bouncer()){
 
 		$registered=array_merge ($newera,$Additional);
 		$registered=POSTName($registered);
-		$registered=RemahRemah($registered);
+		$registered=RemahRemah($registered,array('allergies','allergies_reaction','DXF','FDXF'),array('ob_'));
 		$registered['PastIllness']=DxEater($registered['PastIllness']);
 		$registered['FamillyHistories']=DxEater($registered['FamillyHistories']);
 		
@@ -266,14 +266,7 @@ if(bouncer()){
 		return $Fields;
 	}
 	
-	function RemahRemah($crumb){
-		foreach($crumb as $y => $x){
-			if(strpos($y, 'ob_') !== false || in_array($y,array('allergies','allergies_reaction','DXF','FDXF'))){
-				unset($crumb[$y]);
-			}
-		}
-		return $crumb;
-	}
+	
 
 
 	//------------------------DAUH TUKAD SCRIPT-------------------------
