@@ -1885,7 +1885,7 @@ class Snorlax{
     $VHC= array('edited_data'=>$DataOne,'version'=>'current','edited_id'=>$Pokeball) + $this->LaxIncense;
     $NewID = $this->GoodBoi_Version->GoBark($VHC);
     $BURK= new AddList ($this->Data, $this->listfield);
-    return $NewID
+    return $NewID;
   }
 
   //1. Fetch column list with '1' [ColumnList] in Subversion DB where version=current AND edited_id= current edited id (ATR1) AND original_table = edited table (ATR2) [CurentVerRow].
