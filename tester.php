@@ -3,7 +3,7 @@ if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
 Login(1);
 
-  mark(unJson('{"dx":"Anemia","location":"","type":"Hipo-Mikro","grade":"Sedang","stage":"","causa":"","note":""},{"dx":"Nephrolitiasis","location":"Dextra","type":"Staghorn","grade":"","stage":"","causa":"","note":""}'));
+mark(trim(" PPPP "));
 
 markA($_POST, "Raw POST ");
 

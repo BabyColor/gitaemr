@@ -107,7 +107,7 @@ function NameArrangement($FName,$MName,$LName,$Pre=null,$Post=null){
 }
 
 function ArraySerialize($A){
-  if (is_array($A)){ return json_encode($A); } else { return $A; }
+  if (is_array($A)){  return json_encode($A); } else { return $A; }
 }
 function ArrayUnserialize($A){
   $B=json_decode($A);
@@ -155,9 +155,123 @@ function NameSep($name){
 
 //For proccessin Diagnosis
 //Automatically detect wether the job is to write or read
-function DxEater($Alpha){
+function DxEater($Alpha,$Method='Dx'){
+  //$Alpha = [ARRAY] data of diagnosis, to WRITE (dx=>x,type=>x,grade=>x,grade=>x... etc) will return a JSON ("dxid":"id","note":"note") from the diagnosis table that matched the input and the note inputed, or to READ (dxid=>x,note=>x) will return an array of mysql fetch from diagnosis table with id of dxid (also with the note)
+  //$Method = The method, 'Dx' : Diagnosys || 'Sym' = Symptomp
+  
+  switch ($Method){
+    case 'Dx':
+      $EatTable = "com_gita_visit_diagnosis";
+      $idPsCol = "dx";
+    break;
+    case 'Sym':
+      $EatTable = "com_gita_visit_symptomp";
+      $idPsCol = "symptomp";
+    break;
+  }
+  
+  
+  $DB = new GoodBoi($EatTable);
+  $Beta = UnJson($Alpha);
+  $jonson=array();
+
+  foreach($Beta as $c=>$DxD){
+    
+    $DxD = UnJson($DxD);
+    foreach($DxD as $y=>$o){
+      $DxD[$y] = trim($o);
+    }
+      
+      /*
+        'dxid' structure => name_#(random)
+      */
+
+      // WRITER
+      /*
+        Flow:
+          1. Check if diagnosis already exist =>No? Make it
+          2. Check if type, grade, stage, and causa for that diagnosis exist? =>No? Make it
+          4. Get the 'dxid' as $dxid
+          5. Return JSON of array(['dxid'] and ['note'])
+      */
+      if(array_key_exists($idPsCol,$DxD)){ //Check if 'dx' key exist, therefore, the job is to WRITE
+        $Que = $DB->GoFetch(" WHERE $idPsCol ='". $DxD[$idPsCol] ."'");
+
+        switch ($Method){
+          case 'Dx':
+            $NewDX=array('dx'=>$DxD['dx'], 'type'=>$DxD['type'],'stage'=>$DxD['stage'],'grade'=>$DxD['grade'],'causa'=>$DxD['causa'],'location'=>$DxD['location']); 
+          break;
+          case 'Sym':
+            $NewDX=array('symptomp'=>$DxD['symptomp'], 'location'=>$DxD['location'],'reffered_pain'=>$DxD['reffered_pain'],'duration'=>$DxD['duration'],'frequency'=>$DxD['frequency'],'quality'=>$DxD['quality'],'worsened_by'=>$DxD['worsened_by'],'relieved_by'=>$DxD['relieved_by']); 
+          break;
+        }
+
+        //Aray of data to be inserted as new dx if new dx needed to inserted
+        array_map('Empty2Null',$DxD); //Return empty value as Null
+        
+
+        if($Que){ // #1 Check if diagnosis already exist
+          $dxid=$Que[0]['id'];
+          $dxidx=explode('_',$dxid);
+          $dxidx=$dxidx[0];
+
+          switch ($Method){
+            case 'Dx':
+              $FetchQ="WHERE dx='". $DxD['dx'] ."' AND type='". $DxD['type'] ."' AND stage='". $DxD['stage'] ."' AND grade='". $DxD['grade'] ."' AND causa='". $DxD['causa'] ."' AND location='". $DxD['location'] ."'";
+            break;
+            case 'Sym':
+              $FetchQ="WHERE symptomp='". $DxD['symptomp'] ."' AND location='". $DxD['location'] ."' AND reffered_pain='". $DxD['reffered_pain'] ."' AND duration='". $DxD['duration'] ."' AND frequency='". $DxD['frequency'] ."' AND quality='". $DxD['quality'] ."' AND worsened_by='". $DxD['worsened_by'] ."' AND relieved_by='". $DxD['relieved_by'] ."' "; 
+            break;
+          }
+          
+          $Que = $DB->GoFetch($FetchQ); 
+          $NewDX +=array('walkthrough'=>$Que[0]['walkthrough']);
+
+
+            if($Que){// #2 Check if diagnosis with indentical attributs already exist
+              $dxid=$Que[0]['id']; //#4
+            } 
+
+          else { //Write dx with new attributes
+            do { // Generate new 'dxid' with dxname+_random number, if already exist, repeat
+              $dxid=$dxidx ."_". rand(1,1000);
+            } while ($DB->GoFetch("WHERE id = '$dxid'"));
+            $NewDX +=array('id'=>$dxid);
+            new Snorlax('id',$EatTable,$NewDX,null,'New');
+          }
+        } 
+
+        else { //Wirte new dx
+          $dxid_pre=strtolower(str_replace(" ","-",$DxD['dx']));
+        while ($DB->GoFetch("WHERE dx LIKE '$dxid_pre%'")){// Generate new 'dxid' with dxname+_random number, if already exist same dx prefix, use dxname+randomnumber+_randomnumber
+            $dxid_pre=$dxid_pre . rand(1,100);
+          }
+          $dxid=$dxid_pre . "_1";
+          $NewDX +=array('id'=>$dxid);
+          new Snorlax('id',$EatTable,$NewDX,null,'New');
+        }
+        $Inserted = array("dxid"=>$dxid, "note"=>$DxD['note']);
+        if($DxD['susp']) { $Inserted += array("suspect"=>TRUE); }
+        array_push($jonson,json_encode($Inserted)); // #5 Return WRITER
+      } 
+      
+      // READER
+      elseif(array_key_exists('dxid',$DxD)){ //Check if 'dxid' key exist, therefore, the job is to READ
+        $Que = $DB->GoFetch("WHERE id='". $DxD['dxid'] ."'");
+        $Qlue[$c] = $Que[0] + array('Thisnote'=>$DxD['note'],'Susp'=>$DxD['suspect']);
+      }
+  }
+  if($jonson) { return json_encode($jonson); }
+  if($Qlue) { return $Qlue; }
+  
+}
+
+
+//For proccessin Symptomp
+//Automatically detect wether the job is to write or read
+function SympEater($Alpha){
   //$DxD = [ARRAY] data of diagnosis, to WRITE (dx=>x,type=>x,grade=>x,grade=>x... etc) will return a JSON ("dxid":"id","note":"note") from the diagnosis table that matched the input and the note inputed, or to READ (dxid=>x,note=>x) will return an array of mysql fetch from diagnosis table with id of dxid (also with the note)
-  $DB = new GoodBoi("com_gita_visit_diagnosis");
+  $DB = new GoodBoi("com_gita_visit_symptomp");
   $Beta = UnJson($Alpha);
   $jonson=array();
   foreach($Beta as $c=>$DxD){
@@ -230,31 +344,88 @@ function DxEater($Alpha){
 
 // Turn empty string into null (Good for MySQL)
 function Empty2Null($Data){
-  if(!$Data){
+  if(!$Data || $Data=''){
     return 'null';
   }
 }
 
+//JSON to list. Turn each JSON element as <li> with random number id
+//$JSON = JSON ==> Structure ==> array(array(key=>val),array(key=>val),array(key=>val),...)
+//$Disp = ARRAY Displayed Key and their connector word : array(array('PRE','key name','POST')). Ex: will be displayed as "<li>PRE key POST</li> (without spacing)"
+/////////ARGUMENTS
+//////idPrefix = Prefix of list ID (List id will be "prefix $listIdKey" for each list)
+//////listIdKey = Wich Key will be used to determined the each list's ID, if empty, will generate random number instead
+//////liClass = Class of each list
+//////preClass = Class of connector word
+//////postClass = Class of connector word
+//CALLBACK: the list(s) will be returned as array
+
+function JSON2List($JSON,$Display,$Arguments=array('idPrefix'=>'list_','class'=>'w3-list')){
+  $UsedID = array();
+  foreach($JSON as $y => $x){
+    //Make list ID
+    $liID = $Arguments['listIdKey']? $x[$Arguments['listIdKey']] : rand(1,99999) ;
+    while(in_array($liID,$UsedID)){
+      $liID = rand(1,99999) ;
+    }
+    
+    array_push($UsedID,$liID);
+    $liID = $Arguments['idPrefix'] . $liID;
+    mark($x,"JSON");
+    $list[$y] = "<li id='" . $liID ."'>";
+    foreach ($Display as $a){
+      if(!$x[$a[1]]) { continue; }
+      $list[$y] .= "<span class='". $Arguments['preClass'] ."'>". $a[0] . "</span>" . $x[$a[1]] . "<span class='". $Arguments['postClass'] ."'>" . $a[2] . "</span>";
+    }
+    $list[$y] .= "</li>";
+    
+  }
+  mark($list,"LIST ");
+  return $list;
+}
 
 //Put into data, if new medicine, and update attributes of already existed medicine
 //$Data = ARRAY of medicines
 //$New = ARRAY of New Medicines
 function NewMedicine($Data,$New){
   $Data = PhoenixDown($Data);
+  $Attrib = array('form','adm','rule','ext');
+  $MyMed = new GoodBoi('com_gita_medicine');
   //Check if there are new drugs, and add
   foreach($New as $x){
-    $Ins=new Snorlax('id','com_gita_medicine',$x,null,'New',null,FALSE);
-    $NewID = $Ins -> IV();
+    //Check if already identical drug?
+    $CheckMed = $MyMed -> GoFetch(array('name'=>$x['name'],'comp'=>ArraySerialize($x['comp']),'type'=>$x['type'], 'form_n'=>$x['form_n'],'form'=>ArraySerialize($x['form']),'adm'=>ArraySerialize($x['adm']),'rule'=>ArraySerialize($x['rule']),'ext'=>ArraySerialize($x['ext'])));
+    if($CheckMed){ 
+      $NewID = $CheckMed[0]['id'];
+     } else {
+      $OldID = $x['id'];
+      unset($x['id']);
+      $x = array_map('ArraySerialize',$x);
+      $Ins=new Snorlax('id','com_gita_medicine',$x,null,'New',null,FALSE);
+      $NewID = $Ins -> IVs();
+    }
     foreach($Data as $b => $a){
       if($a['id']==$x['id']){
         $Data[$b]['id'] = $NewID; 
         break;
       }
-    } 
+    }
   }
-  
   //Check if attributes is new, and add
-  
+  foreach($Data as $x){
+    if(strrpos( $x['id'],'NEW_')!==FALSE){ continue; }
+    $MedData = $MyMed -> GoFetch("WHERE id = '". $x['id'] ."'");
+    $MedData = PhoenixDown($MedData);
+    foreach($Attrib as $a){
+      if(!$x[$a]) { continue; } // If inputed attributes is empty, skip current loop
+      if(!in_array($x[$a],$MedData[0][$a])){ // If inputed attributes is new (Not already in list, add them)
+        mark($MedData[0][$a],$x[$a]  ." IS NOT IN ARRAY YOO");
+        array_push($MedData[0][$a],$x[$a]);
+        $MyMed -> GoBurry(array($a=>json_encode($MedData[0][$a])),array('id'=>$x['id']));
+      }
+    }
+  }
+  return $Data;
 }
 /*
 ************************************************************************************************
@@ -715,6 +886,32 @@ function DXFList($Dx,$Job='view'){
   }
   return $PSxPIList;
 }
+
+// Draw Planning list on patient profile/visit data
+function SymList($Sx,$Job='view'){
+  $Sx = DxEater($Sx,'Sym');
+  mark($Sx,"SX");
+  foreach($Sx as $x){
+    $Display=array(
+      array("","symptomp"," "),
+      array($GLOBALS['lanSymtompSep1'] ." ","location",", "),
+      array($GLOBALS['lanSymtompSep2'] ." ","reffered_pain",", "),
+      array($GLOBALS['lanSymtompSep3'] ." ","duration",", "),
+      array($GLOBALS['lanSymtompSep4'] ." ","frequency",", "),
+      array($GLOBALS['lanSymtompSep5'] ." ","quality",", "),
+      array($GLOBALS['lanSymtompSep6'] ." ","worsened_by",", "),
+      array($GLOBALS['lanSymtompSep7'] ." ","relieved_by",", "),
+      array($GLOBALS['lanSymtompSep8'] ." ","Thisnote",""),
+    );
+  }
+  $Symptomp = JSON2List($Sx,$Display,array('listIdKey'=>'id','idPrefix'=>'symp_','preClass'=>'connector'));
+  mark($Symptomp,"SYMPTOMP");
+  foreach ($Symptomp as $x){
+    $list .= $x;
+  }
+return $list;
+}
+
 
 
 function AllergiesList($All,$Job='view'){
@@ -1349,7 +1546,16 @@ class GoodBoi{
   }
 
   
-  public function GoFetch ($selection,$Method="*"){ // Method to SELECT database 
+  public function GoFetch ($selection,$Method="*"){ 
+    // selection : STR The "WHERE" query, can also be ARRAY of (column=>searched value)  
+    if(is_array($selection)){
+      
+      foreach ($selection as $y=>$x){
+        if(!$syn) { $syn = "WHERE ". $y ."='". $x ."'";} else { $syn .= " AND ". $y ."='". $x ."'"; }
+        
+      }
+      $selection = $syn;
+    }
     $ewe = SniffButt();
     $query="SELECT ". $Method ." FROM ". $this->table ." $selection";
    
@@ -1371,9 +1577,11 @@ class GoodBoi{
     MarkA($sausage, __CLASS__ . "++++" . __FUNCTION__);
    //Debug
     $bun->query($sausage) ;
-    Mark($bun->error, "Wan! Wan! Wan!");
+    Mark($bun->error, "Wan! Wan! Wan!", $sausage);
     return $bun->insert_id;
   }
+
+
   public function GoCount($a){
     $RowCount=$this->GoFetch($a,"COUNT(*) as Total");
     //Debug
@@ -1384,12 +1592,18 @@ class GoodBoi{
    return $RowCount[0]['Total'];
   }
 
-  public function GoBurry($data,$selection){ //Method to Update SQL data (array(column=>new value,"WHERE bla bla bla"array(column=>new value))
+  public function GoBurry($data,$selection){ //Method to Update SQL data (array(column=>new value,"WHERE bla bla bla"[ can also be as array(column=>criteria val)])
     $bun = SniffButt();
     $dataesc= Blissey($data);
+    if(is_array($selection)){
+      $syn = "WHERE ";
+      foreach ($selection as $y=>$x){
+        $syn .= $y ."='". $x ."' ";
+      }
+      $selection = $syn;
+    }
     $filling=array2arrow($dataesc,"="," , ");
     $sausage= "UPDATE ". $this->table ." SET $filling $selection";
-   mark($sausage,"[","]");
     //Debug
    //Debug
    DeFlea($sausage, __CLASS__ . "++++" . __FUNCTION__);
@@ -1883,9 +2097,10 @@ class Snorlax{
     }
     $DataOne= json_encode($DataOne);
     $VHC= array('edited_data'=>$DataOne,'version'=>'current','edited_id'=>$Pokeball) + $this->LaxIncense;
-    $NewID = $this->GoodBoi_Version->GoBark($VHC);
+    $SVNNewID = $this->GoodBoi_Version->GoBark($VHC);
     $BURK= new AddList ($this->Data, $this->listfield);
-    return $NewID;
+    mark($Pokeball,"SNORLAX IV NEW ID ");
+    return $Pokeball;
   }
 
   //1. Fetch column list with '1' [ColumnList] in Subversion DB where version=current AND edited_id= current edited id (ATR1) AND original_table = edited table (ATR2) [CurentVerRow].

@@ -52,23 +52,25 @@ if(bouncer()){
 
 	
 		$registered=array_merge ($newera,$Additional);
+		$registered=PhoenixDown($registered);
+		$registered['PXH']=NewMedicine($registered['PXH'],$registered['NewMedH']);
 		$Remover=array(
 			'stat_BMI_int',
 			'DXF',
 			'PlanningF',
 			'SubjectF',
 			'vt_BP',
-		//	'NewMedH'
+			'NewMedH'
 		);
 		$RemoverLike=array('ob_');
-		$registered=PhoenixDown($registered);
+		
 
 		//New Diagnosis
 		//1. Check if Diagnosis is new.
 		//2. If yes, insert it into diagnosis list
-		DxEater($registered['DXH']);
+		$registered['DXH']=DxEater($registered['DXH']);
+		$registered['soap_subject']=DxEater($registered['soap_subject'],'Sym');
 
-		//New Medicine
 		
 
 
@@ -77,6 +79,8 @@ if(bouncer()){
 
 
 		$registered=RemahRemah($registered,$Remover,$RemoverLike);
+
+		$registered=array_map('ArraySerialize',$registered);
 		
 		
 		//DEBUG
@@ -107,8 +111,9 @@ if(bouncer()){
 			
 			
 			$BARK= new Snorlax ($Tid,$MainTableName,$registered,null,'New',$MainTable);
-			OkDialog($lanNewVisitT,$lanNewVisitC);
+			OkDialog($lanNewVisitT,$lanNewVisitC,FALSE);
 
+			$VisitID = $BARK -> IVs();
 			mark($NewDex,"LATEST VISIT ID");
 
 			$LogDes=$LogDes. "New Visit Added";
@@ -138,7 +143,7 @@ if(bouncer()){
 		if(empty($Validation->SignUpError)){ // Register if no error occured 
 			
 			
-			$BARK= new Snorlax ($Tid,'com_gita_patient',$registered,'Edit',$MainTable);
+			$BARK= new Snorlax ($Tid,$MainTableName,$registered,'Edit',$MainTable);
 
 			$OKContent = "lanEdited" . $NewUserApproved;
 			OkDialog($lanUserEditT,$lanUserEditC);
@@ -166,7 +171,7 @@ if(bouncer()){
 		switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
 			case "view":
 			case "edit":
-			$VisitID= $registered? $registered['visitid']: $_GET['dataid'];
+			$VisitID= $VisitID? $VisitID: $_GET['dataid'];
 			case "reg":
 					/*
 			$Form = new Smeargle($FieldID,$viewsonic,$Tid,$layout,$MainTable,$EditPatient);
@@ -176,7 +181,7 @@ if(bouncer()){
 			//}
 			$Forms['grouping']= History($Forms['grouping']);
 			*/
-			$Forms = new Smeargle($FieldID,$viewsonic,array('FHeader'=>$lanPatientDetailFormHeader,'DataTable'=>$MainTableName,'DataKey'=>$Tid,'DataID'=>$PatientID));
+			$Forms = new Smeargle($FieldID,$viewsonic,array('FHeader'=>$lanPatientDetailFormHeader,'DataTable'=>$MainTableName,'DataKey'=>$Tid,'DataID'=>$VisitID));
 			$Forms = $Forms -> Start();
 			$Forms= DauhTukadScript($Forms); 
 			markA($Forms,"FORMS");
@@ -184,7 +189,7 @@ if(bouncer()){
 			break;
 		case "list":
 			LogPatient($_GET['dataid']);
-			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, FName, LName, dob, sex, address, desa, district",8=>'FName',9=>"prefix, FName, LName", 4=>$Tid, 10=>"prefix,FName, LName"));
+			$List= new Listing($MainTable,$layout,array(7=>$MainTableName,6=>'form_id',2=>"visitid, time, patient, provider, assistant_provider, visit_type",8=>'patient',9=>"time, patient, provider, visit_type", 4=>$Tid));
 		
 			/*
 			foreach($List->Gardevoir as $y=>$x){
@@ -213,6 +218,8 @@ if(bouncer()){
 			//DB handling
 			////Return the DB as json and embed into hidden element to be passed to javascript
 			$symptomps=$GLOBALS['symtomp']->GoFetch();
+			//echo "<div id=sympsamson hidden>". json_encode($symptomps) ."</div>";
+
 			$diagnose=$GLOBALS['diagnosis']->GoFetch();
 			echo "<div id=dxsamson hidden>". json_encode($diagnose) ."</div>";
 
@@ -292,7 +299,7 @@ if(bouncer()){
 	
 			
 			//Default Value FDXD
-			$PSx=  $GLOBALS['VisitID']? $PxT->GoFetch("WHERE visitid='". $GLOBALS['VisitID'] ."'") : null;
+			$PSx=  $GLOBALS['VisitID']? $VxT->GoFetch("WHERE visitid='". $GLOBALS['VisitID'] ."'") : null;
 			
 
 
@@ -301,7 +308,7 @@ if(bouncer()){
 			// Subject
 
 				$New ="<ul class='w3-ul' id=SubjectD>
-					". DXFList($PSx[0]['soap_subject'],$GLOBALS['viewsonic']) ."
+					". SymList($PSx[0]['soap_subject'],$GLOBALS['viewsonic']) ."
 						</ul>
 					<div class=FieldList id='SubjectD'></div>
 					<input type=hidden id='SubjectH' value='empty' name='soap_subject'>	";
@@ -317,7 +324,7 @@ if(bouncer()){
 			//Diagnosis
 			$New="
 					<ul class='w3-ul' id=DXD>
-					". DXFList($PSx[0]['Diagnosis'],$GLOBALS['viewsonic']) ."
+					". DXFList($PSx[0]['DXH'],$GLOBALS['viewsonic']) ."
 					</ul>
 					<input type=hidden id=DXH name=DXH>
 				";
@@ -326,7 +333,7 @@ if(bouncer()){
 			//Planning
 			$New="
 					<ul class='w3-ul' id=PXD>
-					". DXFList($PSx[0]['soap_planning'],$GLOBALS['viewsonic']) ."
+					". DXFList($PSx[0]['FXH'],$GLOBALS['viewsonic']) ."
 					</ul>
 					<input type=hidden id=PXH name=PXH>
 					<ul id=NewMedData hidden></ul>
@@ -362,7 +369,7 @@ if(bouncer()){
 				$New="<ul id=teraphy class='w3-ul w3-card-4' style=width:300px></ul>";
 				$Fields['Group_$lanSOAPPlaning']=Pokeball($Fields['Group_$lanSOAPPlaning'],'New34',array('New3412'=>$New),'After');
 	
-	
+					
 			//Fam History
 			$New="
 					<ul class='w3-ul' id=FDXD>
@@ -390,8 +397,9 @@ if(bouncer()){
 				";
 			$Fields['Group_$lanGuardian']=Pokeball($Fields['Group_$lanGuardian'],'guardianid',array('New5'=>$New),'After');
 			return $Fields;
-		}
 		
+		
+		}
 		
 		$LogContent=array2arrow($registered); //For Logging
 

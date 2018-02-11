@@ -89,7 +89,7 @@ $(dxsamson).each(function(k, v) {
 			jon['quality']=tuksplit[5];
 			jon['worsened_by']=tuksplit[6];
 			jon['relieved_by']=tuksplit[7];
-			for(var i = 8; i <= (tuksplit.length - 1); i++) {jon['additional'] += "," +  tuksplit[i]; } 
+			for(var i = 8; i <= (tuksplit.length - 1); i++) {jon['note'] += "," +  tuksplit[i]; } 
 
 
 		Pokeball(ver, '#SubjectD', '#SubjectF', jon);				
