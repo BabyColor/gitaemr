@@ -356,12 +356,18 @@ function Empty2Null($Data){
 //////idPrefix = Prefix of list ID (List id will be "prefix $listIdKey" for each list)
 //////listIdKey = Wich Key will be used to determined the each list's ID, if empty, will generate random number instead
 //////liClass = Class of each list
+//////liClassSusp = Class of <li> for those with 'susp'
 //////preClass = Class of connector word
 //////postClass = Class of connector word
+//////removeButton = BOOLEAN, add remove button on each <li> end
+//////hiddenVal = BOOLEAN, Make hidden div with class 'jonson' on each which contain JSON of the <li>
+//////walkthrough = BOOLEAN, display walktrought hidden box
+
 //CALLBACK: the list(s) will be returned as array
 
 function JSON2List($JSON,$Display,$Arguments=array('idPrefix'=>'list_','class'=>'w3-list')){
   $UsedID = array();
+  $JSON = PhoenixDown($JSON);
   foreach($JSON as $y => $x){
     //Make list ID
     $liID = $Arguments['listIdKey']? $x[$Arguments['listIdKey']] : rand(1,99999) ;
@@ -372,11 +378,32 @@ function JSON2List($JSON,$Display,$Arguments=array('idPrefix'=>'list_','class'=>
     array_push($UsedID,$liID);
     $liID = $Arguments['idPrefix'] . $liID;
     mark($x,"JSON");
-    $list[$y] = "<li id='" . $liID ."'>";
+
+    $Class = $x['Susp']? $Arguments['liClassSusp'] : $Arguments['liClass'];
+
+    $list[$y] = "<li id='" . $liID ."' class='$Class' onclick=BukaTutup('walk_$liID')>";
     foreach ($Display as $a){
       if(!$x[$a[1]]) { continue; }
       $list[$y] .= "<span class='". $Arguments['preClass'] ."'>". $a[0] . "</span>" . $x[$a[1]] . "<span class='". $Arguments['postClass'] ."'>" . $a[2] . "</span>";
     }
+
+    if($Arguments['removeButton']){ // Add Remove button
+      $list[$y] .= "<span class='w3-right-align w3-text-red rem'> [X]<script>$('.rem').on('click', function() {
+        $(this).parent().addClass('w3-red');
+        $(this).parent().remove();
+      });</script></span>";
+    }
+
+    if($Arguments['hiddenVal']) { // Hidden jonson div
+      $list[$y] .= '<span class="jonson" hidden="">';
+      $list[$y] .= ArraySerialize($x);
+      $list[$y] .= '</span>';
+    }
+
+    if($Arguments['walkthrough']) { // walkthrough
+      $list[$y] .= "<div id='walk_$liID' class='w3-container w3-hide w3-white'>". walkthrough($x['walkthrough']) ."</div>";
+    }
+
     $list[$y] .= "</li>";
     
   }
@@ -860,7 +887,7 @@ function DXFList($Dx,$Job='view'){
 
     $PSxPIList .= "<li class='$Class' onclick=BukaTutup('$lid')>";
 
-    // Drawing the displayed diagnosis laong with their attributes if exist
+    // Drawing the displayed diagnosis along with their attributes if exist
    if($x['Susp']){ $PSxPIList .= 'Suspect '; }
    if($x['dx']){ $PSxPIList .= $x['dx']; }
    if($x['location']){ $PSxPIList .= ", ". $x['location'] ; }
@@ -888,26 +915,67 @@ function DXFList($Dx,$Job='view'){
 }
 
 // Draw Planning list on patient profile/visit data
-function SymList($Sx,$Job='view'){
-  $Sx = DxEater($Sx,'Sym');
+//$Sx = The Data (soap_subject, DXH, PXH,...)
+//$Mode = STR, either 'Sym' for symptmp, 'Dx' for Diagnosis, 'Med' for Medicine
+function SymList($Sx,$Mode,$Job='view'){
+  $Sx = DxEater($Sx,$Mode);
   mark($Sx,"SX");
-  foreach($Sx as $x){
-    $Display=array(
-      array("","symptomp"," "),
-      array($GLOBALS['lanSymtompSep1'] ." ","location",", "),
-      array($GLOBALS['lanSymtompSep2'] ." ","reffered_pain",", "),
-      array($GLOBALS['lanSymtompSep3'] ." ","duration",", "),
-      array($GLOBALS['lanSymtompSep4'] ." ","frequency",", "),
-      array($GLOBALS['lanSymtompSep5'] ." ","quality",", "),
-      array($GLOBALS['lanSymtompSep6'] ." ","worsened_by",", "),
-      array($GLOBALS['lanSymtompSep7'] ." ","relieved_by",", "),
-      array($GLOBALS['lanSymtompSep8'] ." ","Thisnote",""),
-    );
+
+  switch ($Mode) {
+    case "Sym":
+      $Display=array(
+        array("","symptomp"," "),
+        array($GLOBALS['lanSymtompSep1'] ." ","location",", "),
+        array($GLOBALS['lanSymtompSep2'] ." ","reffered_pain",", "),
+        array($GLOBALS['lanSymtompSep3'] ." ","duration",", "),
+        array($GLOBALS['lanSymtompSep4'] ." ","frequency",", "),
+        array($GLOBALS['lanSymtompSep5'] ." ","quality",", "),
+        array($GLOBALS['lanSymtompSep6'] ." ","worsened_by",", "),
+        array($GLOBALS['lanSymtompSep7'] ." ","relieved_by",", "),
+        array($GLOBALS['lanSymtompSep8'] ." : ","Thisnote",""),
+      );
+    break;
+    case "Dx":
+      $Display = array (
+        array("","dx"," "),
+        array(" ","location",", "),
+        array($GLOBALS['lanType'] ." ","type",", "),
+        array($GLOBALS['lanGrade'] ." ","grade",", "),
+        array($GLOBALS['lanStage'] ." ","stage",", "),
+        array($GLOBALS['lanCausa'] ." ","causa",", "),
+        array($GLOBALS['lanNotes'] ." : ","Thisnote",", ")
+      );
+    break;
+    case "Med":
+      $Display = array (
+        array("","name"," "),
+        array(" ","location",", "),
+        array($GLOBALS['lanType'] ." ","type",", "),
+        array($GLOBALS['lanGrade'] ." ","grade",", "),
+        array($GLOBALS['lanStage'] ." ","stage",", "),
+        array($GLOBALS['lanCausa'] ." ","causa",", "),
+        array($GLOBALS['lanNotes'] ." : ","Thisnote",", ")
+      );
+    break;
   }
-  $Symptomp = JSON2List($Sx,$Display,array('listIdKey'=>'id','idPrefix'=>'symp_','preClass'=>'connector'));
+  
+
+  $Arg = array('listIdKey'=>'id','idPrefix'=>'symp_','preClass'=>'connector');
+
+  $Arg['liClassSusp'] = 'w3-container w3-padding-small w3-hover-orange w3-text-orange w3-hover-text-white'; 
+  $Arg['liClass']  = 'w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white';
+
+  if(in_array($Job,array('edit','reg'))){
+    $Arg['removeButton'] =  $Arg['hiddenVal'] =  $Arg['walkthrough'] = TRUE;
+  }
+
+  $Symptomp = JSON2List($Sx,$Display,$Arg);
   mark($Symptomp,"SYMPTOMP");
+
   foreach ($Symptomp as $x){
-    $list .= $x;
+      //Close button only appear ig job is edit or reg
+      $list .= $x;
+
   }
 return $list;
 }

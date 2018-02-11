@@ -308,7 +308,7 @@ if(bouncer()){
 			// Subject
 
 				$New ="<ul class='w3-ul' id=SubjectD>
-					". SymList($PSx[0]['soap_subject'],$GLOBALS['viewsonic']) ."
+					". SymList($PSx[0]['soap_subject'],'Sym',$GLOBALS['viewsonic']) ."
 						</ul>
 					<div class=FieldList id='SubjectD'></div>
 					<input type=hidden id='SubjectH' value='empty' name='soap_subject'>	";
@@ -324,7 +324,7 @@ if(bouncer()){
 			//Diagnosis
 			$New="
 					<ul class='w3-ul' id=DXD>
-					". DXFList($PSx[0]['DXH'],$GLOBALS['viewsonic']) ."
+					". SymList($PSx[0]['DXH'],'Dx',$GLOBALS['viewsonic']) ."
 					</ul>
 					<input type=hidden id=DXH name=DXH>
 				";

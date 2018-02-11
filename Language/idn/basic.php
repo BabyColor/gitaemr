@@ -308,4 +308,9 @@ $lanDrugRule="Kapan?";
 $lanDrugExtra="Catatan Tambahan";
 $lanSOAPMed="Medikamentosa";
 $lanNewMedicineHeader="Buat Obat Baru";
+$lanType = "tipe";
+$lanGrade = "grade";
+$lanStage = "stage";
+$lanCausa = "et causa";
+
 ?>
