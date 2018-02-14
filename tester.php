@@ -5,7 +5,7 @@ Login(1);
 
 mark(trim(" PPPP "));
 
-markA($_POST, "Raw POST ");
+mark($_POST, "Raw POST ");
 
 
 

@@ -19,11 +19,11 @@ switch($job){
 	require "SOAP.php";
 	break;
 	default: // Job 0 --- Login Form
-	require "login_form.php";
+	require "SOAP.php";
 	break;
 	case 2: // Job 2 --- Logout
 	Logout();
-	require "login_form.php";
+	require "SOAP.php";
 	break;
 }
 

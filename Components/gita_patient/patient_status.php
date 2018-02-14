@@ -162,7 +162,7 @@ if(bouncer()){
 			break;
 		case "list":
 			LogPatient($_GET['dataid']);
-			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, FName, LName, dob, sex, address, desa, district",8=>'FName',9=>"prefix, FName, LName", 4=>$Tid, 10=>"prefix,FName, LName"));
+			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, FName, LName, dob, sex, address, desa, district",8=>'FName',9=>"prefix, FName, LName", 4=>$Tid, 10=>"prefix,FName, LName",'ContentMain'=>array('prefix','FName','LName'),'ContentSub'=>array($Tid,'sex')));
 		
 			/*
 			foreach($List->Gardevoir as $y=>$x){

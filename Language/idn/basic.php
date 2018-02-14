@@ -313,4 +313,20 @@ $lanGrade = "grade";
 $lanStage = "stage";
 $lanCausa = "et causa";
 
+//////////////////////////////////////////////////
+////////////  Billing /////////////////////////////
+////////////////////////////////////////////////
+$lanConsultationFee = "Biaya konsultasi";
+$lanAdministrationFee = "Biaya administrasi";
+$lanMedicineFee = "Biaya Obat-Obatan";
+$lanBillingAdditionalLabel = "Lain-Lain";
+$lanBillingAdditionalInput = "Tambahan";
+$lanDiscount = "Potongan Harga";
+$lanOpeningDiscount = "Diskon Greand Opening";
+$lanTotalPrice = "Total Tagihan";
+$lanRawPrice = "Total Sebelum Potongan";
+$lanTotalDiscount = "Potongan";
+$lanBillingBill = "Tagihan";
+$lanBillingDiscount = "Potongan";
+$lanBilled = "Tagihkan";
 ?>

@@ -12,7 +12,7 @@ if(bouncer()){
 	$diagnosis = new GoodBoi ('com_gita_visit_diagnosis');
 	$FieldID = "gita_visit_soap";
     $Tid='visitid';
-
+	$VisitID= $VisitID? $VisitID: $_GET['dataid'];
 
     switch($_GET['job']){ // Decide which method should be used to display?
 		case 1:
@@ -110,11 +110,17 @@ if(bouncer()){
 		if(empty($Validation->SignUpError)){ // Register if no error occured 
 			
 			
-			$BARK= new Snorlax ($Tid,$MainTableName,$registered,null,'New',$MainTable);
+			$BARK= new Snorlax ($Tid,$MainTableName,$registered,null,'New',$MainTable,FALSE);
 			OkDialog($lanNewVisitT,$lanNewVisitC,FALSE);
 
 			$VisitID = $BARK -> IVs();
-			mark($NewDex,"LATEST VISIT ID");
+			
+			$VisitTab = new GoodBoi('com_gita_visit');
+
+			$VisitData['soap'] = $BARK -> IVs();
+
+			$VisitTab -> GoBark($VisitData);
+
 
 			$LogDes=$LogDes. "New Visit Added";
             $ErrorLog=null;
@@ -142,8 +148,8 @@ if(bouncer()){
 
 		if(empty($Validation->SignUpError)){ // Register if no error occured 
 			
-			
-			$BARK= new Snorlax ($Tid,$MainTableName,$registered,'Edit',$MainTable);
+			$registered[$Tid] = $VisitID;
+			$BARK= new Snorlax ($Tid,$MainTableName,$registered,null,'Edit',$MainTable);
 
 			$OKContent = "lanEdited" . $NewUserApproved;
 			OkDialog($lanUserEditT,$lanUserEditC);
@@ -171,7 +177,7 @@ if(bouncer()){
 		switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
 			case "view":
 			case "edit":
-			$VisitID= $VisitID? $VisitID: $_GET['dataid'];
+			//$VisitID= $VisitID? $VisitID: $_GET['dataid'];
 			case "reg":
 					/*
 			$Form = new Smeargle($FieldID,$viewsonic,$Tid,$layout,$MainTable,$EditPatient);
@@ -188,8 +194,8 @@ if(bouncer()){
 			Gardevoir($Forms);
 			break;
 		case "list":
-			LogPatient($_GET['dataid']);
-			$List= new Listing($MainTable,$layout,array(7=>$MainTableName,6=>'form_id',2=>"visitid, time, patient, provider, assistant_provider, visit_type",8=>'patient',9=>"time, patient, provider, visit_type", 4=>$Tid));
+			//LogPatient($_GET['dataid']);
+			$List= new Listing($MainTable,$layout,array(7=>'gita_visit_soap',6=>'form_id',2=>"visitid, time, patient, provider, assistant_provider, visit_type",8=>'patient',9=>"patient, provider, visit_type", 4=>$Tid, 10=>'time', 'ContentMain'=> array('time' ), 'ContentSub'=> array('patient','DXH')));
 		
 			/*
 			foreach($List->Gardevoir as $y=>$x){
@@ -333,7 +339,7 @@ if(bouncer()){
 			//Planning
 			$New="
 					<ul class='w3-ul' id=PXD>
-					". DXFList($PSx[0]['FXH'],$GLOBALS['viewsonic']) ."
+					". MedListGenerator($PSx[0]['PXH'],$GLOBALS['viewsonic'],array()) ."
 					</ul>
 					<input type=hidden id=PXH name=PXH>
 					<ul id=NewMedData hidden></ul>

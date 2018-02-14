@@ -58,7 +58,7 @@ if(!empty($_SESSION['Person'])){
     //                            LOGIN FORM
     //================================================================================================
     if((empty($_POST) || !empty($LoginError)) && empty($_SESSION['Person'])){ // Only draw login form if data hasn't submited, or Login Error occured
-        echo "<form style=login action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=0 method=POST >
+        echo "<form class='w3-card-4 w3-form' style=login action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=0 method=POST >
             <table style=login>
             <tr>
                 <th colspan=2>$lanLoginTitle</th>

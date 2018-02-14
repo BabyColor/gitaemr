@@ -168,6 +168,10 @@ function DxEater($Alpha,$Method='Dx'){
       $EatTable = "com_gita_visit_symptomp";
       $idPsCol = "symptomp";
     break;
+    case 'Med':
+      $EatTable = "com_gita_medicine";
+      $idPsCol = "name";
+    break;
   }
   
   
@@ -679,6 +683,29 @@ function PhoenixDown($Data,$Keys=null){
   }
   return $Data;
 }
+
+//Filter array within array with specific value in specific key
+//Filter $Arr whom have $Key with value of $Val
+//return an ARRAY containing the Array(s) mathching with the search criteria
+function FilterArray($Arr,$Key,$Val){
+  $Returned = array();
+  foreach($Arr as $x){
+    if($x[$Key]==$Val) { array_push($Returned,$x); }
+  }
+  return $Returned;
+}
+
+//Trim ARRAY of ARRAY $arr, leaving only key that is stated in ARRAY $key
+//$arr = Array to be trimmed
+//$key = Array of key name to be kept
+function Hadouken($arr,$key){
+  foreach($arr as $y=>$x){
+    if(!in_array($y,$key)){
+      unset($arr[$y]);
+    }
+  }
+  return $arr;
+}
 /*
 ==========================================================================================================
 
@@ -753,6 +780,7 @@ function WarningDialog($Title,$Content){
 }
 
 function Mark($a,$pre='Mark',$post=null){ //DEBUGGING TOOLS
+  if(!$_SESSION['DeFlea']) { return; }
   $SID=rand();
   echo "<div id='$SID' class='w3-tiny w3-hover-pale-blue w3-card-4 w3-panel w3-pale-yellow w3-small mark'><h6>$pre </h6><p>";
   if(is_array($a)){
@@ -764,6 +792,7 @@ function Mark($a,$pre='Mark',$post=null){ //DEBUGGING TOOLS
 }
 
 function MarkA($a,$pre=null,$post=null){ //DEBUGGING TOOLS
+  if(!$_SESSION['DeFlea']) { return; }
   $Mid=rand();
   echo "<div class='w3-card-4 '><button class='w3-button w3-block w3-left-align w3-light-green' onclick=BukaTutup('". $Mid ."')><strong>$pre </strong></button>";
   echo "<div id='". $Mid ."' class='w3-container w3-hide w3-pale-blue'><div>";
@@ -844,6 +873,7 @@ function ZebraList($Array,$NameColumn,$Label=null,$Argument=array('Listing','Ker
 
 function AangList($array){
   //(Array of list('Main'[main text], 'Sub'[sub text], 'Aang'[avatar pic source], 'URI'[Edit URL], 'OK' [OK URL])
+  //mark($array, "AANGL ISTA RRAY");
   echo "<div class='w3-panel'>
         <ul class='w3-ul w3-card-4'>";
   foreach($array as $y=>$x){
@@ -948,13 +978,15 @@ function SymList($Sx,$Mode,$Job='view'){
     break;
     case "Med":
       $Display = array (
+        array("[","type","] "),
         array("","name"," "),
-        array(" ","location",", "),
-        array($GLOBALS['lanType'] ." ","type",", "),
-        array($GLOBALS['lanGrade'] ." ","grade",", "),
-        array($GLOBALS['lanStage'] ." ","stage",", "),
-        array($GLOBALS['lanCausa'] ." ","causa",", "),
-        array($GLOBALS['lanNotes'] ." : ","Thisnote",", ")
+        array("","form_n",", "),
+        array(": ","qday"," "),
+        array("&times ","qtt"," "),
+        array(" ","form"," "),
+        array(" ","adm"," . "),
+        array(" ","rule"," "),
+        array(" (","extra",") "),
       );
     break;
   }
@@ -968,7 +1000,7 @@ function SymList($Sx,$Mode,$Job='view'){
   if(in_array($Job,array('edit','reg'))){
     $Arg['removeButton'] =  $Arg['hiddenVal'] =  $Arg['walkthrough'] = TRUE;
   }
-
+  mark($Sx,"SYMPTOMP $$");
   $Symptomp = JSON2List($Sx,$Display,$Arg);
   mark($Symptomp,"SYMPTOMP");
 
@@ -1040,6 +1072,80 @@ function AgeText($DOB,$Full=true){
     }
     
   }
+}
+
+//Just like symList, but for medicine
+//$RawData : The meidicine data
+//$Job : 'edit' or 'view'
+////ARGUMENTS////
+//Style = List display style : 'inLine' displayed in one line | 'R' displayed like in presception paper
+function MedListGenerator($RawData,$Job,$Arguments=array('Style' => 'R')){
+  $Data = UnJson($RawData);
+  //#1. Append medicine's data to the $Data
+  $Data = AppendMed($Data);
+
+  //#2. Prepare some variable
+  switch($Job){
+    case 'edit': // Add Remove and Edit butoon on Job Edit
+    $remAndEdit = "<span class='w3-right-align w3-text-red w3-tiny rem' onclick=remButton($(this).parent().attr('id'))>[×]</span>
+    <span class='w3-right-align w3-text-red w3-tiny edit' onclick=editButton($(this).parent().attr('id'))>[Edit]</span>";
+    break;
+  }
+
+  //#3. Draw List
+  foreach ($Data as $y => $x){
+    
+    
+    foreach( $x['comp'] as $c){
+      $compUnit = $x['comp']['prosent']? "%" : "mg";
+      $compList .= "<li class='w3-small'>". $x['comp']['name'] ." ". $x['comp']['amount'] ." $compUnit</li>";
+    }
+    
+    $medlist .= "
+                    <li id=medlist_". $x['id'] ." medId='". $x['id'] ."' onclick=BukaTutup('detail_med_$y') class='w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white'>
+                      <span class='w3-xlarge'>R/</span>
+                      <div>
+                          <strong>". $x['name'] ."</strong> 
+                          ". $x['form_n'] ." 
+                          No ". $x['No'] ."</div>
+                      <div>
+                          <span class='w3-large'>∫</span>
+                          ". $x['qday'] ."
+                          <span class='w3-small'>dd</span> 
+                          ". $x['qtt'] ." 
+                          ". $x['form'] ." 
+                          ". $x['adm'] ." . 
+                          ". $x['rule'] ." 
+                          (". $x['extra'] .")</div>
+                      <div></div>
+                      $remAndEdit
+                      <div class='jonson' hidden=''>$RawData</div>
+                      <div id='detail_1' class='w3-card w3-hide w3-light-grey'>
+                          <div class='w3-panel w3-row'>
+                              <div class='w3-col m4'>". $x['type'] ."</div>
+                              <div class='w3-col m4'>
+                                  <ul class='w3-ul'>
+                                      $compList
+                                  </ul>
+                              </div>
+                              <div class='w3-col m4'></div>
+                          </div>
+                      </div>
+                   </li>";
+  }
+
+  return $medlist;
+}
+
+//Append Medicine data to medication list 
+function AppendMed($Data){
+  $MedTable = new GoodBoi('com_gita_medicine');
+  foreach($Data as $y => $x){
+    $MedData = $MedTable -> GoFetch("WHERE id = '". $x['id'] ."'","name, comp, type, form_n");
+    $Data[$y] += $MedData[0];
+    $Data[$y]['comp'] = UnJson( $Data[$y]['comp'] );
+  }
+  return $Data;
 }
 /*
 ==========================================================================================================
@@ -2107,6 +2213,7 @@ class Snorlax{
    $this->TargetTab = $OriTab;   
    $this->LaxIncense = array('timest'=>Date2SQL(),'culpirt'=>$Culpirt, 'culpirt_info'=>$CulpirtInfo, 'facility'=>$GLOBALS['SettingCurrentFacility'],'original_table'=>$OriTab, 'edited_id'=>$Data[$DataID]);
    $this->Data = $Data;
+   mark($this->Data,"THIS DATA");
    Mark($Method,"SNORLAX");  //========================== DEBUG===========================
    if($Auto){
       switch ($Method){
@@ -2229,6 +2336,7 @@ class Snorlax{
 
   //The actual DB wiritng process
   function PulverizingPancake($Ditto,$Snore){
+    mark($this->Data,"FATA ID");
     $this->GoodBoi_Version->GoBurry($Ditto,"WHERE id='". $this->PrevVersionID . "'"); //[2]
     $this->GoodBoi_Target->GoBurry($this->NewData,"WHERE ". $this->TargetID ."='". $this->Data[$this->TargetID] ."'"); //[4]
     $this->GoodBoi_Version->GoBark($Snore);
@@ -2257,6 +2365,7 @@ class Listing{
   protected $FormID;
   protected $TID;// Main table's ID column
   protected $NameColumn; 
+  protected $Arguments;
   public $Gardevoir; //Array of the final list draw
 
   // (GoodBoi Class, [ARGUMENT])
@@ -2273,6 +2382,7 @@ class Listing{
       $ColumnMain=$Argument[8]; // Which column is the main column (Those will be used as link)
       $DefaultSearchColumn=$Argument[9]; //CSV All column to be searched if no specific column selected
       $NameColumn=$Argument[10]; // Column that makes the name (Also become main column)
+      $this->Arguments = $Argument;
 
       $this->ColumnMain=$ColumnMain;
       $this->Header=$E=Array2Array($ColumnLabelObj->GoFetch("WHERE $HeadingWhereCol ='$HeadingWhereVal'"),'field_id','field_label');
@@ -2312,18 +2422,22 @@ class Listing{
 
   function DrawList(){
     $EURI=$_GET;
-    $EURI['job']=3;
+    $EURI['job']=4;
     $EURI = GetGET($EURI);
     $CURI=$_GET;
-    $CURI['job']=4;
+    $CURI['job']=3;
     $CURI = GetGET($CURI);
     foreach($this->Query as $x){
       $y=$x[$this->TID];
-      $yoyo[$y]['Main']=FullName($x);
-      $yoyo[$y]['Sub']=$x['patientid'] ." ". lan2var($x['sex']);
+      $yoyo[$y]['Main'] = in_array('LName',$this->Arguments['ContentMain'])? FullName(Hadouken($x,$this->Arguments['ContentMain'])): array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentMain'])))['Val'] ;
+      $yoyo[$y]['Sub']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentSub'])))['Val'];
       $yoyo[$y]['URI']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$EURI" . "dataid=". $x[$this->TID];
       $yoyo[$y]['Click']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$CURI" . "dataid=". $x[$this->TID];
-      $yoyo[$y]['OK']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=". $x[$this->TID];
+      switch ($this->TID){
+        case 'patientid':
+          $yoyo[$y]['OK']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=". $x[$this->TID];
+          break;
+      }
       //Menyamakan persepsi antara tabel pasien dan staff (Beda nama kolom)
       if($x['Aang']) { $x['photo'] = $x['Aang']; }
       if($x['Sex']) { $x['sex'] = $x['Sex']; }
@@ -2667,7 +2781,7 @@ class Smeargle{
     if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
     $this->HideGroup = TRUE;
 
-    $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('". $Group ."')>". lan2var($Group) ."</h4><div id='$Group' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
+    $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('group_". str_replace('$','',$Group) ."')>". lan2var($Group) ."</h4><div id='group_" . str_replace('$','',$Group) ."' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
 
     //Process each Fields
     foreach($Fields as $x){
@@ -2810,7 +2924,7 @@ class Smeargle{
         if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
           $this->HideGroup = TRUE;
 
-          $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('". $Group ."')>". lan2var($Group) ."</h4><div id='$Group' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
+          $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('group_". str_replace('$','',$Group) ."')>". lan2var($Group) ."</h4><div id='group_" . str_replace('$','',$Group) ."' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
 
         //Process each Fields
         foreach($Fields as $x){
