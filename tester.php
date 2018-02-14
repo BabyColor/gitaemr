@@ -1,10 +1,7 @@
 <?php
 if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
-Login(1);
-
-mark(trim(" PPPP "));
-
+//Login(1);
 mark($_POST, "Raw POST ");
 
 

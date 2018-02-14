@@ -58,23 +58,7 @@ if(!empty($_SESSION['Person'])){
     //                            LOGIN FORM
     //================================================================================================
     if((empty($_POST) || !empty($LoginError)) && empty($_SESSION['Person'])){ // Only draw login form if data hasn't submited, or Login Error occured
-        echo "<form class='w3-card-4 w3-form' style=login action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=0 method=POST >
-            <table style=login>
-            <tr>
-                <th colspan=2>$lanLoginTitle</th>
-                </tr>
-            <tr>
-                <td>$lanLoginUser</td>
-                <td><input type=text name=UserName></input></td>
-            </tr>
-            <tr>
-                <td>$lanLoginPass</td>
-                <td><input type=password name=Password></input></td>
-            </tr>
-            <tr>
-                <td colspan=2><input type=submit value=$lanLogin></input></td>
-            </tr>
-        </table></form>";
+        include "login.html";
     }
         if(empty($LogRawPass)){ // Hashing password if Raw Password option is set to 0
             $_POST=array_replace($_POST,array("Password"=>password_hash($_POST['Password'], 		PASSWORD_DEFAULT)));
