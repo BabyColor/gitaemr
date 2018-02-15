@@ -176,7 +176,7 @@ if(!empty($_SESSION['Person'])){
                   
 
                 </div>
-                <form id='loginForm' action="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ) ?>?mod=gita_login&job=0" method=POST>
+                <form id='loginForm' action="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ) ?>?mod=gita_login&job=0" method=POST hidden>
                     <!--<label class='w3-label' for='username'>$lanLoginUser</label>
                                                         <input class='w3-input' type=text id='username' name=UserName>-->
 
@@ -186,7 +186,7 @@ if(!empty($_SESSION['Person'])){
                     <div class='w3-row w3-center'>
                         <div class=' w3-col m10'>
                                 <input class='w3-input' type=password id='password' name='Password'>
-                                <input class='w3-input' type=hidden id='username' name='UserName'>
+                                <input class='w3-input' type=hidden id='username' name='UserName' >
                         </div>
                         <div class='w3-center w3-col m2' >
                             <i class='w3-button material-icons w3-large' class='submitButton'>perm_identity</i>
@@ -210,7 +210,7 @@ if(!empty($_SESSION['Person'])){
             $(this).addClass('w3-sepia').removeClass('w3-lime w3-round');
         });
 
-        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); $("#password").focus(); });
+        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); $("#password").focus(); $(loginForm).removeAttr('hidden'); });
 
         $("html").keydown(function (c) {
             switch (c.which) {
@@ -228,6 +228,7 @@ if(!empty($_SESSION['Person'])){
                     break;
                 case 13:
                     c.preventDefault();
+                    $(loginForm).removeAttr('hidden');
                     $("#password").focus();
                     break;
             }
@@ -247,6 +248,7 @@ if(!empty($_SESSION['Person'])){
 
         $("#submit").click(function(){ $("#loginForm").submit();});
         $("#password").keydown(function(x){ if(x.which==13){$("#loginForm").submit();}});
+        $("#password").focus(function(){ $(loginForm).removeAttr('hidden'); }).blur(function(){ $(loginForm).Attr('hidden',true) });;
 
     </script>
 </body>
