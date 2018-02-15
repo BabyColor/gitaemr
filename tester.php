@@ -2,6 +2,7 @@
 if(!empty($_SESSION['DeFlea'])){ mark("DEBUG MODE");}
 echo "=================TESTER===========================<br><br>";
 //Login(1);
+echo "<a class='w3-button' href='". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=2'>LOGOUT</a>";
 mark($_POST, "Raw POST ");
 
 

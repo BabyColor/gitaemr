@@ -1549,11 +1549,7 @@ function Login($User){
 }
 
 function Logout(){
-  unset($_SESSION['Person']);
-  unset($_SESSION['UserN']);
-  unset($_SESSION['Name']);
-  unset($_SESSION['ULevel']);
-  unset($_SESSION['UGroup']);
+  session_destroy();
 }
 
 function LogUser($Userclass=null){ // Update the Last IP and Last activity of user (User ID, Class that linked to staff_list db)

@@ -1,3 +1,5 @@
+console.log("JS LIB LOADED");
+
 function ConfirmPassword(){
   var psw = $("#Password").val()
   var psw2 = $("#psw2").val()
@@ -436,3 +438,13 @@ function collectBill(classField){
   console.log(jonson);
   return jonson;
 }
+
+function UrlExists(url)
+{
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false);
+    http.send();
+    return TRUE;
+}
+
+console.log("INTOL END");

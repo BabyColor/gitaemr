@@ -827,3 +827,6 @@ $('#LOLOK').on('click', function () {
 	console.log(li2json('PXD'));
 	console.log(li2json('NewMedData'));
 });
+
+///////////////////// LOGIN
+

@@ -1,23 +1,147 @@
-<li id='1' onclick="BukaTutup('detail_1')" class='w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white'>
-    <span class='w3-xlarge'>R/</span>
-    <div>
-        <strong>Mirasic</strong> tablet No 10</div>
-    <div>
-        <span class='w3-large'>∫</span> 3
-        <span class='w3-small'>dd</span> 1 tab po . pc (prn)</div>
-    <div></div>
-    <span class='w3-right-align w3-text-red w3-tiny rem'>[×]</span>
-    <span class='w3-right-align w3-text-red w3-tiny edit'>[Edit]</span>
-    <div class='jonson' hidden=''>{'id':'1','No':'10','qday':'3','qtt':'1','form':'tab','adm':'po','rule':'pc','extra':'prn'}</div>
-    <div id='detail_1' class='w3-card w3-hide w3-light-grey'>
-        <div class='w3-panel w3-row'>
-            <div class='w3-col m4'>Antipiretik-pain killer</div>
-            <div class='w3-col m4'>
-                <ul class='w3-ul'>
-                    <li class='w3-small'>Parasetamol 500 mg</li>
-                </ul>
+<html>
+
+<head>
+    <?php require "Engine/head.php"; ?>
+    <script>
+        var currentCharacter;
+        var characterCursor = 0;
+        function CharSelect(userName) {
+            userName = userName.replace('char_', '');
+            if (currentCharacter == userName) { return; }
+            $("#bgCharacter")
+                .animate({
+                    left: '-300px',
+                    opacity: '0'
+                }, 300)
+                .queue(function () {
+                    $("#bgCharacter img").attr('src', 'Media/Potrait/' + userName + '.jpg');
+                    $(this).dequeue();
+                })
+                .animate({
+                    left: '0',
+                    opacity: '1'
+                }, 600);
+
+
+            $("#StaffName")
+                .animate({ opacity: '0' })
+                .queue(function () {
+                    $(this).text($("#char_" + userName).attr('name')).dequeue();
+                })
+                .animate({ opacity: '1' });
+            currentCharacter = userName;
+            $("#username").val(userName);
+
+        }
+    </script>
+</head>
+
+<body class='w3-black'>
+    <div class='w3-card-4 w3-black' style='height:80%; max-height:600px'>
+        <h3 class='w3-center'>
+            <?php echo $lanLoginTitle; ?>
+        </h3>
+
+        <div class='w3-display-container' style='height:60%; width:80%'>
+            <div id='bgCharacter' class='w3-display-container w3-animate-left' style='width:45%; max-height:100%; overflow: hidden; animation: animateleft 1s'>
+                <div class='character_bg w3-display-bottomleft' style='height:101%; width:100%'></div>
+                <img src='Media/Potrait/BabyColor.jpg' style='width:100%; overflow: hidden'>
+
             </div>
-            <div class='w3-col m4'></div>
+            <div id='characterInfo' class='w3-display-topright w3-right'>
+                <div id='StaffName' class='w3-panel w3-bottombar w3-border-white w3-right w3-xxlarge'>
+                    I Putu Gita Prasetya Adiguna
+                </div>
+            </div>
+            <div class='w3-display-bottommiddle'>
+                <div id='characterSelection' class='w3-panel w3-center w3-row'>
+
+                    <div class='w3-col m3'>
+                        <img id='char_BabyColor' class='green-padding-supersmall w3-sepia  w3-animate-zoom characterPhoto' src='Media/Korra/user_1.jpg'
+                            style="width:100%; animation: animatezoom 0.2s" name='I Putu Gita Prasetya Adiguna'>
+                    </div>
+                    <div class='w3-col m3'>
+                        <img id='char_Sunardiasih' class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/sunar.jpg'
+                            style="width:100%; animation: animatezoom 0.4s" name='Ni Wayan Sunardi Asih'>
+                    </div>
+                    <div class='w3-col m3'>
+                        <img id='char_Admin' class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/gardevoir.jpg'
+                            style="width:100%; animation: animatezoom 0.6s" name='Gardevoir'>
+                    </div>
+                    <div class='w3-col m3'>
+                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 0.8s">
+                    </div>
+                    <div class='w3-col m3'>
+                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 1.0s">
+                    </div>
+                    <div class='w3-col m3'>
+                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 1.2s">
+                    </div>
+                    <div class='w3-col m3'>
+                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 1.4s">
+                    </div>
+
+                </div>
+                <form id='loginForm' action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ." ?mod=gita_login&job=0 method=POST>
+                    <!--<label class='w3-label' for='username'>$lanLoginUser</label>
+                                                        <input class='w3-input' type=text id='username' name=UserName>-->
+
+                    <label class='w3-label w3-center' for='password'>
+                        <?php echo $lanLoginPass; ?>
+                    </label>
+                    <div class='w3-row'>
+                        <input class='w3-input w3-rest' type=password id='password' name=Password>
+                        <input class='w3-input' type=hidden id='username' name=UserName>
+                        <div class='w3-center' style='width:50px'>
+                            <i class="w3-button material-icons">perm_identity</i>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</li>
+    <script>
+        $(".characterPhoto").hover(function () {
+            $(".characterPhoto").addClass('w3-sepia').removeClass('w3-white');
+            $(this).removeClass('w3-sepia').addClass('w3-white');
+
+        }, function () {
+            $(this).addClass('w3-sepia').removeClass('w3-white');
+        });
+
+        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); $("#password").focus(); });
+
+        $("body").keydown(function (c) {
+            switch (c.which) {
+                case 39:
+                    characterCursor += 1;
+                    break;
+                case 37:
+                    characterCursor -= 1;
+                    break;
+                case 38:
+                    characterCursor -= 4;
+                    break;
+                case 40:
+                    characterCursor += 4;
+                    break;
+                case 13:
+                    $("#password").focus();
+                    break;
+            }
+            if (characterCursor < 0) { characterCursor += 8; }
+            if (characterCursor > 7) { characterCursor -= 8; }
+            console.log(characterCursor);
+            console.log($(".characterPhoto:eq(" + characterCursor + ")").attr('id'));
+
+            CharSelect($(".characterPhoto:eq(" + characterCursor + ")").attr('id'));
+
+            $(".characterPhoto").addClass('w3-sepia').removeClass('w3-white');
+            $(".characterPhoto:eq(" + characterCursor + ")").removeClass('w3-sepia').addClass('w3-white');
+        });
+
+
+    </script>
+</body>
+
+</html>

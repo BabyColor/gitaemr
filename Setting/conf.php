@@ -4,6 +4,11 @@ defined('GitaEmr') or Die($UnatuhorizedAccess);
 $SiteTitle = "Gita EMR";
 $DeFlea = 1;
 
+$setGlobal = array (
+    'requireLogin' => TRUE,
+    'loginPage' => 'Components/gita_login/login.php'
+);
+
 
 //----Database related
 $MRhoster = "localhost";
@@ -56,4 +61,6 @@ $comvisitBMIO="Overweight";
 $comvisitBMIOI="Obese Class I";
 $comvisitBMIOII="Obese Class II";
 $comvisitBMIOIII="Obese Class III";
+
+
 ?>
