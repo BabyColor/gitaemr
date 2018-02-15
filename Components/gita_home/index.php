@@ -4,7 +4,7 @@ $layout= new GoodBoi('layout');
 echo "<div class='w3-card-4 w3-container w3-lime'>
 <h1>Selamat datang ". $_SESSION['Name'] . "</h1></div><br>";
 
-echo "<section class=HomePatient>";
+echo "<section class='w3-card-4 w3-white w3-panel w3-xxlarge HomePatient'>";
 if(empty($_SESSION['Patient'])){
     echo "<div class='w3-card-4 w3-panel w3-white' >Anda belum memilih pasien, silahkan pilih pasien dari <a href=". GetOwnURL() ."> $lanListPatient </a> atau daftarkan <a href=". GetOwnURL() .">$lanNewPatient</a></div>";
     LogPatient($_GET['dataid']);
