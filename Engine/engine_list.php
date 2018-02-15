@@ -39,7 +39,7 @@ function array2csv($arr,$bra=null,$IgnoreBlank=null,$IgnoreExc=null,$sep=" , "){
     $counter++;
   }
   
-  if(!empty($_SESSION['DeFlea'])){ markA($aa,__FUNCTION__ ." Key ==> "); markA($bb,__FUNCTION__ ." Val ==> "); } //Debug
+
   return array("Key"=>$aa,"Val"=>$bb);
 }
 
@@ -706,6 +706,14 @@ function Hadouken($arr,$key){
   }
   return $arr;
 }
+
+//Update Array 1 by replacing avilable key in array 2
+function ArrayUpdate($a1,$a2){
+  foreach($a2 as $y=>$x){
+    $a1[$y]=$x;
+  }
+  return $a1;
+}
 /*
 ==========================================================================================================
 
@@ -871,14 +879,14 @@ function ZebraList($Array,$NameColumn,$Label=null,$Argument=array('Listing','Ker
   return $Zebra;
 }
 
-function AangList($array){
+function AangList($array,$ulId){
   //(Array of list('Main'[main text], 'Sub'[sub text], 'Aang'[avatar pic source], 'URI'[Edit URL], 'OK' [OK URL])
   //mark($array, "AANGL ISTA RRAY");
-  echo "<div class='w3-panel'>
-        <ul class='w3-ul w3-card-4'>";
+  echo "<div class=''>
+        <ul class='w3-ul w3-card-4' id=$ulId>";
   foreach($array as $y=>$x){
     // BUtton 1
-    echo "<li id='$y' class='w3-bar w3-white w3-hover-lime'>";
+    echo "<li id='" . $ulId . "_li_" .$y. "' class='w3-bar w3-white w3-hover-lime'>";
     if(!empty($x['OK'])){ echo "<span class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['OK'] ." ><i class='material-icons'>person</i></a></span>"; }
     // Button 2
     if(!empty($x['URI'])){ echo "<span class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['URI'] ." ><i class='material-icons'>menu</i></a></span>"; }
@@ -1539,6 +1547,7 @@ function SymptompPhraser($x,$space=null){
 
 //-------------------User-----------------------
 function Login($User){
+  session_start();
   $userlist=new GoodBoi("staff_list");
   $x=$userlist->GoFetch("WHERE usrid='$User'");
   $_SESSION['Person']=$User;
@@ -2362,9 +2371,12 @@ class Listing{
   protected $TID;// Main table's ID column
   protected $NameColumn; 
   protected $Arguments;
+  protected $ulId; // <ul> id
   public $Gardevoir; //Array of the final list draw
 
   // (GoodBoi Class, [ARGUMENT])
+  //Arguments
+  //// hiddenDiv = text to be inserted into a hidden div (not showed, but can be used by search filter)
   function __Construct($GoodBoi,$ColumnLabelObj=null,$Argument=array(null,'Listing','*',null,'field_id','field_label',"form_id",null,null,'FName,MName,LName')){
     //Variabelize Arguments
       $Where=$Argument[0]; //WHERE query
@@ -2390,6 +2402,8 @@ class Listing{
 
       //Name Colom to array
       $this->NameColumn=explode(",",$NameColumn);
+
+      $this->ulId = 'list_'. rand();
 
     //Decide which criteria used to display data (Default if no search criteria inputed from the search bok)
     if(empty($_GET['listcolumn']) || $_GET['listcolumn'] == 'ALL'){ $Src=$DefaultSearchColumn; } else {$Src =$_GET['listcolumn'];} // Turn Argument[9] into array for searching (Use all of them for search criteria)
@@ -2427,6 +2441,7 @@ class Listing{
       $y=$x[$this->TID];
       $yoyo[$y]['Main'] = in_array('LName',$this->Arguments['ContentMain'])? FullName(Hadouken($x,$this->Arguments['ContentMain'])): array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentMain'])))['Val'] ;
       $yoyo[$y]['Sub']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentSub'])))['Val'];
+      $yoyo[$y]['Hidden']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['hiddenDiv'])))['Val'];
       $yoyo[$y]['URI']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$EURI" . "dataid=". $x[$this->TID];
       $yoyo[$y]['Click']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$CURI" . "dataid=". $x[$this->TID];
       switch ($this->TID){
@@ -2457,7 +2472,8 @@ class Listing{
       
     }
     //$Draw=ZebraList($this->Query,$this->NameColumn,$this->Header,array(6=>$this->TID,5=>$URI));
-    $Draw = AangList($yoyo,$URI);
+    
+    $Draw = AangList($yoyo,$this->ulId);
     $this->Gardevoir=$Draw;
     if(Empty($this->Query)){
       echo $GLOBALS['lanNoResult'];
@@ -2465,14 +2481,15 @@ class Listing{
   }
 
   function SearchList(){
+    $ulId = $this->ulId;
     if(!empty($this->DefaultSearchColumn)){
       //Draw search form
       $URI = GetGET();
       
-      $Form= "<div class='w3-card w3-white'><h3 class='w3-lime w3-container'>". $GLOBALS['lanSearch'] ."</h3><div class='w3-panel '><form  action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
+      $Form= "<div class='w3-card w3-white'><div class='w3-row w3-panel'><form  action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
       unset($_GET['listcrit']);
       unset($_GET['listcolumn']);
-      $Form .= "<input name=listcrit type=search list=search>";
+      $Form .= "<div class='w3-cell  w3-cell-bottom' style='width:75%'><span><label for='listcrit' class='w3-label'>". $GLOBALS['lanSearch'] ."</label><input name='listcrit' class='w3-input' id='listcrit' type=search onkeyup=\"listFilterHide('$ulId','listcrit')\"></span></div>";
 
       // Making datalist for SearchBox
       $Form .= "<datalist id=search>";
@@ -2490,7 +2507,7 @@ class Listing{
       }
       $Form .= "</datalist>";
 
-      $Form .= "<div class='w3-right'><select name=listcolumn >";
+      $Form .= "<div class='w3-cell w3-cell-bottom' style='width:20%'><span><select name=listcolumn class='w3-select'>";
       $Form .= "<option value=ALL selected>". $GLOBALS['lanAll'] ."</option>";
 
       // Making the search column list
@@ -2500,12 +2517,208 @@ class Listing{
         $Form .= "<option value=". $x['field_id'] .">". lan2var($x['field_label']) . "</option>";
       }
 
-      $Form .= "</select>";
+      $Form .= "</select></span></div>";
       foreach ($_GET as $y=>$x){
         $Form .= "<input type=hidden name=$y value=$x>";
       }
-      $Form .= " <input class='w3-button w3-blue' type=submit value=". $GLOBALS['lanSearch'] ."></input></div>";
-      $Form .= "</form></div></div>";
+      $Form .= "<div class=' w3-cell  w3-cell-bottom' style='width:5%' ><span> <i class='w3-button material-icons w3-large' class='submitButton'>search</i></span></div></div>";
+      $Form .= "</form></div>";
+      return $Form;
+     }
+    }
+
+    function Gardevoir(){
+      
+      Gardevoir($this->Gardevoir);
+    }
+}
+/*
+=======================================================================================
+██╗     ██╗███████╗████████╗██╗███╗   ██╗ ██████╗ 
+██║     ██║██╔════╝╚══██╔══╝██║████╗  ██║██╔════╝ 
+██║     ██║███████╗   ██║   ██║██╔██╗ ██║██║  ███╗
+██║     ██║╚════██║   ██║   ██║██║╚██╗██║██║   ██║
+███████╗██║███████║   ██║   ██║██║ ╚████║╚██████╔╝
+╚══════╝╚═╝╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
+=======================================================================================
+To display a list (e.g. Patient list, Staff list)
+                                                  
+*/
+
+class Listing2{
+  protected $Array; // Main array
+  protected $Arguments;
+  protected $Listing; // Ready to be listed
+  protected $ulId; // <ul> id
+  public $Gardevoir; //Array of the final list draw
+
+  /* 
+  $Array = Main Array (list1,list2) => list is ASSOC ARRAY of ('main'=>Main text,
+                                                                  'sub'=> Sub text,
+                                                                  'hidden'=> Hidden text (For filtering and other purpose),
+                                                                  'picture'=> Image filename to be showed ,
+                                                                  'onClick' => Link on click,
+                                                                  'dropDown' => HTML that will be hidden at first, but displayed when clicked,
+                                                                  'button1' => Button 1 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link),
+                                                                  'button2' =>  Button 2 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link),
+                                                                  'button3' => Button 3 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link)
+                                                                  ') 
+  $Arguments = Argument Array => ( 'MySQL' => for fetching data from MySQL, if declared, fetching from MySQL will repace main array . ARRAY ('table'=>MySQL Table,
+                                                                                                                                            'condition'=>WHERE QUERY
+                                                                                                                                            'select'=>SELECT array (column1, column2), empty mean all (*)
+                                                                                                                                            'id' => Column contaun primary key
+                                                                                                                                            'main' => INDEXED ARRAY of column to be set as main text,
+                                                                                                                                            'sub' => INDEXED ARRAY of column to be set as sub text,
+                                                                                                                                            'hidden' => INDEXED ARRAY of column to be set as hidden text,
+                                                                                                                                            'picture' => column to be set as picture,
+                                                                                                                                            'onClick' => $_GET to be set as onClick link,
+                                                                                                                                            'dropDown' => column to be set as Drop Down,
+                                                                                                                                            'button1','button2','button3' => $_GET to be set as link for corespondenting button,
+                                                                                                                                              ),
+                                  'heading' => Heading text, 
+                                  'search' => Include search area? TRUE/FALSE,   
+                                  'mainSeperator' => Main Text Seperator,   
+                                  'subSeperator' => Subtext seperator,
+                                  'picDir' => directory path of pictures in (Media/...)                                                        
+  */
+  function __Construct($Array,$Arguments=null){
+      $this->Array = $Array;
+      $this->Arguments = $Arguments;
+      if($Arguments['MySQL']){$this->FetchArray();}
+  }
+
+  //Populate main array from MySQL
+  public function FetchArray($MySQL){
+    $Tab = new GoodBoi($MySQL['table']);
+    $Data = $Tab->GoFetch($MySQL['condition'],$MySQL['select']);
+    $Data = $this->Beautifying($Data,$MySQL);
+    $this->Array = $Data;
+  }
+
+  //Format array to be ready to drawed
+  //$Raw is the raw array
+  //$Need is ARRAY ('main'=>The key for main text, 'sub'=>..., 'hidden'=>..., ....)
+  public function Beautifying($Raw,$Need){
+    foreach($Raw as $y=>$x){
+      foreach($Need as $b=>$a){
+        switch($b){
+          case 'main':
+          case 'sub':
+          case 'hidden':
+            $Clean[$y][$b] = in_array('LName',$a)? FullName(Hadouken($x,$a)): array2csv(array_map('lan2var',Hadouken($x,$a)))['Val'] ;
+            break;
+          case 'picture':
+          case 'onClick':
+          case 'dropDown':
+          case 'button1':
+          case 'button2':
+          case 'button3':
+            $Clean[$y][$b] = $x[$b] ;
+            break;
+          default:
+            continue;
+            break;
+        }
+        
+      }
+    }
+    return $Clean;
+  }
+
+
+  function DrawList(){
+    $EURI=$_GET;
+    $EURI['job']=4;
+    $EURI = GetGET($EURI);
+    $CURI=$_GET;
+    $CURI['job']=3;
+    $CURI = GetGET($CURI);
+    foreach($this->Query as $x){
+      $y=$x[$this->TID];
+      $yoyo[$y]['Main'] = in_array('LName',$this->Arguments['ContentMain'])? FullName(Hadouken($x,$this->Arguments['ContentMain'])): array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentMain'])))['Val'] ;
+      $yoyo[$y]['Sub']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentSub'])))['Val'];
+      $yoyo[$y]['Hidden']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['hiddenDiv'])))['Val'];
+      $yoyo[$y]['URI']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$EURI" . "dataid=". $x[$this->TID];
+      $yoyo[$y]['Click']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$CURI" . "dataid=". $x[$this->TID];
+      switch ($this->TID){
+        case 'patientid':
+          $yoyo[$y]['OK']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=". $x[$this->TID];
+          break;
+      }
+      //Menyamakan persepsi antara tabel pasien dan staff (Beda nama kolom)
+      if($x['Aang']) { $x['photo'] = $x['Aang']; }
+      if($x['Sex']) { $x['sex'] = $x['Sex']; }
+
+      if(empty($x['photo'])){
+        switch ($x['sex']){
+          case '$lanMale':
+          $yoyo[$y]['Aang']='def_male.png';
+          break;
+          case '$lanFemale':
+          $yoyo[$y]['Aang']='def_female.png';
+          break;
+          case '$lanAlien':
+          $yoyo[$y]['Aang']='def_alien.png';
+          break;
+          case '$lanUnidentified':
+          $yoyo[$y]['Aang']='def_unknown.png';
+          break;
+        }
+      }
+      
+    }
+    //$Draw=ZebraList($this->Query,$this->NameColumn,$this->Header,array(6=>$this->TID,5=>$URI));
+    
+    $Draw = AangList($yoyo,$this->ulId);
+    $this->Gardevoir=$Draw;
+    if(Empty($this->Query)){
+      echo $GLOBALS['lanNoResult'];
+    }
+  }
+
+  function SearchList(){
+    $ulId = $this->ulId;
+    if(!empty($this->DefaultSearchColumn)){
+      //Draw search form
+      $URI = GetGET();
+      
+      $Form= "<div class='w3-card w3-white'><div class='w3-row w3-panel'><form  action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
+      unset($_GET['listcrit']);
+      unset($_GET['listcolumn']);
+      $Form .= "<div class='w3-cell  w3-cell-bottom' style='width:75%'><span><label for='listcrit' class='w3-label'>". $GLOBALS['lanSearch'] ."</label><input name='listcrit' class='w3-input' id='listcrit' type=search onkeyup=\"listFilterHide('$ulId','listcrit')\"></span></div>";
+
+      // Making datalist for SearchBox
+      $Form .= "<datalist id=search>";
+      $Tape=$this->GoodBoi->GoFetch();
+      
+      $Ketan=explode(", ",$this->DefaultSearchColumn);
+      foreach($Tape as $y=>$x){
+        $Form .= "<option value=select__". $x[$this->TID] .">";
+        foreach($Ketan as $b=>$a){
+          $Arm .= $x[$a] ." ";
+        }
+        $Form .= $Arm;
+        unset($Arm);
+        $Form .= "</option>";
+      }
+      $Form .= "</datalist>";
+
+      $Form .= "<div class='w3-cell w3-cell-bottom' style='width:20%'><span><select name=listcolumn class='w3-select'>";
+      $Form .= "<option value=ALL selected>". $GLOBALS['lanAll'] ."</option>";
+
+      // Making the search column list
+      $rpl= csv2csv($this->DefaultSearchColumn);
+      $Label=$this->ColumnLabelObj->GoFetch("WHERE form_id='". $this->FormID ."' AND field_id IN (". $rpl .")","field_label, field_id");
+      foreach ($Label as $x){
+        $Form .= "<option value=". $x['field_id'] .">". lan2var($x['field_label']) . "</option>";
+      }
+
+      $Form .= "</select></span></div>";
+      foreach ($_GET as $y=>$x){
+        $Form .= "<input type=hidden name=$y value=$x>";
+      }
+      $Form .= "<div class=' w3-cell  w3-cell-bottom' style='width:5%' ><span> <i class='w3-button material-icons w3-large' class='submitButton'>search</i></span></div></div>";
+      $Form .= "</form></div>";
       return $Form;
      }
     }

@@ -795,7 +795,8 @@ $('#gita_billing').submit(function () {
 
 
 //////////////////////////////////////---Template
-
+//SCIRPT CACT< KEPALANYA HILANG< POETNING!!!
+/*
 		$("#billingRawPrice").text(Sum41(".js_price"));
 		$("#billingDiscountPrice").text(Sum41(".js_discount"));
 		$('#billingTotalPrice').text($('#billingRawPrice').text() - $('#billingDiscountPrice').text());
@@ -807,7 +808,7 @@ $(".js_noSubmitEnter").keydown(function (e) {
 		e.preventDefault();
 	}
 });
-
+*/
 $('#gita_billing').submit(function () {
 	$('#jonson_bills').val(li2json('billing_manual_additional_items'));
 	$('#jonson_discounts').val(li2json('billing_manual_additional_discount'));

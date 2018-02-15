@@ -18,6 +18,7 @@ if(!empty($_SESSION['Person'])){
             //Break checking loop if user already found
             $dog=$Dalmantion->GoFetch("WHERE ". $x ."='". $_POST['UserName'] ."'");
             $hash=$dog[0]['Password'] ;
+            mark($dog[0],'DOG');
             if(!empty($hash)){ break; }
             $ErrorLog=$ErrorLog ."No ". $x ." Found, ";
         }

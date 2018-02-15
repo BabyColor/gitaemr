@@ -1,6 +1,8 @@
 <?php
+require "Engine/head.php";
+
 $StaffListTab = new GoodBoi('staff_list');
-$StaffList = $StaffListTab -> GoFetch("LIMIT 8");
+$StaffList = $StaffListTab -> GoFetch("LIMIT 8","Aang, UserName, BName, FName, MName, LName");
 $StaffLength = count($StaffList);
 
 //================================================================================================
@@ -20,7 +22,7 @@ if(!empty($_SESSION['Person'])){
         //-------------Check registereed user
         foreach($LoginMethod as $x){
                 //Break checking loop if user already found
-                $dog=$StaffListTab->GoFetch("WHERE ". $x ."='". $_POST['UserName'] ."'","Aang, UserName, BName, FName, MName, LName");
+                $dog=$StaffListTab->GoFetch("WHERE ". $x ."='". $_POST['UserName'] ."'");
                 $hash=$dog[0]['Password'] ;
                 if(!empty($hash)){ break; }
                 $ErrorLog=$ErrorLog ."No ". $x ." Found, ";
@@ -47,10 +49,17 @@ if(!empty($_SESSION['Person'])){
             mark($dog[0]['usrid'],"USER ID");
             if(empty($LoginError)){
                 //Login Succesfull
-                OKDialog($lanLoginSuccessT,$lanLoginSuccessC);
+                //OKDialog($lanLoginSuccessT,$lanLoginSuccessC);
                 Login($dog[0]['usrid']);
-                mark($_SESSION,"Logged in as ");
+                echo "
+                        <div class='w3-card-4 w3-green w3-panel w3-center' style='margin: 20%'>
+                        <h2>$lanLoginSuccessT</h2>
+                        <div class='we-large'>$lanLoginSuccessC</div>
+                        <div class='we-large'><a href=index.php><i class='material-icons'>home</i></a></div>
+                        </div>
+                        ";
                 $LogDes="Login";
+                die();
             } else {
                 ErrorDialog($lanLoginFailedT,$LoginError);
                 
@@ -65,7 +74,7 @@ if(!empty($_SESSION['Person'])){
 <html>
 
 <head>
-    <?php require "Engine/head.php"; ?>
+    <?php  ?>
     <script>
         var currentCharacter;
         var characterCursor = 0;
@@ -82,7 +91,7 @@ if(!empty($_SESSION['Person'])){
                 type:'HEAD',
                 error: function()
                 {
-                        BGChar = 'Media/Potrait/unknown.png';
+                        BGChar = 'Media/Potrait/unknown'+Math.floor((Math.random() * 5) + 1)+'.png';
                         console.log("AJAX E");
                         console.log(BGChar);
                 },
@@ -95,6 +104,7 @@ if(!empty($_SESSION['Person'])){
                 });
             
             $("#bgCharacter")
+                .stop()
                 .animate({
                     left: '-300px',
                     opacity: '0'
@@ -111,6 +121,7 @@ if(!empty($_SESSION['Person'])){
 
 
             $("#StaffName")
+                .stop()
                 .animate({ opacity: '0' })
                 .queue(function () {
                     $(this).text($("#char_" + userName).attr('name')).dequeue();
@@ -130,15 +141,15 @@ if(!empty($_SESSION['Person'])){
         </h3>
 
         <div class='w3-display-container w3-card-4 w3-black' style='height:80%; width:80%; max-width:1024px; overflow: hidden; margin: auto '>
-            <div id='bgCharacter' class='w3-display-container w3-animate-left' style='width:auto; float: left; max-height:100%; overflow: hidden; animation: animateleft 1s'>
+            <div id='bgCharacter' class='w3-display-container w3-animate-left' style=' float: left; max-height:100%; overflow: hidden; animation: animateleft 1s'>
                 
-                <div class='w3-display-bottomleft w3-row'  style='height:100%; width:101%'>
+               <!-- <div class='w3-display-bottomleft w3-row'  style='height:100%; width:101%'>
                     <div class='w3-col m6' style='height:100%;'>a</div>
                     <div class='character_bg_gra_right w3-col m6' style='height:100%;'>a</div>
                 </div>
                 <div class='character_bg_gra_top w3-display-topmiddle' style='height:10%; width:100%'></div>
-                <div class='character_bg_gra_bottom w3-display-bottommiddle' style='height:20%; width:100%'></div>
-                <div style=' height:100%' class='w3-left-align'>
+                <div class='character_bg_gra_bottom w3-display-bottommiddle' style='height:20%; width:100%'></div>-->
+                <div style=' height:100% ; width:100%' class='w3-left-align'>
                     <img src='' style='height:100%; overflow: hidden'>
                 </div>
 
@@ -162,33 +173,10 @@ if(!empty($_SESSION['Person'])){
 
                                 echo "<span id='StaffCount' hidden>$StaffLength</span>"
                         ?>
-                   <!-- <div class='w3-col m3'>
-                        <img id='char_BabyColor' class='green-padding-supersmall w3-sepia  w3-animate-zoom characterPhoto' src='Media/Korra/user_1.jpg'
-                            style="width:100%; animation: animatezoom 0.2s" name='I Putu Gita Prasetya Adiguna'>
-                    </div>
-                    <div class='w3-col m3'>
-                        <img id='char_Sunardiasih' class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/sunar.jpg'
-                            style="width:100%; animation: animatezoom 0.4s" name='Ni Wayan Sunardi Asih'>
-                    </div>
-                    <div class='w3-col m3'>
-                        <img id='char_Admin' class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/gardevoir.jpg'
-                            style="width:100%; animation: animatezoom 0.6s" name='Gardevoir'>
-                    </div>
-                    <div class='w3-col m3'>
-                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 0.8s">
-                    </div>
-                    <div class='w3-col m3'>
-                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 1.0s">
-                    </div>
-                    <div class='w3-col m3'>
-                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 1.2s">
-                    </div>
-                    <div class='w3-col m3'>
-                        <img class='w3-sepia green-padding-supersmall w3-animate-zoom characterPhoto' src='Media/Korra/unlock-character.png' style="width:100%; animation: animatezoom 1.4s">
-                    </div>-->
+                  
 
                 </div>
-                <form id='loginForm' action="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ) ?>?mod=gita_login&job=0" method=POST>
+                <form id='loginForm' action="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ) ?>?mod=gita_login&job=0" method=POST hidden>
                     <!--<label class='w3-label' for='username'>$lanLoginUser</label>
                                                         <input class='w3-input' type=text id='username' name=UserName>-->
 
@@ -197,11 +185,11 @@ if(!empty($_SESSION['Person'])){
                     </label>
                     <div class='w3-row w3-center'>
                         <div class=' w3-col m10'>
-                                <input class='w3-input' type=password id='password' name=Password>
-                                <input class='w3-input' type=hidden id='username' name=UserName>
+                                <input class='w3-input' type=password id='password' name='Password'>
+                                <input class='w3-input' type=hidden id='username' name='UserName' >
                         </div>
                         <div class='w3-center w3-col m2' >
-                            <i class="w3-button material-icons">perm_identity</i>
+                            <i class='w3-button material-icons w3-large' class='submitButton'>perm_identity</i>
                         </div>
                     </div>
                 </form>
@@ -222,7 +210,7 @@ if(!empty($_SESSION['Person'])){
             $(this).addClass('w3-sepia').removeClass('w3-lime w3-round');
         });
 
-        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); $("#password").focus(); });
+        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); $("#password").focus(); $(loginForm).removeAttr('hidden'); });
 
         $("html").keydown(function (c) {
             switch (c.which) {
@@ -239,6 +227,8 @@ if(!empty($_SESSION['Person'])){
                     characterCursor += 4;
                     break;
                 case 13:
+                    c.preventDefault();
+                    $(loginForm).removeAttr('hidden');
                     $("#password").focus();
                     break;
             }
@@ -256,13 +246,9 @@ if(!empty($_SESSION['Person'])){
             $(".characterPhoto:eq(" + characterCursor + ")").removeClass('w3-sepia').addClass('w3-lime w3-round');
         });
 
-        $("html").keydown(function(x){
-            if(x.which==13){ 
-                x.preventDefault();
-                $("#password").focus();
-            }
-        });
-
+        $("#submit").click(function(){ $("#loginForm").submit();});
+        $("#password").keydown(function(x){ if(x.which==13){$("#loginForm").submit();}});
+        $("#password").focus(function(){ $(loginForm).removeAttr('hidden'); }).blur(function(){ $(loginForm).Attr('hidden',true) });;
 
     </script>
 </body>
