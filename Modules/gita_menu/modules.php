@@ -18,4 +18,11 @@ foreach($Menu1 as $b=>$a){
     echo "</div>";
 }
 
+foreach($_SESSION['Px'] as $y=>$x){
+    $$y=lan2var($x);
+}
+$FullName=$_SESSION['PName'];
+$Age=AgeText($dob);
+echo "<div class='w3-padding-large w3-float-right' ><span class='w3-display-right'>Pasien : $FullName</span></div>";
+
 ?>

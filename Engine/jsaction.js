@@ -796,6 +796,33 @@ $('#gita_billing').submit(function () {
 
 //////////////////////////////////////---Template
 
+		$("#billingRawPrice").text(Sum41(".js_price"));
+		$("#billingDiscountPrice").text(Sum41(".js_discount"));
+		$('#billingTotalPrice').text($('#billingRawPrice').text() - $('#billingDiscountPrice').text());
+	}
+});
+
+$(".js_noSubmitEnter").keydown(function (e) {
+	if (e.which == 13) {
+		e.preventDefault();
+	}
+});
+
+$('#gita_billing').submit(function () {
+	$('#jonson_bills').val(li2json('billing_manual_additional_items'));
+	$('#jonson_discounts').val(li2json('billing_manual_additional_discount'));
+	$('#price_bills').val($("#billingRawPrice").text());
+	$('#price_discounts').val($("#billingDiscountPrice").text());
+	$('#price_total').val($("#billingTotalPrice").text());
+	console.log(li2json('billing_manual_additional_items'));
+	console.log(li2json('billing_manual_additional_discount'));
+	console.log(li2json("#billingRawPrice").text());
+	console.log(li2json("#billingDiscountPrice").text());
+	console.log(li2json("#billingTotalPrice").text());
+});
+
+//////////////////////////////////////---Template
+
 function BukaTutup(id) {
 	var x = "#" + id;
 	if ($(x).hasClass('w3-hide')) {
