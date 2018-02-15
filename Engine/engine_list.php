@@ -168,6 +168,10 @@ function DxEater($Alpha,$Method='Dx'){
       $EatTable = "com_gita_visit_symptomp";
       $idPsCol = "symptomp";
     break;
+    case 'Med':
+      $EatTable = "com_gita_medicine";
+      $idPsCol = "name";
+    break;
   }
   
   
@@ -356,12 +360,18 @@ function Empty2Null($Data){
 //////idPrefix = Prefix of list ID (List id will be "prefix $listIdKey" for each list)
 //////listIdKey = Wich Key will be used to determined the each list's ID, if empty, will generate random number instead
 //////liClass = Class of each list
+//////liClassSusp = Class of <li> for those with 'susp'
 //////preClass = Class of connector word
 //////postClass = Class of connector word
+//////removeButton = BOOLEAN, add remove button on each <li> end
+//////hiddenVal = BOOLEAN, Make hidden div with class 'jonson' on each which contain JSON of the <li>
+//////walkthrough = BOOLEAN, display walktrought hidden box
+
 //CALLBACK: the list(s) will be returned as array
 
 function JSON2List($JSON,$Display,$Arguments=array('idPrefix'=>'list_','class'=>'w3-list')){
   $UsedID = array();
+  $JSON = PhoenixDown($JSON);
   foreach($JSON as $y => $x){
     //Make list ID
     $liID = $Arguments['listIdKey']? $x[$Arguments['listIdKey']] : rand(1,99999) ;
@@ -372,11 +382,32 @@ function JSON2List($JSON,$Display,$Arguments=array('idPrefix'=>'list_','class'=>
     array_push($UsedID,$liID);
     $liID = $Arguments['idPrefix'] . $liID;
     mark($x,"JSON");
-    $list[$y] = "<li id='" . $liID ."'>";
+
+    $Class = $x['Susp']? $Arguments['liClassSusp'] : $Arguments['liClass'];
+
+    $list[$y] = "<li id='" . $liID ."' class='$Class' onclick=BukaTutup('walk_$liID')>";
     foreach ($Display as $a){
       if(!$x[$a[1]]) { continue; }
       $list[$y] .= "<span class='". $Arguments['preClass'] ."'>". $a[0] . "</span>" . $x[$a[1]] . "<span class='". $Arguments['postClass'] ."'>" . $a[2] . "</span>";
     }
+
+    if($Arguments['removeButton']){ // Add Remove button
+      $list[$y] .= "<span class='w3-right-align w3-text-red rem'> [X]<script>$('.rem').on('click', function() {
+        $(this).parent().addClass('w3-red');
+        $(this).parent().remove();
+      });</script></span>";
+    }
+
+    if($Arguments['hiddenVal']) { // Hidden jonson div
+      $list[$y] .= '<span class="jonson" hidden="">';
+      $list[$y] .= ArraySerialize($x);
+      $list[$y] .= '</span>';
+    }
+
+    if($Arguments['walkthrough']) { // walkthrough
+      $list[$y] .= "<div id='walk_$liID' class='w3-container w3-hide w3-white'>". walkthrough($x['walkthrough']) ."</div>";
+    }
+
     $list[$y] .= "</li>";
     
   }
@@ -652,6 +683,17 @@ function PhoenixDown($Data,$Keys=null){
   }
   return $Data;
 }
+
+//Filter array within array with specific value in specific key
+//Filter $Arr whom have $Key with value of $Val
+//return an ARRAY containing the Array(s) mathching with the search criteria
+function FilterArray($Arr,$Key,$Val){
+  $Returned = array();
+  foreach($Arr as $x){
+    if($x[$Key]==$Val) { array_push($Returned,$x); }
+  }
+  return $Returned;
+}
 /*
 ==========================================================================================================
 
@@ -726,6 +768,7 @@ function WarningDialog($Title,$Content){
 }
 
 function Mark($a,$pre='Mark',$post=null){ //DEBUGGING TOOLS
+  if(!$_SESSION['DeFlea']) { return; }
   $SID=rand();
   echo "<div id='$SID' class='w3-tiny w3-hover-pale-blue w3-card-4 w3-panel w3-pale-yellow w3-small mark'><h6>$pre </h6><p>";
   if(is_array($a)){
@@ -737,6 +780,7 @@ function Mark($a,$pre='Mark',$post=null){ //DEBUGGING TOOLS
 }
 
 function MarkA($a,$pre=null,$post=null){ //DEBUGGING TOOLS
+  if(!$_SESSION['DeFlea']) { return; }
   $Mid=rand();
   echo "<div class='w3-card-4 '><button class='w3-button w3-block w3-left-align w3-light-green' onclick=BukaTutup('". $Mid ."')><strong>$pre </strong></button>";
   echo "<div id='". $Mid ."' class='w3-container w3-hide w3-pale-blue'><div>";
@@ -860,7 +904,7 @@ function DXFList($Dx,$Job='view'){
 
     $PSxPIList .= "<li class='$Class' onclick=BukaTutup('$lid')>";
 
-    // Drawing the displayed diagnosis laong with their attributes if exist
+    // Drawing the displayed diagnosis along with their attributes if exist
    if($x['Susp']){ $PSxPIList .= 'Suspect '; }
    if($x['dx']){ $PSxPIList .= $x['dx']; }
    if($x['location']){ $PSxPIList .= ", ". $x['location'] ; }
@@ -888,26 +932,69 @@ function DXFList($Dx,$Job='view'){
 }
 
 // Draw Planning list on patient profile/visit data
-function SymList($Sx,$Job='view'){
-  $Sx = DxEater($Sx,'Sym');
+//$Sx = The Data (soap_subject, DXH, PXH,...)
+//$Mode = STR, either 'Sym' for symptmp, 'Dx' for Diagnosis, 'Med' for Medicine
+function SymList($Sx,$Mode,$Job='view'){
+  $Sx = DxEater($Sx,$Mode);
   mark($Sx,"SX");
-  foreach($Sx as $x){
-    $Display=array(
-      array("","symptomp"," "),
-      array($GLOBALS['lanSymtompSep1'] ." ","location",", "),
-      array($GLOBALS['lanSymtompSep2'] ." ","reffered_pain",", "),
-      array($GLOBALS['lanSymtompSep3'] ." ","duration",", "),
-      array($GLOBALS['lanSymtompSep4'] ." ","frequency",", "),
-      array($GLOBALS['lanSymtompSep5'] ." ","quality",", "),
-      array($GLOBALS['lanSymtompSep6'] ." ","worsened_by",", "),
-      array($GLOBALS['lanSymtompSep7'] ." ","relieved_by",", "),
-      array($GLOBALS['lanSymtompSep8'] ." ","Thisnote",""),
-    );
+
+  switch ($Mode) {
+    case "Sym":
+      $Display=array(
+        array("","symptomp"," "),
+        array($GLOBALS['lanSymtompSep1'] ." ","location",", "),
+        array($GLOBALS['lanSymtompSep2'] ." ","reffered_pain",", "),
+        array($GLOBALS['lanSymtompSep3'] ." ","duration",", "),
+        array($GLOBALS['lanSymtompSep4'] ." ","frequency",", "),
+        array($GLOBALS['lanSymtompSep5'] ." ","quality",", "),
+        array($GLOBALS['lanSymtompSep6'] ." ","worsened_by",", "),
+        array($GLOBALS['lanSymtompSep7'] ." ","relieved_by",", "),
+        array($GLOBALS['lanSymtompSep8'] ." : ","Thisnote",""),
+      );
+    break;
+    case "Dx":
+      $Display = array (
+        array("","dx"," "),
+        array(" ","location",", "),
+        array($GLOBALS['lanType'] ." ","type",", "),
+        array($GLOBALS['lanGrade'] ." ","grade",", "),
+        array($GLOBALS['lanStage'] ." ","stage",", "),
+        array($GLOBALS['lanCausa'] ." ","causa",", "),
+        array($GLOBALS['lanNotes'] ." : ","Thisnote",", ")
+      );
+    break;
+    case "Med":
+      $Display = array (
+        array("[","type","] "),
+        array("","name"," "),
+        array("","form_n",", "),
+        array(": ","qday"," "),
+        array("&times ","qtt"," "),
+        array(" ","form"," "),
+        array(" ","adm"," . "),
+        array(" ","rule"," "),
+        array(" (","extra",") "),
+      );
+    break;
   }
-  $Symptomp = JSON2List($Sx,$Display,array('listIdKey'=>'id','idPrefix'=>'symp_','preClass'=>'connector'));
+  
+
+  $Arg = array('listIdKey'=>'id','idPrefix'=>'symp_','preClass'=>'connector');
+
+  $Arg['liClassSusp'] = 'w3-container w3-padding-small w3-hover-orange w3-text-orange w3-hover-text-white'; 
+  $Arg['liClass']  = 'w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white';
+
+  if(in_array($Job,array('edit','reg'))){
+    $Arg['removeButton'] =  $Arg['hiddenVal'] =  $Arg['walkthrough'] = TRUE;
+  }
+  mark($Sx,"SYMPTOMP $$");
+  $Symptomp = JSON2List($Sx,$Display,$Arg);
   mark($Symptomp,"SYMPTOMP");
+
   foreach ($Symptomp as $x){
-    $list .= $x;
+      //Close button only appear ig job is edit or reg
+      $list .= $x;
+
   }
 return $list;
 }
@@ -972,6 +1059,80 @@ function AgeText($DOB,$Full=true){
     }
     
   }
+}
+
+//Just like symList, but for medicine
+//$RawData : The meidicine data
+//$Job : 'edit' or 'view'
+////ARGUMENTS////
+//Style = List display style : 'inLine' displayed in one line | 'R' displayed like in presception paper
+function MedListGenerator($RawData,$Job,$Arguments=array('Style' => 'R')){
+  $Data = UnJson($RawData);
+  //#1. Append medicine's data to the $Data
+  $Data = AppendMed($Data);
+
+  //#2. Prepare some variable
+  switch($Job){
+    case 'edit': // Add Remove and Edit butoon on Job Edit
+    $remAndEdit = "<span class='w3-right-align w3-text-red w3-tiny rem' onclick=remButton($(this).parent().attr('id'))>[×]</span>
+    <span class='w3-right-align w3-text-red w3-tiny edit' onclick=editButton($(this).parent().attr('id'))>[Edit]</span>";
+    break;
+  }
+
+  //#3. Draw List
+  foreach ($Data as $y => $x){
+    
+    
+    foreach( $x['comp'] as $c){
+      $compUnit = $x['comp']['prosent']? "%" : "mg";
+      $compList .= "<li class='w3-small'>". $x['comp']['name'] ." ". $x['comp']['amount'] ." $compUnit</li>";
+    }
+    
+    $medlist .= "
+                    <li id=medlist_". $x['id'] ." medId='". $x['id'] ."' onclick=BukaTutup('detail_med_$y') class='w3-container w3-padding-small w3-hover-blue w3-text-blue w3-hover-text-white'>
+                      <span class='w3-xlarge'>R/</span>
+                      <div>
+                          <strong>". $x['name'] ."</strong> 
+                          ". $x['form_n'] ." 
+                          No ". $x['No'] ."</div>
+                      <div>
+                          <span class='w3-large'>∫</span>
+                          ". $x['qday'] ."
+                          <span class='w3-small'>dd</span> 
+                          ". $x['qtt'] ." 
+                          ". $x['form'] ." 
+                          ". $x['adm'] ." . 
+                          ". $x['rule'] ." 
+                          (". $x['extra'] .")</div>
+                      <div></div>
+                      $remAndEdit
+                      <div class='jonson' hidden=''>$RawData</div>
+                      <div id='detail_1' class='w3-card w3-hide w3-light-grey'>
+                          <div class='w3-panel w3-row'>
+                              <div class='w3-col m4'>". $x['type'] ."</div>
+                              <div class='w3-col m4'>
+                                  <ul class='w3-ul'>
+                                      $compList
+                                  </ul>
+                              </div>
+                              <div class='w3-col m4'></div>
+                          </div>
+                      </div>
+                   </li>";
+  }
+
+  return $medlist;
+}
+
+//Append Medicine data to medication list 
+function AppendMed($Data){
+  $MedTable = new GoodBoi('com_gita_medicine');
+  foreach($Data as $y => $x){
+    $MedData = $MedTable -> GoFetch("WHERE id = '". $x['id'] ."'","name, comp, type, form_n");
+    $Data[$y] += $MedData[0];
+    $Data[$y]['comp'] = UnJson( $Data[$y]['comp'] );
+  }
+  return $Data;
 }
 /*
 ==========================================================================================================
@@ -2039,6 +2200,7 @@ class Snorlax{
    $this->TargetTab = $OriTab;   
    $this->LaxIncense = array('timest'=>Date2SQL(),'culpirt'=>$Culpirt, 'culpirt_info'=>$CulpirtInfo, 'facility'=>$GLOBALS['SettingCurrentFacility'],'original_table'=>$OriTab, 'edited_id'=>$Data[$DataID]);
    $this->Data = $Data;
+   mark($this->Data,"THIS DATA");
    Mark($Method,"SNORLAX");  //========================== DEBUG===========================
    if($Auto){
       switch ($Method){
@@ -2161,6 +2323,7 @@ class Snorlax{
 
   //The actual DB wiritng process
   function PulverizingPancake($Ditto,$Snore){
+    mark($this->Data,"FATA ID");
     $this->GoodBoi_Version->GoBurry($Ditto,"WHERE id='". $this->PrevVersionID . "'"); //[2]
     $this->GoodBoi_Target->GoBurry($this->NewData,"WHERE ". $this->TargetID ."='". $this->Data[$this->TargetID] ."'"); //[4]
     $this->GoodBoi_Version->GoBark($Snore);
@@ -2251,7 +2414,7 @@ class Listing{
     $CURI = GetGET($CURI);
     foreach($this->Query as $x){
       $y=$x[$this->TID];
-      $yoyo[$y]['Main']=FullName($x);
+      $yoyo[$y]['Main'] = FullName($x)? FullName($x): $x['patient'];
       $yoyo[$y]['Sub']=$x['patientid'] ." ". lan2var($x['sex']);
       $yoyo[$y]['URI']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$EURI" . "dataid=". $x[$this->TID];
       $yoyo[$y]['Click']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$CURI" . "dataid=". $x[$this->TID];
@@ -2599,7 +2762,7 @@ class Smeargle{
     if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
     $this->HideGroup = TRUE;
 
-    $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('". $Group ."')>". lan2var($Group) ."</h4><div id='$Group' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
+    $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('group_". str_replace('$','',$Group) ."')>". lan2var($Group) ."</h4><div id='group_" . str_replace('$','',$Group) ."' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
 
     //Process each Fields
     foreach($Fields as $x){
@@ -2742,7 +2905,7 @@ class Smeargle{
         if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
           $this->HideGroup = TRUE;
 
-          $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('". $Group ."')>". lan2var($Group) ."</h4><div id='$Group' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
+          $Draw['Header']= "<div class='". $this->Class['GroupDiv'] ."'><h4 class='". $this->Class['GroupHeader'] ."' onclick=BukaTutup('group_". str_replace('$','',$Group) ."')>". lan2var($Group) ."</h4><div id='group_" . str_replace('$','',$Group) ."' class='". $this->Class['GroupContainerDiv'] ." $w3hide'>";
 
         //Process each Fields
         foreach($Fields as $x){

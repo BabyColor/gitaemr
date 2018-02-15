@@ -12,7 +12,7 @@ if(bouncer()){
 	$diagnosis = new GoodBoi ('com_gita_visit_diagnosis');
 	$FieldID = "gita_visit_soap";
     $Tid='visitid';
-
+	$VisitID= $VisitID? $VisitID: $_GET['dataid'];
 
     switch($_GET['job']){ // Decide which method should be used to display?
 		case 1:
@@ -142,8 +142,8 @@ if(bouncer()){
 
 		if(empty($Validation->SignUpError)){ // Register if no error occured 
 			
-			
-			$BARK= new Snorlax ($Tid,$MainTableName,$registered,'Edit',$MainTable);
+			$registered[$Tid] = $VisitID;
+			$BARK= new Snorlax ($Tid,$MainTableName,$registered,null,'Edit',$MainTable);
 
 			$OKContent = "lanEdited" . $NewUserApproved;
 			OkDialog($lanUserEditT,$lanUserEditC);
@@ -171,7 +171,7 @@ if(bouncer()){
 		switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
 			case "view":
 			case "edit":
-			$VisitID= $VisitID? $VisitID: $_GET['dataid'];
+			//$VisitID= $VisitID? $VisitID: $_GET['dataid'];
 			case "reg":
 					/*
 			$Form = new Smeargle($FieldID,$viewsonic,$Tid,$layout,$MainTable,$EditPatient);
@@ -188,7 +188,7 @@ if(bouncer()){
 			Gardevoir($Forms);
 			break;
 		case "list":
-			LogPatient($_GET['dataid']);
+			//LogPatient($_GET['dataid']);
 			$List= new Listing($MainTable,$layout,array(7=>$MainTableName,6=>'form_id',2=>"visitid, time, patient, provider, assistant_provider, visit_type",8=>'patient',9=>"time, patient, provider, visit_type", 4=>$Tid));
 		
 			/*
@@ -308,7 +308,7 @@ if(bouncer()){
 			// Subject
 
 				$New ="<ul class='w3-ul' id=SubjectD>
-					". SymList($PSx[0]['soap_subject'],$GLOBALS['viewsonic']) ."
+					". SymList($PSx[0]['soap_subject'],'Sym',$GLOBALS['viewsonic']) ."
 						</ul>
 					<div class=FieldList id='SubjectD'></div>
 					<input type=hidden id='SubjectH' value='empty' name='soap_subject'>	";
@@ -324,7 +324,7 @@ if(bouncer()){
 			//Diagnosis
 			$New="
 					<ul class='w3-ul' id=DXD>
-					". DXFList($PSx[0]['DXH'],$GLOBALS['viewsonic']) ."
+					". SymList($PSx[0]['DXH'],'Dx',$GLOBALS['viewsonic']) ."
 					</ul>
 					<input type=hidden id=DXH name=DXH>
 				";
@@ -333,7 +333,7 @@ if(bouncer()){
 			//Planning
 			$New="
 					<ul class='w3-ul' id=PXD>
-					". DXFList($PSx[0]['FXH'],$GLOBALS['viewsonic']) ."
+					". MedListGenerator($PSx[0]['PXH'],$GLOBALS['viewsonic'],array()) ."
 					</ul>
 					<input type=hidden id=PXH name=PXH>
 					<ul id=NewMedData hidden></ul>
