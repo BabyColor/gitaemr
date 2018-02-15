@@ -268,7 +268,7 @@ $lanNewVisitC="Kunjungan berhasil dicatat";
 
 //-------------------Login------------------------
 $lanBackToLogin="Kembali ke <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=2>Masuk</a> atau <a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_login&job=3>Minta Bantuan Masuk</a>";
-$lanLoginTitle="Masuk";
+$lanLoginTitle="Chose Your Character";
 $lanLoginNoUser="Pengguna tidak terdaftar";
 $lanLoginWrongPass="Kata sandi yang dimasukkan salah";
 $lanLoginSuccessT="Login Berhasil";

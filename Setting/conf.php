@@ -2,7 +2,7 @@
 defined('GitaEmr') or Die($UnatuhorizedAccess);
 //Main configuration file
 $SiteTitle = "Gita EMR";
-$DeFlea = FALSE;
+$DeFlea = TRUE;
 
 $setGlobal = array (
     'requireLogin' => TRUE,
