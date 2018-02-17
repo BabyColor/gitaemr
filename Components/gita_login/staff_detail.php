@@ -7,7 +7,7 @@ $option = new GoodBoi ('list_list');
 
 //---Auto Logout if registering new user
 if(!empty($_SESSION['Person'] && $_GET['job']==1)){
-	Logout();
+	
 }
 
 // Signup Action

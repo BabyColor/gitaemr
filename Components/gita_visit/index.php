@@ -22,7 +22,6 @@ switch($job){
 	require "SOAP.php";
 	break;
 	case 2: // Job 2 --- Logout
-	Logout();
 	require "SOAP.php";
 	break;
 }

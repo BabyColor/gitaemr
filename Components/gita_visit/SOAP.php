@@ -199,7 +199,7 @@ if(bouncer()){
 																'table'=>$MainTableName,
 																'id' => 'visitid',
 																'main' => array('del'=>' ', 'data'=> array('patient')),
-																'sub' => array('del'=>' || ', 'data'=>array('time','visit_type')),
+																'sub' => array('del'=>', ', 'data'=>array('time','visit_type')),
 																'hidden' => array('DXH','PXH','SubjectF'),
 																'onClick' => 'mod=gita_visit&job=4',
 																'button1' => array('DOM'=>"<i class=\"fa fa-pencil\"></i>",'link'=>'mod=gita_visit&job=3','toolTip'=>$lanEdit),
@@ -208,7 +208,10 @@ if(bouncer()){
 												'filter' => 'top'   
 												)
 												);
-												$List -> Draw($List->Aang('Patient','Sex'));
+			$PatientTab = new GoodBoi ("com_gita_patient");
+			$Patient = $PatientTab->GoFetch();
+			$List->RefineRefined('patient',$Patient,array('Which'=>'main','Organize'=>'patientid','Function'=>'FullName'));
+			$List -> Draw($List->Zebra());
 			break;
 			}
 	

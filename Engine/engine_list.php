@@ -713,6 +713,19 @@ function ArrayUpdate($a1,$a2){
   }
   return $a1;
 }
+
+//ARRAY of ARRAY. Change index numb of item based on that item['someKey']
+// Example case : after fetching MySQL data, assign the primary column as the index insetad of row
+// CAUTION : The key must be contain unique value on each item
+// $Array = ARRAY to be proccesed (array1,array2,...)
+// $Key = Which key to be used as index?
+// CALLBACK : ARRAY (array1[$Key]=>array1, array2[$Key]=>$array2)
+function Organize($Array,$Key){
+  foreach($Array as $y => $x){
+    $a[$x[$Key]] = $x;
+  }
+  return $a;
+}
 /*
 ==========================================================================================================
 
@@ -1746,6 +1759,8 @@ class GoodBoi{
    return $row;
   }
 
+
+
   public function GoBark ($data){ // Method to INSERT data, $data is an array (Column as Key, and Values as Value))
     $bun = SniffButt();
     $dataesc= Blissey($data);
@@ -2357,7 +2372,7 @@ class Snorlax{
 =======================================================================================
 To display a list (e.g. Patient list, Staff list)
                                                   
-*/
+
 
 class Listing{
   protected $GoodBoi; // GoodBoi class
@@ -2531,6 +2546,7 @@ class Listing{
       Gardevoir($this->Gardevoir);
     }
 }
+*/
 /*
 =======================================================================================
 ██╗     ██╗███████╗████████╗██╗███╗   ██╗ ██████╗ 
@@ -2586,10 +2602,10 @@ LIST STYLE
 */
 
 class Imperial{
-  protected $Array; // Main array
-  protected $Arguments;
-  protected $keyID; //Which key is the ID
-  protected $ulId; // <ul> id
+  public $Array; // Main array
+  public $Arguments;
+  public $keyID; //Which key is the ID
+  public $ulId; // <ul> id
   public $RefinedArray; // Refined array that ready to be drawed
 
   //////////////////////////////////////////CONSTRUCTOR//////////////////////////////////////////////
@@ -2657,19 +2673,32 @@ class Imperial{
 
       $id=$x[$this->keyID];
       foreach($Need as $b=>$a){
+        //mark($a,$b);
         switch($b){
           case 'main':
           case 'sub':
-            $Clean[$id][$b] = in_array('LName',$a)? FullName(Hadouken($x,$a['data'])): array2csv(array_map('lan2var',Hadouken($x,$a['data'])),null,null,null,$a['del'])['Val'] ;
+            if(in_array('LName',$a)){ 
+              $Clean[$id][$b]['val']['fullName'] =  "aa" . FullName(Hadouken($x,$a['data']));
+              unset($x['prefix']);
+              unset($x['FName']);
+              unset($x['LName']);
+            } 
+            
+            foreach(Hadouken($x,$a['data']) as $o=>$v){
+              $Clean[$id][$b]['val'][$o] =lan2var($v) ;
+            }
+            $Clean[$id][$b]['del'] = $a['del'] ;
             break;
           case 'hidden':
             array2csv(array_map('lan2var',Hadouken($x,$a['data'])))['Val'];
             break;
           case 'picture':
+          case 'dropDown':
             $Clean[$id][$b] = $x[$a] ;
             break;
           case 'onClick':
-          case 'dropDown':
+            $Clean[$id][$b]="index.php?" . $a ."&dataid=$id" ;
+            break;
           case 'button1':
           case 'button2':
           case 'button3':
@@ -2686,7 +2715,26 @@ class Imperial{
     return $Clean;
   }
 
-
+  // UNDER CONSTRUICTON
+  // USe to modify $this->RefinedArray
+  // $modKey = What key to be modified
+  // $newArray = The New Array
+  // $Arguments
+  /////// Function = Function to be called to modify, if left null, no funciton will be called
+  /////// Organize = STR Perform 'Organize' function with this STR as key
+  /////// Which = Which part to be modified? (main/sub), default is 'main'
+  public function RefineRefined($modKey,$newArray,$Arguments=array('Which'=>'main')){ 
+			if($Arguments['Organize']) {$newArray = Organize($newArray,$Arguments['Organize']);}
+			$Ref = $this->RefinedArray;
+			foreach ($Ref as $y => $x){
+        mark($Arguments['Function'],"FF");
+        $Ref[$y][$Arguments['Which']]['val'][$modKey] = $Arguments['Function']? call_user_func($Arguments['Function'],$Ref[$y][$Arguments['Which']]['val'][$modKey]) : $Ref[$y][$Arguments['Which']]['val'][$modKey];
+        mark($Ref[$y][$Arguments['Which']]['val'],"REF");
+      }
+      
+      $this->RefinedArray = $Ref;
+    }
+      
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Make list with avatar picture
   // -------------------------------------------------------------
@@ -2729,7 +2777,7 @@ class Imperial{
       //List Content
       $Items[$y] .= "<div class='w3-bar-item'>";
       //Main + click link
-      $Items[$y] .= $x['onClick']?  "<a class='w3-large' href=". $x['onClick'] ."&dataid=$y >". $x['main'] ."<br></a>": "<div class='w3-large'>" . $x['main'] . "</div>";
+      $Items[$y] .= $x['onClick']?  "<a class='w3-large' href=". $x['onClick'] ." >". $x['main'] ."<br></a>": "<div class='w3-large'>" . $x['main'] . "</div>";
       //Sub, hidden and closure
       $Items[$y] .= "<span>". $x['sub'] ."</span><span hidden>". $x['hidden'] ."</span>
                     </div>
@@ -2740,6 +2788,56 @@ class Imperial{
 
     return $Items;
   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Make striped colored list
+  // -------------------------------------------------------------
+  // | [main]                               [sub]                 |
+  // -------------------------------------------------------------
+  // $array = The array to be drawned, if empty, use class's Array PROPERTY instead
+  // $Class = ARRAY of class option 'color', 'hover'
+  public function Zebra($array=null,$Class=array('color'=>'white','hover'=>'lime')){
+    $ulId = $this->ulId;
+    $array= $array? $array: $this->RefinedArray;
+   
+
+    //Opening
+    $Items['__pre'] = "<div class=''>
+                    <ul class='w3-ul w3-card-4 stripped_li w3-" . $Class['color'] . "' id=$ulId>";
+    
+    //Items
+    $c=0;
+    foreach($array as $y=>$x){
+      mark($x,"X");
+      foreach($x['main']['val'] as $i=>$v){
+        $l .= $l? $x['main']['del'] . $v :$v ;
+      }
+      $x['main'] = $l;
+      unset($l);
+      foreach($x['sub']['val'] as $i=>$v){
+        $l .= $l?  $x['sub']['del'] . $v : $v ;
+      }
+      $x['sub'] = $l;
+      unset($l);
+
+mark($x,"X2");
+
+      $Items[$y] = "<li id='" . $ulId . "_li_" .$y. "' class='w3-hover-" . $Class['hover'] . "' >";
+      //Main + click link
+      $Items[$y] .= "<div class='w3-cell w3-cell-middle' style='width:60%'>";
+      $Items[$y] .= $x['onClick']?  " <span ><a class='w3-large' href=". $x['onClick'] ." >". $x['main'] ."</a></span>": "<span class='w3-large'>" . $x['main'] . "</span>";
+      $Items[$y] .= "</div>";
+      //Sub, hidden and closure
+      $Items[$y] .= "<div class='w3-cell w3-cell-middle' style='width:40%'><span >". $x['sub'] ."</span></div><span hidden>". $x['hidden'] ."</span>
+                    </li>";
+      $c++;
+    }
+    $Items['__post'] = "</ul></div>";
+
+    return $Items;
+  }
+
+
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // CALLBACK : STR of picture path
@@ -2785,6 +2883,7 @@ class Imperial{
   ///////////////////////////////////////////////////////////////////
   // Drawer
   public function Draw($List){
+    echo "<div class='w3-card-4 w3-container w3-light-green w3-center'><h3 class='w3-panel'>" . $this->Arguments['heading'] . "</h3></div>";
     if($this->Arguments['filter']=='top'){ echo $this->FilterList(); }
     Gardevoir($List);
     if($this->Arguments['filter']=='bottom'){ echo $this->FilterList(); }
