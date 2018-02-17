@@ -703,19 +703,23 @@ $(".js_select_currency").on('change', function () {
 	$(unitF).text("AA");
 });
 
-$(".js_disc").blur(function () {
+$(".js_disc").change(function () {
 	discF = $(this).closest(".js_discount_div").find(".js_discount")[0];
 	console.log($(this).closest(".js_discount_div").find(".js_discount"));
 	$(discF).val(GimmeDiscount($("#billingRawPrice").text(), $(this).val()));
 	console.log(GimmeDiscount($("#billingRawPrice").text(), $(this).val()));
 });
 
-$(".js_price , .js_discount, .js_disc").blur(function () {
+$(".js_price , .js_discount, .js_disc").change(function () {
 	$("#billingRawPrice").text(Sum41(".js_price"));
 	$("#billingDiscountPrice").text(Sum41(".js_discount"));
 	$('#billingTotalPrice').text($('#billingRawPrice').text() - $('#billingDiscountPrice').text());
 });
 
+$(".js_pricePcs").change(function(){
+	console.log($(this).parent().find('input .js_priceQtt'));
+	$(this).parent().find('.js_priceQtt').val(Number($(this).parent().find('.js_pricePcs').val() ) * Number($(this).parent().find('.js_medQtt').text()));
+});
 
 $("#manual_label , #manual_price").keyup(function (e) {
 	if (e.which == 13) {

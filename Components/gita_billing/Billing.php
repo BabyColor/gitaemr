@@ -189,11 +189,12 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 											<div class='w3-col m7'>
 												<input type='number' class='w3-input js_price'id='def_".$y."_price' value='". $x['price'] ."'>
 											</div>
-											<div class='w3-col m4'>
+											<div class='w3-col m2'>
 												<select class='w3-select js_select_currency'id='def_".$y."unit' >
 													$CurrencyOption
 												</select>
 											</div>
+											
 										</div>
 										";
 			}
@@ -218,7 +219,7 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 				//Make radio button for Medicine Inventory
 				$medInventory = $medInventoryTab -> GoFetch("WHERE medId='". $x['id'] ."' AND  location='$SettingCurrentFacility' AND stock > 0");
 				foreach($medInventory as $m) {
-					$radio .= "<input type='radio' class='w3-radio' value='". $m['id'] ."'>Isi ". $m['ContentPerPcs'] ."/Pcs || Harga ". $m['priceUnit'] ." ". $m['price'] ." || Expired ". $m['expDate'] ." || Sisa Stok ". $m['stock'] ." || Rak ". $m['shelve'] ." || Supplier ". $m['supplier'] ."<br>";
+					$radio .= "<input type='radio' class='w3-radio' value='". $m['id'] ."'>Isi ". $m['content'] ."/Pcs || Harga ". $m['priceUnit'] ." ". $m['sellingPrice'] ." || Expired ". $m['expDate'] ." || Sisa Stok ". $m['stock'] ." || Rak ". $m['shelve'] ." || Supplier ". $m['supplier'] ."<br>";
 				}
 				
 				
@@ -228,13 +229,19 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 											<div class='w3-col m1 js_currency_unit' unit='". $x['priceUnit'] ."'>
 												". FilterArray($Currency,'id',$medInventory[0]['priceUnit'])[0]['symbol'] ."
 											</div>
-											<div class='w3-col m7'>
-												<input type='number' class='w3-input js_price' id='med_".$y."_price' value='". $medInventory[0]['sellingPrice'] ."'>
+											<div class='w3-col m3'>
+												<input type='number' class='w3-input js_pricePcs' id='med_".$y."_price' value='". $medInventory[0]['sellingPrice'] ."'>
 											</div>
 											<div class='w3-col m4'>
 												<select class='w3-select js_select_currency'  id='med_".$y."unit' >
 													$CurrencyOption
 												</select>
+											</div>
+											<div class='w3-col m1 js_medQtt' unit='". $x['unit'] ."'>
+												(" . $x['qtt'] . ")
+											</div>
+											<div class='w3-col m3'>
+												<input type='number' class='w3-input js_price js_priceQtt'id='def_".$y."_price' value='".$medInventory[0]['sellingPrice'] * $x['qtt']  ."' disabled>
 											</div>
 											<div class='w3-col m12'>
 												$radio
@@ -418,6 +425,7 @@ echo "<script>$(document).ready(function() {
 		});
 		$('#billingDiscountPrice').text(Sum41('.js_discount'));
 		$('#billingTotalPrice').text($('#billingRawPrice').text()-$('#billingDiscountPrice').text());
+		$('.js_TotalPcsPrice').text(Number($(this).parent().find('.js_pricePcs').val() ) * Number($(this).parent().find('.js_medQtt').text()));
 	});</script>";
 echo "<script src=Engine/medicine.js></script>";
 ?>
