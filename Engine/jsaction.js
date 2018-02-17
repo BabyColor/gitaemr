@@ -843,7 +843,11 @@ function BukaTutup(id) {
 }
 
 
+///////////////////////// List Filter //////////////////////////
 
+/*$("#listFilter").keydown(function(){
+	listFilterHide($(this).val(),$(this).attr('id'));
+});*/
 
 ///TESTER
 $('#LOLOK').on('click', function () {

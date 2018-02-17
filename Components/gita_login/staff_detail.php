@@ -155,9 +155,11 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 	switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
 		case "view":
 		case "edit":
+			$EditedUser= $registered? $registered['usrid']: $_GET['dataid'];
+			Person();
 		case "new":
-			$Form = new Smeargle("gita_login_signup",$viewsonic,'usrid',$layout,$staff,$EUser);
-			$Forms = $Form->DrawForm(array($lanSignUp));
+			$Forms = new Smeargle("gita_login_signup",$viewsonic,array('FHeader'=>$lanUserDetailFormHeader,'DataTable'=>'staff_list','DataKey'=>'usrid','DataID'=>$EditedUser));
+			$Forms = $Forms -> Start();
 			//if($viewsonic!="view"){
 			//	$Forms=str_replace('$lan',"$lan",$Forms);
 			//}
@@ -283,10 +285,37 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 }
 
 if($_GET['job']==5){
-	$List= new Listing($staff,$layout,array(7=>'gita_login_signup',6=>'form_id',2=>"usrid, BName, FName, MName, LName, Job, Departement, Specialty",8=>'FName',9=>"BName, FName, MName, LName, Job, Departement, Specialty", 4=>'usrid'));
-	$List->Gardevoir();
+	$List = new Imperial(null,array( 'MySQL' => array (
+		'table'=>'staff_list',
+		'id' => 'usrid',
+		'main' => array('del'=>' ', 'data'=> array('prefix','FName','LName')),
+		'sub' => array('del'=>' , ', 'data'=>array('RegID','Job')),
+		'hidden' => array('Position','Departement'),
+		'picture' => 'Aang',
+		'button1' => array('DOM'=>"<i class=\"material-icons\">account_circle</i>",'link'=>'mod=gita_login&job=3','toolTip'=>$lanEdit)
+		),
+'heading' => $lanUserList, 
+'filter' => 'top'   
+)
+);
+$List -> Draw($List->Aang('Korra','Sex'));
 }
 
+//Draw avatar and basic info
+function Person(){
+	$Person = $GLOBALS['staff'] -> GoFetch("WHERE usrid='" . $GLOBALS['EditedUser'] ."'");
+	echo "
+			<div class='w3-row'>
+				<div class='w3-col m4 w3-card-4 w3-white w3-center'>
+					<img src='Media/Korra/" . $Person[0]['Aang'] . "' style='max-height:100%; max-width:100%;'>
+					<p style='height:5%'></p>
+				</div>
+				<div class='w3-col m8 w3-card-4 w3-white w3-panel'>
+					<h3>". FullName($Person[0])  ."</h3>
+				</div>
+			</div>
+		";
+}
 
 $LogContent=array2arrow($registered); //For Logging
 

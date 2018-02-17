@@ -475,7 +475,6 @@ function NewMedicine($Data,$New){
 function getAge($BD){
   $birthday = new DateTime($BD);
   $diff = $birthday->diff(new DateTime());
-  mark($diff->format('%m'),'AGE');
   return $diff->format('%m') + 12 * $diff->format('%y');
 }
 
@@ -571,7 +570,7 @@ function DrawOption($array,$Arguments){
 
 //Make full name form MySQL query
 function FullName($Arr){
-  $Name= $Arr['prefix'] ." ". $Arr['BName'] ." ".$Arr['FName'] ." ". $Arr['LName'];
+  $Name= $Arr['prefix'] ." ". $Arr['prefix'] ." ".$Arr['FName'] ." ". $Arr['LName'];
   return $Name;
 }
 
@@ -903,7 +902,8 @@ function AangList($array,$ulId){
   echo "</ul> </div>";
 }
 //---------------The Main Drawer---------------------------
-//$Draw can be array or string
+//Turn ARRAY and all ARRAYs within it into STR and ECHO them
+//$Draw = ARRAY or STR to be drawn
 function Gardevoir($Draw){
     if(is_array($Draw)){
     foreach($Draw as $x){
@@ -1067,7 +1067,6 @@ function walkthrough($WID){
 function AgeText($DOB,$Full=true){
   $birthday = new DateTime($DOB);
   $diff = $birthday->diff(new DateTime());
-  mark($diff->format('%m'),'AGE');
   $months = $diff->format('%m') + 12 * $diff->format('%y');
   $years = $diff->format('%y');
   if($Full){
@@ -2541,34 +2540,78 @@ class Listing{
 ███████╗██║███████║   ██║   ██║██║ ╚████║╚██████╔╝
 ╚══════╝╚═╝╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
 =======================================================================================
-To display a list (e.g. Patient list, Staff list)
+"The Imperial sure love their damn list!"
+
+Class to display a list (e.g. Patient list, Staff list) in many style
+
+All the method to make list are CALLBACK that return ARRAY of the list items (Opening, Item1, Item2, ... , Closure) with each items contain string
+Draw it with METHOD 'Draw' for filter box placement
+
+List of METHOD :
+
+SUPPLEMENT
+
+  FetchArray($MySQL): [CALLBACK] (AUTORUN if 'MySQL' Arguments passed on construct)
+        Prepare data ARRAY by fetching from MySQL DB.
+        The result will be returned and used to populate class's 'Array' Property on Autorun
+        $MySQL : ARRAY of MySQL fetch data configuration, see constructor's Arguments for detail
+
+  PrepareArray($Raw,Need) [CALLBACK]:
+        Format ARRAY to be ready to be drawn
+        return the refined ARRAY
+        $Raw is the raw array
+        $Need is ARRAY ('main'=>The key for main text, 'sub'=>..., 'hidden'=>..., ....)
+
+  FilterList: [CALLBACK]
+        Make and return 'Filter' box HTML
+
+  Draw($List):
+        Draw the list and the search column
+        
+LIST STYLE
+
+  [Aang] : List with Avatar (Picture), hence, the name
+  -------------------------------------------------------------
+  |                            [button3] [button2] [button1]  |
+  |  [picture]   [main]                                       |
+  |              [sub]                                        |
+  -------------------------------------------------------------
+  Aang($picPath,$noPic,$array,$Class)
+    $picPath = path to pictures directory in ('Media' directory), default is 'Korra'
+    $noPic = How picture will be generated if data has no picture (refer to METHOD PicGenerator)
+    $array = The array to be drawned, if empty, use class's Array PROPERTY instead
+    $Class = ARRAY of class option 'color', 'hover'
+  
                                                   
 */
 
-class Listing2{
+class Imperial{
   protected $Array; // Main array
   protected $Arguments;
-  protected $Listing; // Ready to be listed
+  protected $keyID; //Which key is the ID
   protected $ulId; // <ul> id
-  public $Gardevoir; //Array of the final list draw
+  public $RefinedArray; // Refined array that ready to be drawed
 
+  //////////////////////////////////////////CONSTRUCTOR//////////////////////////////////////////////
   /* 
-  $Array = Main Array (list1,list2) => list is ASSOC ARRAY of ('main'=>Main text,
-                                                                  'sub'=> Sub text,
-                                                                  'hidden'=> Hidden text (For filtering and other purpose),
-                                                                  'picture'=> Image filename to be showed ,
-                                                                  'onClick' => Link on click,
-                                                                  'dropDown' => HTML that will be hidden at first, but displayed when clicked,
-                                                                  'button1' => Button 1 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link),
-                                                                  'button2' =>  Button 2 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link),
-                                                                  'button3' => Button 3 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link)
-                                                                  ') 
-  $Arguments = Argument Array => ( 'MySQL' => for fetching data from MySQL, if declared, fetching from MySQL will repace main array . ARRAY ('table'=>MySQL Table,
+  $Array = Main Array ('id1'=>list1,'id2'=>list2) => list is ASSOC ARRAY of (
+                                                                'main'=>Main text,
+                                                                'sub'=> Sub text,
+                                                                'hidden'=> Hidden text (For filtering and other purpose),
+                                                                'picture'=> Image filename to be showed ,
+                                                                'onClick' => Link on click,
+                                                                'dropDown' => HTML that will be hidden at first, but displayed when clicked,
+                                                                'button1' => Button 1 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link),
+                                                                'button2' =>  Button 2 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link),
+                                                                'button3' => Button 3 : ARRAY ('DOM'=>HTML element to be distplayed, 'link' => Link, 'toolTip'=>Tool Tip)
+                                                                ') 
+  $Arguments = Argument Array => ( 'MySQL' => for fetching data from MySQL, if declared, fetching from MySQL will repace main array . ARRAY (
+                                                                                                                                            'table'=>MySQL Table,
                                                                                                                                             'condition'=>WHERE QUERY
                                                                                                                                             'select'=>SELECT array (column1, column2), empty mean all (*)
-                                                                                                                                            'id' => Column contaun primary key
-                                                                                                                                            'main' => INDEXED ARRAY of column to be set as main text,
-                                                                                                                                            'sub' => INDEXED ARRAY of column to be set as sub text,
+                                                                                                                                            'id' => Column contain primary key
+                                                                                                                                            'main' => ARRAY ('del'=>Delimiter (seperator string), 'data'=>INDEXED ARRAY of column to be set as main text),
+                                                                                                                                            'sub' => ARRAY ('del'=>Delimiter (seperator string), 'data'=>INDEXED ARRAY of column to be set as sub text),
                                                                                                                                             'hidden' => INDEXED ARRAY of column to be set as hidden text,
                                                                                                                                             'picture' => column to be set as picture,
                                                                                                                                             'onClick' => $_GET to be set as onClick link,
@@ -2576,44 +2619,62 @@ class Listing2{
                                                                                                                                             'button1','button2','button3' => $_GET to be set as link for corespondenting button,
                                                                                                                                               ),
                                   'heading' => Heading text, 
-                                  'search' => Include search area? TRUE/FALSE,   
-                                  'mainSeperator' => Main Text Seperator,   
-                                  'subSeperator' => Subtext seperator,
-                                  'picDir' => directory path of pictures in (Media/...)                                                        
+                                  'filter' => Include search area? where? (top,bottom),   
+                                  'picDir' => directory path of pictures in (Media/...).
+                                  'listId' => ID of the <ul>   
+                                  )                                                    
   */
+  
   function __Construct($Array,$Arguments=null){
       $this->Array = $Array;
       $this->Arguments = $Arguments;
-      if($Arguments['MySQL']){$this->FetchArray();}
+      $this->ulId = $Arguments['listId']? $Arguments['listId'] : rand(0,100);
+      $this->RefinedArray = $Arguments['MySQL']? $this->FetchArray($Arguments['MySQL']) : $Array;
   }
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Populate main array from MySQL
   public function FetchArray($MySQL){
+    $this->keyID = $MySQL['id'];
     $Tab = new GoodBoi($MySQL['table']);
-    $Data = $Tab->GoFetch($MySQL['condition'],$MySQL['select']);
-    $Data = $this->Beautifying($Data,$MySQL);
-    $this->Array = $Data;
+    $Selector = $MySQL['select']? $MySQL['select']: "*";
+    $this->Array = $Tab->GoFetch($MySQL['condition'],$Selector);
+    $Data = $this->PrepareArray($this->Array,$MySQL);
+    return $Data;
+    
   }
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Format array to be ready to drawed
   //$Raw is the raw array
   //$Need is ARRAY ('main'=>The key for main text, 'sub'=>..., 'hidden'=>..., ....)
-  public function Beautifying($Raw,$Need){
+  public function PrepareArray($Raw,$Need){
     foreach($Raw as $y=>$x){
+      
+      //Temper certain data
+        $x['dob'] = AgeText($x['dob']);
+
+
+      $id=$x[$this->keyID];
       foreach($Need as $b=>$a){
         switch($b){
           case 'main':
           case 'sub':
+            $Clean[$id][$b] = in_array('LName',$a)? FullName(Hadouken($x,$a['data'])): array2csv(array_map('lan2var',Hadouken($x,$a['data'])),null,null,null,$a['del'])['Val'] ;
+            break;
           case 'hidden':
-            $Clean[$y][$b] = in_array('LName',$a)? FullName(Hadouken($x,$a)): array2csv(array_map('lan2var',Hadouken($x,$a)))['Val'] ;
+            array2csv(array_map('lan2var',Hadouken($x,$a['data'])))['Val'];
             break;
           case 'picture':
+            $Clean[$id][$b] = $x[$a] ;
+            break;
           case 'onClick':
           case 'dropDown':
           case 'button1':
           case 'button2':
           case 'button3':
-            $Clean[$y][$b] = $x[$b] ;
+            $a['link'] = "index.php?" . $a['link'] ."&dataid=$id" ;
+            $Clean[$id][$b] =  $a ;
             break;
           default:
             continue;
@@ -2626,107 +2687,109 @@ class Listing2{
   }
 
 
-  function DrawList(){
-    $EURI=$_GET;
-    $EURI['job']=4;
-    $EURI = GetGET($EURI);
-    $CURI=$_GET;
-    $CURI['job']=3;
-    $CURI = GetGET($CURI);
-    foreach($this->Query as $x){
-      $y=$x[$this->TID];
-      $yoyo[$y]['Main'] = in_array('LName',$this->Arguments['ContentMain'])? FullName(Hadouken($x,$this->Arguments['ContentMain'])): array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentMain'])))['Val'] ;
-      $yoyo[$y]['Sub']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['ContentSub'])))['Val'];
-      $yoyo[$y]['Hidden']= array2csv(array_map('lan2var',Hadouken($x,$this->Arguments['hiddenDiv'])))['Val'];
-      $yoyo[$y]['URI']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$EURI" . "dataid=". $x[$this->TID];
-      $yoyo[$y]['Click']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$CURI" . "dataid=". $x[$this->TID];
-      switch ($this->TID){
-        case 'patientid':
-          $yoyo[$y]['OK']= htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=". $x[$this->TID];
-          break;
-      }
-      //Menyamakan persepsi antara tabel pasien dan staff (Beda nama kolom)
-      if($x['Aang']) { $x['photo'] = $x['Aang']; }
-      if($x['Sex']) { $x['sex'] = $x['Sex']; }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Make list with avatar picture
+  // -------------------------------------------------------------
+  // |                            [button3] [button2] [button1]  |
+  // |  [picture]   [main]                                       |
+  // |              [sub]                                        |
+  // -------------------------------------------------------------
+  // $picPath = path to pictures directory in ('Media' directory), default is 'Korra'
+  // $noPic = How picture will be generated if data has no picture (refer to METHOD PicGenerator)
+  // $array = The array to be drawned, if empty, use class's Array PROPERTY instead
+  // $Class = ARRAY of class option 'color', 'hover'
+  public function Aang($picPath='Korra',$noPic=null,$array=null,$Class=array('color'=>'white','hover'=>'lime')){
+    $ulId = $this->ulId;
+    $array= $array? $array: $this->RefinedArray;
+   
 
-      if(empty($x['photo'])){
-        switch ($x['sex']){
-          case '$lanMale':
-          $yoyo[$y]['Aang']='def_male.png';
-          break;
-          case '$lanFemale':
-          $yoyo[$y]['Aang']='def_female.png';
-          break;
-          case '$lanAlien':
-          $yoyo[$y]['Aang']='def_alien.png';
-          break;
-          case '$lanUnidentified':
-          $yoyo[$y]['Aang']='def_unknown.png';
-          break;
-        }
-      }
-      
-    }
-    //$Draw=ZebraList($this->Query,$this->NameColumn,$this->Header,array(6=>$this->TID,5=>$URI));
+    //Opening
+    $Items['__pre'] = "<div class=''>
+                    <ul class='w3-ul w3-card-4' id=$ulId>";
     
-    $Draw = AangList($yoyo,$this->ulId);
-    $this->Gardevoir=$Draw;
-    if(Empty($this->Query)){
-      echo $GLOBALS['lanNoResult'];
+    //Items
+    $c=0;
+    foreach($array as $y=>$x){
+      $Items[$y] = "<li id='" . $ulId . "_li_" .$y. "' class='w3-bar w3-" . $Class['color'] . " w3-hover-" . $Class['hover'] . "'>";
+      // Button 1
+      if($x['button1']){ 
+        $Items[$y] .= "<span title=". $x['button1']['toolTip'] ." class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['button1']['link'] ." >". $x['button1']['DOM'] ."</a></span>";
+      }
+      // Button 2
+      if($x['button2']){ 
+        $Items[$y] .= "<span title=". $x['button2']['toolTip'] ." class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['button2']['link'] ." >". $x['button2']['DOM'] ."</a></span>";
+      }
+      // Button 3
+      if($x['button3']){ 
+        $Items[$y] .= "<span title=". $x['button3']['toolTip'] ." class='w3-bar-item w3-buttonw3-xlarge w3-right'><a href=". $x['button3']['link'] ." >". $x['button3']['DOM'] ."</a></span>";
+      }
+      // Avatar
+      if(!$x['picture']){ $x['picture'] = $this->PicGenerator($this->Array[$c],$noPic); }
+      if($x['picture']){ $Items[$y] .= "<img src='Media/$picPath/". $x['picture'] ."' class='w3-bar-item w3-circle w3-hide-small' style='width:85px'>"; }
+      //List Content
+      $Items[$y] .= "<div class='w3-bar-item'>";
+      //Main + click link
+      $Items[$y] .= $x['onClick']?  "<a class='w3-large' href=". $x['onClick'] ."&dataid=$y >". $x['main'] ."<br></a>": "<div class='w3-large'>" . $x['main'] . "</div>";
+      //Sub, hidden and closure
+      $Items[$y] .= "<span>". $x['sub'] ."</span><span hidden>". $x['hidden'] ."</span>
+                    </div>
+                    </li>";
+      $c++;
     }
+    $Items['__post'] = "</ul> </div>";
+
+    return $Items;
   }
 
-  function SearchList(){
-    $ulId = $this->ulId;
-    if(!empty($this->DefaultSearchColumn)){
-      //Draw search form
-      $URI = GetGET();
-      
-      $Form= "<div class='w3-card w3-white'><div class='w3-row w3-panel'><form  action=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?$URI method='GET' class='Search'>";
-      unset($_GET['listcrit']);
-      unset($_GET['listcolumn']);
-      $Form .= "<div class='w3-cell  w3-cell-bottom' style='width:75%'><span><label for='listcrit' class='w3-label'>". $GLOBALS['lanSearch'] ."</label><input name='listcrit' class='w3-input' id='listcrit' type=search onkeyup=\"listFilterHide('$ulId','listcrit')\"></span></div>";
-
-      // Making datalist for SearchBox
-      $Form .= "<datalist id=search>";
-      $Tape=$this->GoodBoi->GoFetch();
-      
-      $Ketan=explode(", ",$this->DefaultSearchColumn);
-      foreach($Tape as $y=>$x){
-        $Form .= "<option value=select__". $x[$this->TID] .">";
-        foreach($Ketan as $b=>$a){
-          $Arm .= $x[$a] ." ";
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  // CALLBACK : STR of picture path
+  // Generate picture using supplied data
+  // $Data = The ARRAY of current data to be generated pic
+  // $Method = Sex : generate pic using 'sex' key
+  function PicGenerator($Data,$Method){
+    switch ($Method){
+      case 'Sex':
+        switch ($Data['sex']){
+          case '$lanMale':
+          $pic='def_male.png';
+          break;
+          case '$lanFemale':
+          $pic='def_female.png';
+          break;
+          case '$lanAlien':
+          $pic='def_alien.png';
+          break;
+          case '$lanUnidentified':
+          $pic='def_unknown.png';
+          break;
         }
-        $Form .= $Arm;
-        unset($Arm);
-        $Form .= "</option>";
-      }
-      $Form .= "</datalist>";
+        break;
+    }
+    return $pic;
+  }
 
-      $Form .= "<div class='w3-cell w3-cell-bottom' style='width:20%'><span><select name=listcolumn class='w3-select'>";
-      $Form .= "<option value=ALL selected>". $GLOBALS['lanAll'] ."</option>";
 
-      // Making the search column list
-      $rpl= csv2csv($this->DefaultSearchColumn);
-      $Label=$this->ColumnLabelObj->GoFetch("WHERE form_id='". $this->FormID ."' AND field_id IN (". $rpl .")","field_label, field_id");
-      foreach ($Label as $x){
-        $Form .= "<option value=". $x['field_id'] .">". lan2var($x['field_label']) . "</option>";
-      }
-
-      $Form .= "</select></span></div>";
-      foreach ($_GET as $y=>$x){
-        $Form .= "<input type=hidden name=$y value=$x>";
-      }
-      $Form .= "<div class=' w3-cell  w3-cell-bottom' style='width:5%' ><span> <i class='w3-button material-icons w3-large' class='submitButton'>search</i></span></div></div>";
-      $Form .= "</form></div>";
+  ////////////////////////////////////////////////////////////////////////////////////////
+  // Make Search function
+  function FilterList(){
+    $ulId = $this->ulId;      
+      $Form= "<div class='w3-card w3-white w3-panel'>
+                  <div class='w3-row w3-panel'>
+                      <label for='listFilter' class='w3-text-green'>". $GLOBALS['lanFilter'] ."</label>
+                      <input name='listFilter' class='w3-input  w3-border' id='listFilter' type=search onkeyup=\"listFilterHide('$ulId','listFilter')\">
+                  </div>
+              </div>";
       return $Form;
-     }
     }
 
-    function Gardevoir(){
-      
-      Gardevoir($this->Gardevoir);
-    }
+  ///////////////////////////////////////////////////////////////////
+  // Drawer
+  public function Draw($List){
+    if($this->Arguments['filter']=='top'){ echo $this->FilterList(); }
+    Gardevoir($List);
+    if($this->Arguments['filter']=='bottom'){ echo $this->FilterList(); }
+  } 
+
 }
 
 
@@ -2894,9 +2957,11 @@ class Smeargle{
       if (empty($Arguments['DataTable'] . $Arguments['DataKey'])){
         $this->SuppliedData=$SuppliedData;
       } else {
+        mark($Arguments['DataTable'],"DataBtABe");
+        mark($Arguments['DataKey'] . " = " . $DataRow ,"DataBtABasae");
         $DataSup = new GoodBoi($Arguments['DataTable']);
         $DataRow= $Arguments['DataID']? $Arguments['DataID'] : $_GET['dataid']; // If Arguments['DataID'] is empty, use default instead (which is $_GET['dataid'])
-        $this->SuppliedData = $DataSup->GoFetch("WHERE ". $Arguments['DataKey'] ."='". $DataRow ."'");
+        $this->SuppliedData =  $DataSup->GoFetch("WHERE ". $Arguments['DataKey'] ."='". $DataRow ."'");
       }
      
         break;
@@ -3128,7 +3193,7 @@ class Smeargle{
 
         //Fetch Fields from each group
         $Fields = $this->Layout->GoFetch("WHERE form_id='". $this->FormID ."' AND group_cap='$Group' ORDER BY field_order");
-
+        $Fields = PhoenixDown($Fields);
         //Draw Group Header
         if ($this->FormHide && $this->HideGroup) { $w3hide='w3-hide w3-animate-slide'; }// Hide field groups excetp for the first one (showabel by clickin the header)
           $this->HideGroup = TRUE;
@@ -3141,6 +3206,12 @@ class Smeargle{
           //Visibility
           $Visible=UnJson($x['field_permission']);
           if($Visible[$this->Job]<1){ continue; } // If supposed to be not vissible, stop and skip to the next field
+
+          //Image
+          if($x['field_options']['picture']){
+            mark($x['field_options'],"PIC");
+            $this->SuppliedData[0][$x['field_id']] = "<img src=\"Media/". $x['field_options']['picture'] ."/". $this->SuppliedData[0][$x['field_id']] ."\" >";
+          }
 
 
           //Main drawer
@@ -3455,7 +3526,7 @@ function AutoField($Type,$Argument=null){
       return array('val'=>getAge($BD),'text'=>AgeText($BD));
     case 'provider':
       $Prov= new GoodBoi('staff_list');
-      $Dr = $Prov->GoFetch("WHERE usrid='". $_SESSION['Person'] ."'","usrid,BName,FName,MName,LName");
+      $Dr = $Prov->GoFetch("WHERE usrid='". $_SESSION['Person'] ."'","usrid,prefix,FName,MName,LName");
       return array('val'=>$Dr[0]['usrid'],'text'=>FullName($Dr[0]));;
     case 'stat_BMI':
     break;

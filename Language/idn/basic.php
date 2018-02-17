@@ -64,7 +64,7 @@ $lanSignUp="Daftar";
 $lanOccupation="Pekerjaan";
 $lanOldPass="Kata sandi lama";
 $lanConfirmPass="Ulangi kata sandi";
-$lanBName='Awalan';
+$lanprefix='Awalan';
 $lanECell='Telepon Darurat';
 $lanReligion='Agama';
 $lanRace='Ras';
@@ -77,7 +77,7 @@ $lanGuardianFName='Nama Depan';
 $lanGuardianMName='Nama Tengah';
 $lanGuardianLName='Nama Belakang';
 $lanGuardianTitle='Titel';
-$lanGuardianBName='Awalan';
+$lanGuardianprefix='Awalan';
 $lanGuardianSex='Jenis Kelamin';
 $lanGuardianRelationship='Hubungan';
 $lanGuardianAddress='Alamat';
@@ -184,6 +184,8 @@ $lanPatientDetailFormHeader='Data Pasien';
 $lanYear = "Tahun";
 $lanMonth = "Bulan";
 $lanSave = "Simpan";
+$lanFilter = "Saring";
+
 
 
 //-------------------Visit--------------------------
@@ -286,6 +288,19 @@ $lanVisit="Kunjungan";
 $lanVisitNew="Kunjungan Baru";
 $lanVisitList='Daftar Kunjungan';
 
+
+
+////////////////////////////////////////////////////
+////////////  USER LIST /////////////////////////////
+/////////////////////////////////////////////////
+$lanUserList = "Daftar Staff";
+$lanUserDetailFormHeader = "Informasi Staff";
+
+//////////////////////////////////////////////////
+////////////  PATIENT////////////////////////////
+////////////////////////////////////////////////
+$lanChosePatient="Pilih pasien ini";
+
 //////////////////////////////////////////////////
 ////////////  VISIT /////////////////////////////
 ////////////////////////////////////////////////
@@ -312,6 +327,7 @@ $lanType = "tipe";
 $lanGrade = "grade";
 $lanStage = "stage";
 $lanCausa = "et causa";
+$lanSOAPList = "Daftar SOAP";
 
 //////////////////////////////////////////////////
 ////////////  Billing /////////////////////////////

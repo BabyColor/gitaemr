@@ -2,7 +2,7 @@
 require "Engine/head.php";
 
 $StaffListTab = new GoodBoi('staff_list');
-$StaffList = $StaffListTab -> GoFetch("LIMIT 8","Aang, UserName, BName, FName, MName, LName");
+$StaffList = $StaffListTab -> GoFetch("LIMIT 8","Aang, UserName, prefix, FName, MName, LName");
 $StaffLength = count($StaffList);
 
 //================================================================================================
@@ -10,7 +10,6 @@ $StaffLength = count($StaffList);
 //================================================================================================
 
 if(!empty($_SESSION['Person'])){
-        mark("Already Loged In Script PlaceHolder");
        } else {
         //-----Check Login Method
         $_POST = array_map('strip_tags', $_POST); //STRIPPING
@@ -46,7 +45,6 @@ if(!empty($_SESSION['Person'])){
                     $LoginError=$LoginError ."<br>". $lanLoginWrongPass;
                 }
             }
-            mark($dog[0]['usrid'],"USER ID");
             if(empty($LoginError)){
                 //Login Succesfull
                 //OKDialog($lanLoginSuccessT,$lanLoginSuccessC);
@@ -84,6 +82,7 @@ if(!empty($_SESSION['Person'])){
         function CharSelect(userName) {
             userName = userName.replace('char_', '');
             if (currentCharacter == userName) { return; }
+            $(loginForm).removeClass('w3-hide');
             var BGChar;
 
             $.ajax({
@@ -136,7 +135,7 @@ if(!empty($_SESSION['Person'])){
 
 <body class='w3-grey'>
     <div class=' w3-center' style='margin: auto'>
-        <h3 class='w3-center w3-card-4 w3-white' style='width:80%;max-width:1024px; margin: auto'>
+        <h3 class='w3-center w3-card-4 w3-white w3-animate-fading' style='width:80%;max-width:1024px; margin: auto'>
             <?php echo $lanLoginTitle; ?>
         </h3>
 
@@ -176,7 +175,7 @@ if(!empty($_SESSION['Person'])){
                   
 
                 </div>
-                <form id='loginForm' action="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ) ?>?mod=gita_login&job=0" method=POST hidden>
+                <form id='loginForm' action="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ) ?>?mod=gita_login&job=0" method=POST>
                     <!--<label class='w3-label' for='username'>$lanLoginUser</label>
                                                         <input class='w3-input' type=text id='username' name=UserName>-->
 
@@ -210,7 +209,8 @@ if(!empty($_SESSION['Person'])){
             $(this).addClass('w3-sepia').removeClass('w3-lime w3-round');
         });
 
-        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); $("#password").focus(); $(loginForm).removeAttr('hidden'); });
+        $(".characterPhoto").click(function () { CharSelect($(this).prop('id')); 
+        $("#password").focus(); $(loginForm).removeAttr('hidden'); });
 
         $("html").keydown(function (c) {
             switch (c.which) {
@@ -248,7 +248,7 @@ if(!empty($_SESSION['Person'])){
 
         $("#submit").click(function(){ $("#loginForm").submit();});
         $("#password").keydown(function(x){ if(x.which==13){$("#loginForm").submit();}});
-        $("#password").focus(function(){ $(loginForm).removeAttr('hidden'); }).blur(function(){ $(loginForm).Attr('hidden',true) });;
+       // $("#password").focus(function(){ $(loginForm).removeClass('w3-hide'); }).blur(function(){ $(loginForm).addClass('w3-hide') });;
 
     </script>
 </body>

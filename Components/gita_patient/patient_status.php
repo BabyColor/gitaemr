@@ -162,17 +162,22 @@ if(bouncer()){
 			break;
 		case "list":
 			LogPatient($_GET['dataid']);
-			$List= new Listing($MainTable,$layout,array(7=>'gita_patient',6=>'form_id',2=>"patientid, prefix, FName, LName, dob, sex, address, desa, district",8=>'FName',9=>"prefix, FName, LName", 4=>$Tid, 10=>"prefix,FName, LName",'ContentMain'=>array('prefix','FName','LName'),'ContentSub'=>array($Tid,'sex')));
-		
-			/*
-			foreach($List->Gardevoir as $y=>$x){
-				if(strpos($y, 'pre') === false && strpos($y, 'post') === false) {
-				//	mark($y,"THIS GARDE ");
-					$List->Gardevoir[$y] .="<td><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=$y>Buat Kunjungan</a></td>";
-				}
-			}
-			*/
-			$List->Gardevoir();
+			$List = new Imperial(null,array( 'MySQL' => array (
+															'table'=>'com_gita_patient',
+															'id' => 'patientid',
+															'main' => array('del'=>' ', 'data'=> array('prefix','FName','LName')),
+															'sub' => array('del'=>' || ', 'data'=>array('patientid','sex','dob')),
+															'hidden' => array('idcard','address'),
+															'picture' => 'photo',
+															'onClick' => 'mod=gita_patient&job=4',
+															'button1' => array('DOM'=>"<i class=\"material-icons\">check</i>",'link'=>'mod=gita_patient&job=5','toolTip'=>$lanChosePatient),
+															'button2' => array('DOM'=>"<i class=\"fa fa-pencil\"></i>",'link'=>'mod=gita_patient&job=3','toolTip'=>$lanEdit),
+															),
+											'heading' => $lanListPatient, 
+											'filter' => 'top'   
+											)
+										);
+			$List -> Draw($List->Aang('Patient','Sex'));
 			break;
 		}
 

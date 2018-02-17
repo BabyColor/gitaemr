@@ -195,17 +195,20 @@ if(bouncer()){
 			break;
 		case "list":
 			//LogPatient($_GET['dataid']);
-			$List= new Listing($MainTable,$layout,array(7=>'gita_visit_soap',6=>'form_id',2=>"visitid, time, patient, provider, assistant_provider, visit_type",8=>'patient',9=>"patient, provider, visit_type", 4=>$Tid, 10=>'time', 'ContentMain'=> array('time' ), 'ContentSub'=> array('patient','DXH')));
-		
-			/*
-			foreach($List->Gardevoir as $y=>$x){
-				if(strpos($y, 'pre') === false && strpos($y, 'post') === false) {
-				//	mark($y,"THIS GARDE ");
-					$List->Gardevoir[$y] .="<td><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=$y>Buat Kunjungan</a></td>";
-				}
-			}
-			*/
-			$List->Gardevoir();
+			$List = new Imperial(null,array( 'MySQL' => array (
+																'table'=>$MainTableName,
+																'id' => 'visitid',
+																'main' => array('del'=>' ', 'data'=> array('patient')),
+																'sub' => array('del'=>' || ', 'data'=>array('time','visit_type')),
+																'hidden' => array('DXH','PXH','SubjectF'),
+																'onClick' => 'mod=gita_visit&job=4',
+																'button1' => array('DOM'=>"<i class=\"fa fa-pencil\"></i>",'link'=>'mod=gita_visit&job=3','toolTip'=>$lanEdit),
+																),
+												'heading' => $lanSOAPList, 
+												'filter' => 'top'   
+												)
+												);
+												$List -> Draw($List->Aang('Patient','Sex'));
 			break;
 			}
 	
