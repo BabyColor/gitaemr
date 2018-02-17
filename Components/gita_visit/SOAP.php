@@ -193,26 +193,34 @@ if(bouncer()){
 			markA($Forms,"FORMS");
 			Gardevoir($Forms);
 			break;
-		case "list":
-			//LogPatient($_GET['dataid']);
-			$List = new Imperial(null,array( 'MySQL' => array (
-																'table'=>$MainTableName,
-																'id' => 'visitid',
-																'main' => array('del'=>' ', 'data'=> array('patient')),
-																'sub' => array('del'=>', ', 'data'=>array('time','visit_type')),
-																'hidden' => array('DXH','PXH','SubjectF'),
-																'onClick' => 'mod=gita_visit&job=4',
-																'button1' => array('DOM'=>"<i class=\"fa fa-pencil\"></i>",'link'=>'mod=gita_visit&job=3','toolTip'=>$lanEdit),
-																),
-												'heading' => $lanSOAPList, 
-												'filter' => 'top'   
-												)
-												);
-			$PatientTab = new GoodBoi ("com_gita_patient");
-			$Patient = $PatientTab->GoFetch();
-			$List->RefineRefined('patient',$Patient,array('Which'=>'main','Organize'=>'patientid','Function'=>'FullName'));
-			$List -> Draw($List->Zebra());
-			break;
+			case "list":
+				switch ($_GET['filter']){
+					case ('patient'):
+						$cond = "WHERE patient='" . $_GET['dataid'] . "'";
+						break;
+					case ('day'):
+						$cond = "WHERE time >= '" . $_GET['dataid'] . " 00:00:00' AND time < '" . $_GET['dataid'] . " 23:59:59'";
+						break;
+				}
+				//LogPatient($_GET['dataid']);
+				$List = new Imperial(null,array( 'MySQL' => array (
+																	'table'=>$MainTableName,
+																	'id' => 'visitid',
+																	'main' => array('del'=>' ', 'data'=> array('patient')),
+																	'sub' => array('del'=>', ', 'data'=>array('time','visit_type')),
+																	'hidden' => array('DXH','PXH','SubjectF'),
+																	'onClick' => 'mod=gita_visit&job=4',
+																	'button1' => array('DOM'=>"<i class=\"fa fa-pencil\"></i>",'link'=>'mod=gita_visit&job=3','toolTip'=>$lanEdit),
+																	'condition'=>$cond . ' ORDER BY time DESC'),
+													'heading' => $lanSOAPList, 
+													'filter' => 'top'   
+													)
+													);
+				$PatientTab = new GoodBoi ("com_gita_patient");
+				$Patient = $PatientTab->GoFetch();
+				$List->RefineRefined('patient',$Patient,array('Which'=>'main','Organize'=>'patientid','Function'=>'FullName'));
+				$List -> Draw($List->Zebra());
+				break;
 			}
 	
 			

@@ -12,18 +12,14 @@
 
 
 switch($job){
-	case 1: // Job 1 --- Signup Form
-	case 4: // Job 4 --- Edit profile
-	case 3: // Job 3 --- View profile
-	case 5: // Job 5 -- Staff List
-	require "SOAP.php";
-	break;
-	default: // Job 0 --- Login Form
-	require "SOAP.php";
-	break;
-	case 2: // Job 2 --- Logout
-	require "SOAP.php";
-	break;
+	case 1: // Job 1 --- New SOAP
+	case 4: // Job 4 --- Edit SOAP
+	case 3: // Job 3 --- View SOAP
+	case 5: // Job 5 -- SOAP List
+		require "SOAP.php";
+		break;
+	case 6: //----- New Visit
+		
 }
 
 ?>

@@ -570,7 +570,7 @@ function DrawOption($array,$Arguments){
 
 //Make full name form MySQL query
 function FullName($Arr){
-  $Name= $Arr['prefix'] ." ". $Arr['prefix'] ." ".$Arr['FName'] ." ". $Arr['LName'];
+  $Name= $Arr['prefix'] ." ".$Arr['FName'] ." ". $Arr['LName'];
   return $Name;
 }
 
@@ -2729,9 +2729,7 @@ class Imperial{
 			if($Arguments['Organize']) {$newArray = Organize($newArray,$Arguments['Organize']);}
 			$Ref = $this->RefinedArray;
 			foreach ($Ref as $y => $x){
-        mark($Arguments['Function'],"FF");
-        $Ref[$y][$Arguments['Which']]['val'][$modKey] = $Arguments['Function']? call_user_func($Arguments['Function'],$Ref[$y][$Arguments['Which']]['val'][$modKey]) : $Ref[$y][$Arguments['Which']]['val'][$modKey];
-        mark($Ref[$y][$Arguments['Which']]['val'],"REF");
+        $Ref[$y][$Arguments['Which']]['val'][$modKey] = $Arguments['Function']? call_user_func($Arguments['Function'],$newArray[$Ref[$y][$Arguments['Which']]['val'][$modKey]]) : $Ref[$y][$Arguments['Which']]['val'][$modKey];
       }
       
       $this->RefinedArray = $Ref;
@@ -2760,6 +2758,9 @@ class Imperial{
     //Items
     $c=0;
     foreach($array as $y=>$x){
+      $x['main'] = $this->Stringify($x,'main');
+      $x['sub'] = $this->Stringify($x,'sub');
+      
       $Items[$y] = "<li id='" . $ulId . "_li_" .$y. "' class='w3-bar w3-" . $Class['color'] . " w3-hover-" . $Class['hover'] . "'>";
       // Button 1
       if($x['button1']){ 
@@ -2810,19 +2811,8 @@ class Imperial{
     //Items
     $c=0;
     foreach($array as $y=>$x){
-      mark($x,"X");
-      foreach($x['main']['val'] as $i=>$v){
-        $l .= $l? $x['main']['del'] . $v :$v ;
-      }
-      $x['main'] = $l;
-      unset($l);
-      foreach($x['sub']['val'] as $i=>$v){
-        $l .= $l?  $x['sub']['del'] . $v : $v ;
-      }
-      $x['sub'] = $l;
-      unset($l);
-
-mark($x,"X2");
+      $x['main'] = $this->Stringify($x,'main');
+      $x['sub'] = $this->Stringify($x,'sub');
 
       $Items[$y] = "<li id='" . $ulId . "_li_" .$y. "' class='w3-hover-" . $Class['hover'] . "' >";
       //Main + click link
@@ -2868,6 +2858,17 @@ mark($x,"X2");
     return $pic;
   }
 
+  ///////////////////////////////////////////////////////
+  //
+  // Stringify the Array in 'main'/'sub' with delimiter
+  // $x = Each of the RefinedArray property [ foreach($this->RefinedArray as $x) ]
+  // $which = Which one? 'main' or 'sub'
+  private function Stringify($x,$which){
+    foreach($x[$which]['val'] as $i=>$v){
+      $l .= $l? $x[$which]['del'] . $v :$v ;
+    }
+    return $l;
+  }
 
   ////////////////////////////////////////////////////////////////////////////////////////
   // Make Search function

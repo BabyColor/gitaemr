@@ -165,7 +165,7 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 	switch ($viewsonic){ // If viewsonic is empty, thats mean user have unatuhorized access
 		case "view":
 		case "edit":
-		//$VisitID= $VisitID? $VisitID: $_GET['dataid'];
+		//Search visit ID
 		case "reg":
 
 			$button = "<input type=submit class='w3-button w3-lime' value='$lanBilled'>";
@@ -376,19 +376,32 @@ if(!empty($Validation->SignUpError) OR empty($_POST) OR $viewsonic='view'){ //Di
 
 		break;
 	case "list":
-		//LogPatient($_GET['dataid']);
-		$List= new Listing($MainTable,$layout,array(7=>$MainTableName,6=>'form_id',2=>"visitid, time, patient, provider, assistant_provider, visit_type",8=>'patient',9=>"time, patient, provider, visit_type", 4=>$Tid));
-
-		/*
-		foreach($List->Gardevoir as $y=>$x){
-			if(strpos($y, 'pre') === false && strpos($y, 'post') === false) {
-			//	mark($y,"THIS GARDE ");
-				$List->Gardevoir[$y] .="<td><a href=". htmlspecialchars( $_SERVER['PHP_SELF'] ) ."?mod=gita_patient&job=5&dataid=$y>Buat Kunjungan</a></td>";
+			switch ($_GET['filter']){
+				case ('patient'):
+					$cond = "WHERE patient='" . $_GET['dataid'] . "'";
+					break;
+				case ('day'):
+					$cond = "WHERE billedAt >= '" . $_GET['dataid'] . " 00:00:00' AND billedAt < '" . $_GET['dataid'] . " 23:59:59'";
+					break;
 			}
-		}
-		*/
-		$List->Gardevoir();
-		break;
+			$List = new Imperial(null,array( 'MySQL' => array (
+							'table'=>$MainTableName,
+							'id' => 'id',
+							'main' => array('del'=>' ', 'data'=> array('patient')),
+							'sub' => array('del'=>' : ', 'data'=>array('billedAt','total')),
+							'hidden' => array('itemList','discountList'),
+							'onClick' => 'mod=gita_visit&job=4',
+							'button1' => array('DOM'=>"<i class=\"fa fa-pencil\"></i>",'link'=>'mod=gita_visit&job=3','toolTip'=>$lanEdit),
+							'condition'=> $cond . ' ORDER BY billedAt DESC'),
+					'heading' => $lanSOAPList, 
+					'filter' => 'top'   
+			)
+			);
+			$PatientTab = new GoodBoi ("com_gita_patient");
+			$Patient = $PatientTab->GoFetch();
+			$List->RefineRefined('patient',$Patient,array('Which'=>'main','Organize'=>'patientid','Function'=>'FullName'));
+			$List -> Draw($List->Zebra());
+			break;
 		}
 
 
